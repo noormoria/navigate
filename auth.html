@@ -21,11 +21,58 @@
       </div>
 
       <form id="emailForm" class="auth-form">
+        <div id="createFields" class="field-grid" hidden>
+          <label class="field">
+            <span data-en="Full name *" data-ar="الاسم الكامل *">Full name *</span>
+            <input
+              id="authFullName"
+              type="text"
+              maxlength="120"
+              autocomplete="name"
+              data-placeholder-en="Your full name"
+              data-placeholder-ar="الاسم الكامل"
+              placeholder="Your full name"
+            />
+          </label>
+
+          <label class="field">
+            <span data-en="Phone number *" data-ar="رقم الجوال *">Phone number *</span>
+            <input
+              id="authPhone"
+              type="tel"
+              maxlength="30"
+              autocomplete="tel"
+              data-placeholder-en="+966 5X XXX XXXX"
+              data-placeholder-ar="+966 5X XXX XXXX"
+              placeholder="+966 5X XXX XXXX"
+            />
+            <small
+              data-en="Saved to your account for profile use. Phone sign-in will be added later."
+              data-ar="يُحفظ في حسابك للملف الشخصي. تسجيل الدخول بالجوال سيُضاف لاحقًا."
+            >Saved to your account for profile use. Phone sign-in will be added later.</small>
+          </label>
+        </div>
+
         <label class="field">
-          <span data-en="Email address" data-ar="البريد الإلكتروني">Email address</span>
-          <input id="authEmail" type="email" required autocomplete="email" data-placeholder-en="you@company.com" data-placeholder-ar="you@company.com" placeholder="you@company.com"/>
+          <span data-en="Email address *" data-ar="البريد الإلكتروني *">Email address *</span>
+          <input
+            id="authEmail"
+            type="email"
+            required
+            autocomplete="email"
+            data-placeholder-en="you@company.com"
+            data-placeholder-ar="you@company.com"
+            placeholder="you@company.com"
+          />
         </label>
-        <button id="sendCodeButton" class="primary-button full-button" type="submit" data-en="Send sign-in code" data-ar="إرسال رمز تسجيل الدخول">Send sign-in code</button>
+
+        <button
+          id="sendCodeButton"
+          class="primary-button full-button"
+          type="submit"
+          data-en="Send sign-in code"
+          data-ar="إرسال رمز تسجيل الدخول"
+        >Send sign-in code</button>
       </form>
 
       <form id="otpForm" class="auth-form otp-form" hidden>
