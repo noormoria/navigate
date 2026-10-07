@@ -8,6 +8,101 @@ let latestAnalysis = null;
 const $ = (id) => document.getElementById(id);
 const FEATURE_IDS = ['TenureMonths','SatisfactionScore','OrderCount','TotalSpend','DaysSinceLastOrder','Complain'];
 
+const SKILL_CATALOG = [
+  'Python','SQL','Power BI','Tableau','Excel','Machine Learning','Artificial Intelligence','Data Analysis','Data Engineering','Statistics','R','SAS',
+  'AWS','Azure','Google Cloud','Cloud Architecture','Cybersecurity','Network Security','DevOps','Docker','Kubernetes','Linux',
+  'SAP','Oracle','Salesforce','ERP','CRM','Financial Analysis','Accounting','Risk Management','Project Management','Product Management',
+  'Leadership','Team Management','Strategic Planning','Operations','Supply Chain','Logistics','Sales','Business Development','Customer Success',
+  'Marketing','Digital Marketing','UX/UI Design','Graphic Design','JavaScript','React','Node.js','Java','C#','.NET','PHP','Mobile Development'
+];
+let selectedSkills = [];
+
+function skillLevelLabel(level) {
+  const labels = {
+    1:{en:'Low',ar:'منخفض'},
+    2:{en:'Moderate',ar:'متوسط'},
+    3:{en:'Strong',ar:'قوي'},
+    4:{en:'Very strong',ar:'قوي جدًا'},
+    5:{en:'Critical',ar:'حرج'}
+  };
+  const item = labels[Number(level)] || labels[3];
+  return getLanguage()==='ar' ? item.ar : item.en;
+}
+
+function skillImpactScore(skills = selectedSkills) {
+  if (!Array.isArray(skills) || !skills.length) return 0;
+  return clamp((skills.reduce((sum,s)=>sum + Number(s.level || 3),0) / (skills.length * 5)) * 100);
+}
+
+function collectSelectedSkills() {
+  return selectedSkills.map(s=>({name:s.name,level:Number(s.level)}));
+}
+
+function renderSelectedSkills() {
+  const wrap = $('selectedSkills');
+  const empty = $('skillsEmpty');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  if (!selectedSkills.length) { if (empty) empty.hidden=false; return; }
+  if (empty) empty.hidden=true;
+  selectedSkills.forEach((skill,index)=>{
+    const row=document.createElement('div');
+    row.className='selected-skill-row';
+    row.innerHTML=`<span class="selected-skill-name">${skill.name}</span>
+      <label class="skill-strength">
+        <span>${translate('Impact strength','قوة التأثير')}</span>
+        <select data-skill-level="${index}">
+          <option value="1" ${skill.level===1?'selected':''}>1 · ${translate('Low','منخفض')}</option>
+          <option value="2" ${skill.level===2?'selected':''}>2 · ${translate('Moderate','متوسط')}</option>
+          <option value="3" ${skill.level===3?'selected':''}>3 · ${translate('Strong','قوي')}</option>
+          <option value="4" ${skill.level===4?'selected':''}>4 · ${translate('Very strong','قوي جدًا')}</option>
+          <option value="5" ${skill.level===5?'selected':''}>5 · ${translate('Critical','حرج')}</option>
+        </select>
+      </label>
+      <button type="button" class="skill-remove" data-remove-skill="${index}" aria-label="${translate('Remove skill','حذف المهارة')}">×</button>`;
+    wrap.appendChild(row);
+  });
+  wrap.querySelectorAll('[data-skill-level]').forEach(sel=>sel.addEventListener('change',()=>{
+    const i=Number(sel.dataset.skillLevel);
+    if (selectedSkills[i]) selectedSkills[i].level=Number(sel.value);
+  }));
+  wrap.querySelectorAll('[data-remove-skill]').forEach(btn=>btn.addEventListener('click',()=>{
+    selectedSkills.splice(Number(btn.dataset.removeSkill),1);
+    renderSelectedSkills();
+  }));
+}
+
+function addSkill(name) {
+  const clean=String(name||'').trim();
+  if (!clean || selectedSkills.some(s=>s.name.toLowerCase()===clean.toLowerCase())) return;
+  selectedSkills.push({name:clean,level:3});
+  renderSelectedSkills();
+  if ($('skillSearch')) $('skillSearch').value='';
+  if ($('skillSuggestions')) $('skillSuggestions').hidden=true;
+}
+
+function renderSkillSuggestions(query='') {
+  const box=$('skillSuggestions');
+  if (!box) return;
+  const q=query.trim().toLowerCase();
+  if (!q) { box.hidden=true; box.innerHTML=''; return; }
+  const matches=SKILL_CATALOG.filter(s=>s.toLowerCase().includes(q) && !selectedSkills.some(x=>x.name.toLowerCase()===s.toLowerCase())).slice(0,10);
+  if (!matches.length) {
+    box.innerHTML=`<button type="button" data-custom-skill="${query.replace(/"/g,'&quot;')}">${translate('Add','إضافة')} “${query}”</button>`;
+  } else {
+    box.innerHTML=matches.map(s=>`<button type="button" data-skill-option="${s}">${s}</button>`).join('');
+  }
+  box.hidden=false;
+  box.querySelectorAll('[data-skill-option]').forEach(btn=>btn.addEventListener('click',()=>addSkill(btn.dataset.skillOption)));
+  box.querySelectorAll('[data-custom-skill]').forEach(btn=>btn.addEventListener('click',()=>addSkill(btn.dataset.customSkill)));
+}
+
+function restoreSelectedSkills(skills) {
+  selectedSkills = Array.isArray(skills) ? skills.map(s=>({name:String(s.name||'').trim(),level:Math.min(5,Math.max(1,Number(s.level)||3))})).filter(s=>s.name) : [];
+  renderSelectedSkills();
+}
+
+
 const GUEST_HISTORY_KEY = 'navigate_guest_history';
 
 function getGuestHistory() {
@@ -304,7 +399,7 @@ function buildPayload(values, probability, ind, factors, recs) {
     customer_external_id:$('customerExternalId').value.trim()||null,
     company_account_id:$('companyAccountId').value.trim()||null,
     notes:$('customerNotes').value.trim()||null,
-    input_data:values,
+    input_data:{...values, Skills:collectSelectedSkills()},
     churn_risk:Number(probability.toFixed(6)),
     risk_level:level.en,
     retention_priority:Number(ind.priority.toFixed(2)),
@@ -344,6 +439,8 @@ function renderResults(payload, createdAt=new Date()) {
   $('metricRiskLabel').textContent = getLanguage()==='ar'?level.ar:level.en;
   $('metricPriority').textContent = Math.round(ind.priority);
   $('metricValue').textContent = Math.round(ind.valueIndex);
+  const skillsImpact = skillImpactScore(values.Skills || []);
+  $('metricSkills').textContent = Math.round(skillsImpact);
   $('metricEngagement').textContent = Math.round(ind.engagement);
   $('metricRecency').textContent = Math.round(ind.recencyHealth);
   $('metricSatisfaction').textContent = Math.round(ind.satisfactionHealth);
@@ -376,6 +473,11 @@ function renderResults(payload, createdAt=new Date()) {
   renderList($('retentionSignals'),factors.positive);
   renderList($('recommendedActions'),recs.actions,true);
   renderList($('followUpPlan'),recs.followUp,true);
+  const skillList = $('skillsImpactList');
+  if (skillList) {
+    const skills = Array.isArray(values.Skills) ? values.Skills : [];
+    skillList.innerHTML = skills.length ? skills.map(s=>`<div class="skill-impact-item"><span>${s.name}</span><strong>${skillLevelLabel(s.level)} · ${Math.round((Number(s.level)/5)*100)}</strong></div>`).join('') : `<p class="chart-note">${translate('No key skills were added for this customer.','لم تتم إضافة مهارات أساسية لهذا العميل.')}</p>`;
+  }
   $('resultsSection').hidden = false;
   latestAnalysis = {payload,createdAt};
 }
@@ -396,10 +498,24 @@ async function loadSavedAnalysis(id) {
   const {data,error} = await supabase.from('customer_analyses').select('*').eq('id',id).single();
   if (error) throw error;
   $('customerName').value=data.customer_name||''; $('customerEmail').value=data.customer_email||''; $('customerPhone').value=data.customer_phone||''; $('customerExternalId').value=data.customer_external_id||''; $('companyAccountId').value=data.company_account_id||''; $('customerNotes').value=data.notes||'';
-  Object.entries(data.input_data||{}).forEach(([k,v])=>{if($(k)) $(k).value=v;});
+  Object.entries(data.input_data||{}).forEach(([k,v])=>{if($(k) && k!=='Skills') $(k).value=v;});
+  restoreSelectedSkills(data.input_data?.Skills || []);
   if (data.customer_email||data.customer_phone||data.customer_external_id||data.company_account_id||data.notes) { $('optionalDetails').hidden=false; $('optionalDetailsToggle').setAttribute('aria-expanded','true'); }
   renderResults(data,data.created_at);
 }
+
+$('skillSearch')?.addEventListener('input',(e)=>renderSkillSuggestions(e.target.value));
+$('skillSearch')?.addEventListener('keydown',(e)=>{
+  if (e.key==='Enter') {
+    e.preventDefault();
+    const first=$('skillSuggestions')?.querySelector('button');
+    if (first) first.click();
+    else addSkill(e.target.value);
+  }
+});
+document.addEventListener('click',(e)=>{
+  if (!e.target.closest('.skill-search-wrap') && $('skillSuggestions')) $('skillSuggestions').hidden=true;
+});
 
 $('optionalDetailsToggle').addEventListener('click',()=>{
   const d=$('optionalDetails'), open=!d.hidden; d.hidden=open; $('optionalDetailsToggle').setAttribute('aria-expanded',String(!open)); $('optionalDetailsToggle').querySelector('span:first-child').textContent=open?'＋':'−';
@@ -458,7 +574,7 @@ $('analysisForm').addEventListener('submit',async(e)=>{
   $('resultsSection').scrollIntoView({behavior:'smooth',block:'start'});
 });
 $('printReport').addEventListener('click',()=>window.print());
-window.addEventListener('navigate:language',()=>{ if(latestAnalysis) renderResults(latestAnalysis.payload,latestAnalysis.createdAt); });
+window.addEventListener('navigate:language',()=>{ renderSelectedSkills(); if(latestAnalysis) renderResults(latestAnalysis.payload,latestAnalysis.createdAt); });
 
 async function init(){
   // Analysis must work even before Supabase is configured or before the user signs in.
@@ -498,8 +614,9 @@ async function init(){
         $('customerNotes').value=localRecord.notes||'';
 
         Object.entries(localRecord.input_data||{}).forEach(([k,v])=>{
-          if($(k)) $(k).value=v;
+          if($(k) && k!=='Skills') $(k).value=v;
         });
+        restoreSelectedSkills(localRecord.input_data?.Skills || []);
 
         if (
           localRecord.customer_email ||
@@ -538,4 +655,5 @@ async function init(){
     }
   }
 }
+renderSelectedSkills();
 init();
