@@ -4,7 +4,104 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Account | NAVIGATE</title>
-  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="styles.css?v=20261007-4"/>
+
+  <style>
+    /* Auth-page fallback: keeps the account controls styled even if GitHub/browser caches old CSS */
+    .auth-tabs{
+      margin-top:26px!important;
+      padding:4px!important;
+      display:grid!important;
+      grid-template-columns:1fr 1fr!important;
+      gap:4px!important;
+      border:1px solid var(--line,#ead8dd)!important;
+      border-radius:13px!important;
+      background:var(--soft,#f6e9ed)!important;
+    }
+    .auth-tab{
+      min-height:42px!important;
+      padding:0 14px!important;
+      border:0!important;
+      border-radius:9px!important;
+      background:transparent!important;
+      color:var(--muted,#7b6870)!important;
+      cursor:pointer!important;
+      font:inherit!important;
+      font-size:11px!important;
+      font-weight:800!important;
+      appearance:none!important;
+      -webkit-appearance:none!important;
+      box-shadow:none!important;
+    }
+    .auth-tab.active{
+      color:var(--deep,#641323)!important;
+      background:var(--surface2,#fffdfd)!important;
+      box-shadow:var(--shadow-sm,0 10px 28px rgba(74,23,38,.06))!important;
+    }
+    .auth-channel-switch{
+      margin-top:18px!important;
+      padding:4px!important;
+      display:grid!important;
+      grid-template-columns:1fr 1fr!important;
+      gap:4px!important;
+      border:1px solid var(--line,#ead8dd)!important;
+      border-radius:13px!important;
+      background:var(--soft,#f6e9ed)!important;
+    }
+    .auth-channel{
+      min-height:40px!important;
+      padding:0 12px!important;
+      border:0!important;
+      border-radius:9px!important;
+      background:transparent!important;
+      color:var(--muted,#7b6870)!important;
+      cursor:pointer!important;
+      font:inherit!important;
+      font-size:10px!important;
+      font-weight:800!important;
+      appearance:none!important;
+      -webkit-appearance:none!important;
+    }
+    .auth-channel.active{
+      color:var(--deep,#641323)!important;
+      background:var(--surface2,#fffdfd)!important;
+      box-shadow:var(--shadow-sm,0 10px 28px rgba(74,23,38,.06))!important;
+    }
+    .support-box{
+      margin-top:25px!important;
+      padding:15px!important;
+      display:flex!important;
+      justify-content:space-between!important;
+      gap:16px!important;
+      align-items:center!important;
+      border:1px solid var(--line,#ead8dd)!important;
+      border-radius:13px!important;
+      background:var(--soft,#f6e9ed)!important;
+    }
+    .support-box div{display:grid!important;gap:3px!important}
+    .support-box strong{color:var(--deep,#641323)!important;font-size:10px!important}
+    .support-box span{color:var(--muted,#7b6870)!important;font-size:9px!important}
+    .support-box a{
+      color:var(--primary,#8f1d32)!important;
+      font-size:9px!important;
+      font-weight:800!important;
+      text-underline-offset:3px!important;
+    }
+    .auth-inline-note{
+      margin-top:10px!important;
+      padding:11px 12px!important;
+      border:1px solid var(--line,#ead8dd)!important;
+      border-radius:10px!important;
+      background:var(--soft,#f6e9ed)!important;
+      color:var(--muted,#7b6870)!important;
+      font-size:9px!important;
+      line-height:1.55!important;
+    }
+    @media(max-width:760px){
+      .support-box{align-items:flex-start!important;flex-direction:column!important}
+    }
+  </style>
+
 </head>
 
 <body data-page="auth">
@@ -105,6 +202,41 @@
         </button>
       </div>
 
+      <div class="auth-tabs auth-channel-tabs" role="tablist" aria-label="Verification method">
+        <button
+          id="emailChannel"
+          class="auth-tab active"
+          type="button"
+          role="tab"
+          aria-selected="true"
+          data-en="Email code"
+          data-ar="التفعيل بالبريد"
+        >
+          Email code
+        </button>
+
+        <button
+          id="phoneChannel"
+          class="auth-tab"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          data-en="SMS code"
+          data-ar="التفعيل بالجوال"
+        >
+          SMS code
+        </button>
+      </div>
+
+      <div id="phoneSetupNote" class="auth-status" data-type="info" hidden>
+        <span
+          data-en="SMS verification requires Phone Auth and an SMS provider to be enabled in Supabase."
+          data-ar="التفعيل بالجوال يحتاج تفعيل Phone Auth وربط مزود SMS في Supabase."
+        >
+          SMS verification requires Phone Auth and an SMS provider to be enabled in Supabase.
+        </span>
+      </div>
+
       <form id="emailForm" class="auth-form">
 
         <div id="createFields" class="field-grid" hidden>
@@ -141,10 +273,10 @@
             />
 
             <small
-              data-en="Saved to your account profile. Phone sign-in can be added later."
-              data-ar="يُحفظ في ملف حسابك. ويمكن إضافة تسجيل الدخول بالجوال لاحقًا."
+              data-en="Saved to your account profile."
+              data-ar="يُحفظ في ملف حسابك."
             >
-              Saved to your account profile. Phone sign-in can be added later.
+              Saved to your account profile.
             </small>
           </label>
 
@@ -276,7 +408,7 @@
           </span>
         </div>
 
-        <a href="mailto:navigate.support@gmail.com?subject=NAVIGATE%20Support">
+        <a href="support.html">
           navigate.support@gmail.com
         </a>
 
@@ -328,7 +460,7 @@
 
         <a
           class="secondary-button"
-          href="mailto:navigate.support@gmail.com?subject=NAVIGATE%20Support"
+          href="support.html"
           data-en="Contact support"
           data-ar="تواصل مع الدعم"
         >
@@ -366,7 +498,7 @@
   </div>
 </footer>
 
-<script type="module" src="auth.js"></script>
+<script type="module" src="auth.js?v=20261007-4"></script>
 
 </body>
 </html>
