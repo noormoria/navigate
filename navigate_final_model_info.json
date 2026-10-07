@@ -1,0 +1,46 @@
+{
+  "model_name": "Hist Gradient Boosting",
+  "features": [
+    "Tenure",
+    "Total Spend",
+    "Last Interaction",
+    "Usage Frequency",
+    "Support Calls",
+    "Payment Delay",
+    "Subscription Type",
+    "Contract Length"
+  ],
+  "required_ui_fields": [
+    "Tenure",
+    "Total Spend",
+    "Last Interaction"
+  ],
+  "optional_ui_fields": [
+    "Usage Frequency",
+    "Support Calls",
+    "Payment Delay",
+    "Subscription Type",
+    "Contract Length"
+  ],
+  "decision_threshold": 0.5537127026358937,
+  "metrics": {
+    "accuracy": 0.9596334229360192,
+    "precision": 0.9943161255987227,
+    "recall": 0.93416,
+    "f1": 0.9632998195411189,
+    "roc_auc": 0.9814506078549533,
+    "pr_auc": 0.9893568027337138,
+    "brier": 0.034741349415620335
+  },
+  "confusion_matrix": [
+    [
+      37900,
+      267
+    ],
+    [
+      3292,
+      46708
+    ]
+  ],
+  "dataset_rows": 440832
+}
