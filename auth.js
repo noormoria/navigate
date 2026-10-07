@@ -5,11 +5,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let authMode = "signin";
   let pendingEmail = "";
+  let pendingFullName = "";
+  let pendingPhone = "";
 
   const signInTab = $("signInTab");
   const createTab = $("createTab");
   const emailForm = $("emailForm");
   const otpForm = $("otpForm");
+  const createFields = $("createFields");
+  const fullNameInput = $("authFullName");
+  const phoneInput = $("authPhone");
   const emailInput = $("authEmail");
   const otpInput = $("authOtp");
   const otpEmailLabel = $("otpEmailLabel");
@@ -94,6 +99,18 @@ document.addEventListener("DOMContentLoaded", () => {
       createTab.setAttribute("aria-selected", String(creating));
     }
 
+    if (createFields) {
+      createFields.hidden = !creating;
+    }
+
+    if (fullNameInput) {
+      fullNameInput.required = creating;
+    }
+
+    if (phoneInput) {
+      phoneInput.required = creating;
+    }
+
     if (authHeading) {
       authHeading.textContent = creating
         ? tr("Create your NAVIGATE account.", "أنشئ حسابك في NAVIGATE.")
@@ -103,8 +120,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (authIntro) {
       authIntro.textContent = creating
         ? tr(
-            "Create an account with your email. We will send a 6-digit verification code to confirm your address.",
-            "أنشئ حسابك باستخدام بريدك الإلكتروني. سنرسل رمز تحقق مكوّنًا من 6 أرقام لتأكيد بريدك."
+            "Enter your name, phone number, and email. We will save the profile details and send a 6-digit code to verify your email.",
+            "أدخل اسمك ورقم جوالك وبريدك الإلكتروني. سنحفظ بيانات الحساب ونرسل رمزًا من 6 أرقام للتحقق من البريد."
           )
         : tr(
             "Sign in with your existing email and a 6-digit verification code.",
@@ -218,6 +235,47 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    if (authMode === "create") {
+      pendingFullName = (fullNameInput?.value || "").trim();
+      pendingPhone = (phoneInput?.value || "").trim();
+
+      if (!pendingFullName) {
+        setStatus(
+          tr(
+            "Enter your full name.",
+            "أدخل اسمك الكامل."
+          ),
+          "error"
+        );
+        fullNameInput?.focus();
+        return;
+      }
+
+      if (!pendingPhone) {
+        setStatus(
+          tr(
+            "Enter your phone number.",
+            "أدخل رقم جوالك."
+          ),
+          "error"
+        );
+        phoneInput?.focus();
+        return;
+      }
+
+      if (!/^\+?[0-9\s()-]{7,20}$/.test(pendingPhone)) {
+        setStatus(
+          tr(
+            "Enter a valid phone number.",
+            "أدخل رقم جوال صحيح."
+          ),
+          "error"
+        );
+        phoneInput?.focus();
+        return;
+      }
+    }
+
     if (sendCodeButton) {
       sendCodeButton.disabled = true;
       sendCodeButton.textContent = tr(
@@ -227,25 +285,47 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
+      const otpOptions = {
+        shouldCreateUser: authMode === "create",
+      };
+
+      if (authMode === "create") {
+        otpOptions.data = {
+          full_name: pendingFullName,
+          phone_number: pendingPhone,
+        };
+      }
+
       const { error } = await supabase.auth.signInWithOtp({
         email: pendingEmail,
-        options: {
-          shouldCreateUser: authMode === "create",
-        },
+        options: otpOptions,
       });
 
       if (error) {
         console.error("OTP send error:", error);
 
-        setStatus(
-          authMode === "signin"
-            ? tr(
-                `${error.message} If you do not have an account yet, choose Create account.`,
-                `${error.message} إذا لم يكن لديك حساب بعد، اختر إنشاء حساب.`
-              )
-            : error.message,
-          "error"
-        );
+        const mailError =
+          /sending confirmation email|error sending/i.test(error.message || "");
+
+        if (mailError) {
+          setStatus(
+            tr(
+              "The account request reached Supabase, but the verification email could not be sent. Check the custom SMTP settings in Supabase.",
+              "وصل طلب إنشاء الحساب إلى Supabase، لكن تعذر إرسال رسالة التحقق. تحققي من إعدادات SMTP المخصصة في Supabase."
+            ),
+            "error"
+          );
+        } else {
+          setStatus(
+            authMode === "signin"
+              ? tr(
+                  `${error.message} If you do not have an account yet, choose Create account.`,
+                  `${error.message} إذا لم يكن لديك حساب بعد، اختر إنشاء حساب.`
+                )
+              : error.message,
+            "error"
+          );
+        }
         return;
       }
 
