@@ -8,6 +8,35 @@ let latestAnalysis = null;
 const $ = (id) => document.getElementById(id);
 const FEATURE_IDS = ['TenureMonths','SatisfactionScore','OrderCount','TotalSpend','DaysSinceLastOrder','Complain'];
 
+const GUEST_HISTORY_KEY = 'navigate_guest_history';
+
+function getGuestHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(GUEST_HISTORY_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveGuestAnalysis(payload) {
+  const records = getGuestHistory();
+  const record = {
+    ...payload,
+    id: `guest-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,
+    created_at: new Date().toISOString(),
+    storage_scope: 'local'
+  };
+
+  records.unshift(record);
+  localStorage.setItem(GUEST_HISTORY_KEY, JSON.stringify(records.slice(0, 100)));
+  return record;
+}
+
+function loadGuestAnalysis(id) {
+  return getGuestHistory().find((record) => record.id === id) || null;
+}
+
+
 const clamp = (v, min=0, max=100) => Math.min(max, Math.max(min, v));
 const pct = (v) => clamp(v * 100);
 
@@ -400,13 +429,19 @@ $('analysisForm').addEventListener('submit',async(e)=>{
         'success'
       );
     } else {
-      latestAnalysis={payload,createdAt:new Date()};
+      const localRecord = saveGuestAnalysis(payload);
+      latestAnalysis={payload:localRecord,createdAt:localRecord.created_at};
+
+      const url=new URL(window.location.href);
+      url.searchParams.set('id',localRecord.id);
+      history.replaceState({},'',url);
+
       setToast(
         translate(
-          'Analysis complete. Sign in to save it permanently to History.',
-          'اكتمل التحليل. سجّل الدخول لحفظه بشكل دائم في السجل.'
+          'Analysis complete and saved to this device. Sign in only if you want History synced across devices.',
+          'اكتمل التحليل وتم حفظه على هذا الجهاز. سجّل الدخول فقط إذا أردت مزامنة السجل بين الأجهزة.'
         ),
-        'info'
+        'success'
       );
     }
   } catch(error) {
@@ -447,26 +482,56 @@ async function init(){
   const id = new URLSearchParams(window.location.search).get('id');
 
   if (id) {
-    if (!supabaseConfigured || !supabase || !activeUser) {
-      setToast(
-        translate(
-          'Sign in to open a saved analysis from History.',
-          'سجّل الدخول لفتح تحليل محفوظ من السجل.'
-        ),
-        'warning'
-      );
-      return;
-    }
-
     try {
-      await loadSavedAnalysis(id);
+      if (id.startsWith('guest-')) {
+        const localRecord = loadGuestAnalysis(id);
+
+        if (!localRecord) {
+          throw new Error('Local guest analysis was not found on this device.');
+        }
+
+        $('customerName').value=localRecord.customer_name||'';
+        $('customerEmail').value=localRecord.customer_email||'';
+        $('customerPhone').value=localRecord.customer_phone||'';
+        $('customerExternalId').value=localRecord.customer_external_id||'';
+        $('companyAccountId').value=localRecord.company_account_id||'';
+        $('customerNotes').value=localRecord.notes||'';
+
+        Object.entries(localRecord.input_data||{}).forEach(([k,v])=>{
+          if($(k)) $(k).value=v;
+        });
+
+        if (
+          localRecord.customer_email ||
+          localRecord.customer_phone ||
+          localRecord.customer_external_id ||
+          localRecord.company_account_id ||
+          localRecord.notes
+        ) {
+          $('optionalDetails').hidden=false;
+          $('optionalDetailsToggle').setAttribute('aria-expanded','true');
+        }
+
+        renderResults(localRecord, localRecord.created_at);
+      } else {
+        if (!supabaseConfigured || !supabase || !activeUser) {
+          throw new Error('Sign in is required for cloud-saved analyses.');
+        }
+
+        await loadSavedAnalysis(id);
+      }
+
       $('resultsSection').scrollIntoView({behavior:'smooth',block:'start'});
     } catch(e) {
       console.error(e);
       setToast(
         translate(
-          'Saved analysis could not be opened.',
-          'تعذر فتح التحليل المحفوظ.'
+          id.startsWith('guest-')
+            ? 'This local analysis is not available on this device anymore.'
+            : 'Sign in to open this cloud-saved analysis.',
+          id.startsWith('guest-')
+            ? 'هذا التحليل المحلي لم يعد متاحًا على هذا الجهاز.'
+            : 'سجّل الدخول لفتح هذا التحليل المحفوظ سحابيًا.'
         ),
         'error'
       );
