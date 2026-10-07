@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Support | NAVIGATE</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body data-page="support">
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">NA</span>
+      <span class="brand-copy">
+        <strong>NAVIGATE</strong>
+        <small data-en="Customer Retention Intelligence" data-ar="ذكاء الاحتفاظ بالعملاء">Customer Retention Intelligence</small>
+      </span>
+    </a>
+
+    <button class="menu-toggle" data-menu-toggle aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="main-nav" aria-label="Main navigation">
+      <div class="menu-kicker" data-en="NAVIGATE MENU" data-ar="قائمة NAVIGATE">NAVIGATE MENU</div>
+      <a href="index.html" data-nav="home"><span>01</span><strong data-en="Home" data-ar="الرئيسية">Home</strong></a>
+      <a href="analyze.html" data-nav="analyze"><span>02</span><strong data-en="Analyze customer" data-ar="تحليل عميل">Analyze customer</strong></a>
+      <a href="compare.html" data-nav="compare"><span>03</span><strong data-en="Compare candidates" data-ar="مقارنة مرشحين">Compare candidates</strong></a>
+      <a href="history.html" data-nav="history"><span>04</span><strong data-en="History" data-ar="السجل">History</strong></a>
+      <a href="about.html" data-nav="about"><span>05</span><strong data-en="About" data-ar="عن المنصة">About</strong></a>
+      <a href="support.html" data-nav="support"><span>06</span><strong data-en="Support" data-ar="الدعم">Support</strong></a>
+    </nav>
+
+    <div class="header-actions">
+      <button class="utility-button" data-language-toggle>عربي</button>
+      <button class="utility-button" data-theme-toggle><span>☾</span><span>Dark</span></button>
+      <a class="account-button sign-in-button" data-account-button href="auth.html">
+        <span class="account-dot signed-out"></span>
+        <span data-en="Sign in" data-ar="تسجيل الدخول">Sign in</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="page-shell inner-page">
+  <section class="page-heading">
+    <div>
+      <span class="eyebrow" data-en="NAVIGATE SUPPORT" data-ar="دعم NAVIGATE">NAVIGATE SUPPORT</span>
+      <h1 data-en="Tell us what went wrong." data-ar="اكتب لنا المشكلة مباشرة.">Tell us what went wrong.</h1>
+      <p data-en="Submit the form and the message will be forwarded to navigate.support@gmail.com. No sign-in is required." data-ar="أرسل النموذج وستصل الرسالة إلى navigate.support@gmail.com. لا يلزم تسجيل الدخول.">Submit the form and the message will be forwarded to navigate.support@gmail.com. No sign-in is required.</p>
+    </div>
+  </section>
+
+  <section class="support-page-grid">
+    <form
+      id="supportForm"
+      class="support-form-card"
+      action="https://formsubmit.co/navigate.support@gmail.com"
+      method="POST"
+    >
+      <input type="hidden" name="_subject" value="New NAVIGATE Support Request"/>
+      <input type="hidden" name="_template" value="table"/>
+      <input type="hidden" name="_next" value="https://noormoria.github.io/navigate/support.html?sent=1"/>
+      <input type="hidden" name="_url" value="https://noormoria.github.io/navigate/support.html"/>
+      <input type="text" name="_honey" class="honeypot" tabindex="-1" autocomplete="off"/>
+
+      <div class="panel-heading">
+        <div><span class="panel-number">01</span><h2 data-en="Support request" data-ar="طلب دعم">Support request</h2></div>
+      </div>
+
+      <div class="field-grid">
+        <label class="field">
+          <span data-en="Your name" data-ar="اسمك">Your name</span>
+          <input name="name" type="text" required/>
+        </label>
+
+        <label class="field">
+          <span data-en="Your email" data-ar="بريدك الإلكتروني">Your email</span>
+          <input name="email" type="email" required/>
+        </label>
+
+        <label class="field full">
+          <span data-en="Issue type" data-ar="نوع المشكلة">Issue type</span>
+          <select name="issue_type" required>
+            <option value="Account / sign-in">Account / sign-in</option>
+            <option value="Customer analysis">Customer analysis</option>
+            <option value="CV comparison">CV comparison</option>
+            <option value="History">History</option>
+            <option value="Other">Other</option>
+          </select>
+        </label>
+
+        <label class="field full">
+          <span data-en="Describe the problem" data-ar="اشرح المشكلة">Describe the problem</span>
+          <textarea name="message" rows="8" required data-placeholder-en="What happened? What did you expect to happen?" data-placeholder-ar="وش صار؟ وش كنت تتوقع يصير؟"></textarea>
+        </label>
+      </div>
+
+      <button class="primary-button full-button" type="submit" data-en="Send to NAVIGATE Support" data-ar="إرسال إلى دعم NAVIGATE">Send to NAVIGATE Support</button>
+
+      <div id="supportSent" class="auth-status" data-type="success" hidden
+        data-en="Your message was sent. Thank you."
+        data-ar="تم إرسال رسالتك. شكرًا لك.">
+        Your message was sent. Thank you.
+      </div>
+    </form>
+
+    <aside class="support-side-card">
+      <span class="eyebrow" data-en="DIRECT SUPPORT" data-ar="دعم مباشر">DIRECT SUPPORT</span>
+      <h3>navigate.support@gmail.com</h3>
+      <p data-en="The form opens inside NAVIGATE instead of launching the visitor's email app." data-ar="النموذج يفتح داخل NAVIGATE بدل فتح تطبيق البريد عند الزائر.">The form opens inside NAVIGATE instead of launching the visitor's email app.</p>
+      <p data-en="The first FormSubmit message may send an activation email to the support inbox. Confirm it once, then future submissions are forwarded automatically." data-ar="أول رسالة عبر FormSubmit قد ترسل رسالة تفعيل إلى بريد الدعم. وافق عليها مرة واحدة، وبعدها تصل الرسائل تلقائيًا.">The first FormSubmit message may send an activation email to the support inbox. Confirm it once, then future submissions are forwarded automatically.</p>
+    </aside>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <strong>NAVIGATE</strong>
+      <span data-en="Customer Retention Intelligence" data-ar="ذكاء الاحتفاظ بالعملاء">Customer Retention Intelligence</span>
+    </div>
+    <div class="footer-links">
+      <a href="support.html" data-en="Support" data-ar="الدعم">Support</a>
+      <a href="support.html">navigate.support@gmail.com</a>
+    </div>
+    <span data-en="Built for earlier, clearer retention decisions." data-ar="صُمم لقرارات احتفاظ أبكر وأكثر وضوحًا.">Built for earlier, clearer retention decisions.</span>
+  </div>
+</footer>
+
+<script type="module" src="support.js"></script>
+</body>
+</html>

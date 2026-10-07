@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Compare Candidates | NAVIGATE</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.9.1/mammoth.browser.min.js"></script>
+</head>
+<body data-page="compare">
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">NA</span>
+      <span class="brand-copy">
+        <strong>NAVIGATE</strong>
+        <small data-en="Customer Retention Intelligence" data-ar="ذكاء الاحتفاظ بالعملاء">Customer Retention Intelligence</small>
+      </span>
+    </a>
+
+    <button class="menu-toggle" data-menu-toggle aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="main-nav" aria-label="Main navigation">
+      <div class="menu-kicker" data-en="NAVIGATE MENU" data-ar="قائمة NAVIGATE">NAVIGATE MENU</div>
+      <a href="index.html" data-nav="home"><span>01</span><strong data-en="Home" data-ar="الرئيسية">Home</strong></a>
+      <a href="analyze.html" data-nav="analyze"><span>02</span><strong data-en="Analyze customer" data-ar="تحليل عميل">Analyze customer</strong></a>
+      <a href="compare.html" data-nav="compare"><span>03</span><strong data-en="Compare candidates" data-ar="مقارنة مرشحين">Compare candidates</strong></a>
+      <a href="history.html" data-nav="history"><span>04</span><strong data-en="History" data-ar="السجل">History</strong></a>
+      <a href="about.html" data-nav="about"><span>05</span><strong data-en="About" data-ar="عن المنصة">About</strong></a>
+      <a href="support.html" data-nav="support"><span>06</span><strong data-en="Support" data-ar="الدعم">Support</strong></a>
+    </nav>
+
+    <div class="header-actions">
+      <button class="utility-button" data-language-toggle>عربي</button>
+      <button class="utility-button" data-theme-toggle><span>☾</span><span>Dark</span></button>
+      <a class="account-button sign-in-button" data-account-button href="auth.html">
+        <span class="account-dot signed-out"></span>
+        <span data-en="Sign in" data-ar="تسجيل الدخول">Sign in</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="page-shell inner-page">
+  <section class="page-heading">
+    <div>
+      <span class="eyebrow" data-en="CV COMPARISON" data-ar="مقارنة السير الذاتية">CV COMPARISON</span>
+      <h1 data-en="Compare two CVs against the same role criteria." data-ar="قارن سيرتين ذاتيتين وفق نفس متطلبات الوظيفة.">Compare two CVs against the same role criteria.</h1>
+      <p data-en="NAVIGATE reviews documented job-related evidence only. It ignores protected or sensitive traits and does not make the hiring decision for you." data-ar="تراجع NAVIGATE الأدلة المرتبطة بالوظيفة فقط، وتتجاهل الصفات الحساسة أو المحمية، ولا تتخذ قرار التوظيف بدلًا عنك.">NAVIGATE reviews documented job-related evidence only. It ignores protected or sensitive traits and does not make the hiring decision for you.</p>
+    </div>
+  </section>
+
+  <section class="comparison-workspace">
+    <form id="compareForm" class="comparison-form">
+      <article class="form-panel">
+        <div class="panel-heading">
+          <div><span class="panel-number">01</span><h2 data-en="Role criteria" data-ar="متطلبات الوظيفة">Role criteria</h2></div>
+          <span class="required-note" data-en="Required" data-ar="مطلوب">Required</span>
+        </div>
+
+        <label class="field full">
+          <span data-en="Role title" data-ar="المسمى الوظيفي">Role title</span>
+          <input id="roleTitle" type="text" required placeholder="Data Analyst" data-placeholder-en="Data Analyst" data-placeholder-ar="محلل بيانات"/>
+        </label>
+
+        <label class="field full">
+          <span data-en="Job requirements / must-have skills" data-ar="متطلبات الوظيفة / المهارات الأساسية">Job requirements / must-have skills</span>
+          <textarea id="roleCriteria" rows="6" required data-placeholder-en="Example: SQL, Power BI, Excel, Python, dashboarding, 2+ years analytics experience..." data-placeholder-ar="مثال: SQL وPower BI وExcel وPython ولوحات المعلومات وخبرة سنتين في التحليل..."></textarea>
+          <small data-en="The numeric score measures documented CV coverage of these criteria. It is not a hiring score." data-ar="الدرجة الرقمية تقيس تغطية السيرة الذاتية للمتطلبات المكتوبة، وليست درجة توظيف.">The numeric score measures documented CV coverage of these criteria. It is not a hiring score.</small>
+        </label>
+      </article>
+
+      <div class="candidate-upload-grid">
+        <article class="form-panel candidate-panel">
+          <div class="panel-heading">
+            <div><span class="panel-number">A</span><h2 data-en="Candidate A" data-ar="المرشح A">Candidate A</h2></div>
+          </div>
+          <label class="field"><span data-en="Candidate label" data-ar="اسم / رمز المرشح">Candidate label</span><input id="candidateAName" type="text" value="Candidate A"/></label>
+          <label class="upload-zone" for="candidateAFile">
+            <strong data-en="Upload CV" data-ar="ارفع السيرة الذاتية">Upload CV</strong>
+            <span data-en="PDF, DOCX or TXT" data-ar="PDF أو DOCX أو TXT">PDF, DOCX or TXT</span>
+            <input id="candidateAFile" type="file" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" required/>
+          </label>
+          <small id="candidateAFileName" class="file-name"></small>
+        </article>
+
+        <article class="form-panel candidate-panel">
+          <div class="panel-heading">
+            <div><span class="panel-number">B</span><h2 data-en="Candidate B" data-ar="المرشح B">Candidate B</h2></div>
+          </div>
+          <label class="field"><span data-en="Candidate label" data-ar="اسم / رمز المرشح">Candidate label</span><input id="candidateBName" type="text" value="Candidate B"/></label>
+          <label class="upload-zone" for="candidateBFile">
+            <strong data-en="Upload CV" data-ar="ارفع السيرة الذاتية">Upload CV</strong>
+            <span data-en="PDF, DOCX or TXT" data-ar="PDF أو DOCX أو TXT">PDF, DOCX or TXT</span>
+            <input id="candidateBFile" type="file" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" required/>
+          </label>
+          <small id="candidateBFileName" class="file-name"></small>
+        </article>
+      </div>
+
+      <button class="primary-button compare-button" type="submit">
+        <span data-en="Compare CV evidence" data-ar="قارن أدلة السير الذاتية">Compare CV evidence</span>
+        <span>↗</span>
+      </button>
+    </form>
+
+    <section id="compareResults" class="compare-results" hidden>
+      <div class="results-toolbar">
+        <div>
+          <span class="eyebrow" data-en="COMPARISON RESULT" data-ar="نتيجة المقارنة">COMPARISON RESULT</span>
+          <h2 id="comparisonRole">Role</h2>
+          <p data-en="Scores are whole numbers with no decimals." data-ar="الدرجات أعداد صحيحة بدون فواصل عشرية.">Scores are whole numbers with no decimals.</p>
+        </div>
+      </div>
+
+      <div class="candidate-score-grid">
+        <article class="candidate-score-card">
+          <span id="scoreNameA">Candidate A</span>
+          <strong id="scoreA">0</strong>
+          <small>/ 100 criteria coverage</small>
+          <div class="score-track"><i id="scoreBarA"></i></div>
+        </article>
+        <article class="candidate-score-card">
+          <span id="scoreNameB">Candidate B</span>
+          <strong id="scoreB">0</strong>
+          <small>/ 100 criteria coverage</small>
+          <div class="score-track"><i id="scoreBarB"></i></div>
+        </article>
+      </div>
+
+      <div class="comparison-chart-card">
+        <div class="card-heading-row">
+          <div>
+            <span class="eyebrow" data-en="SIDE-BY-SIDE" data-ar="مقارنة مباشرة">SIDE-BY-SIDE</span>
+            <h3 data-en="Documented criteria coverage" data-ar="تغطية المتطلبات الموثقة">Documented criteria coverage</h3>
+          </div>
+        </div>
+        <div id="criteriaComparisonChart" class="criteria-comparison-chart"></div>
+      </div>
+
+      <div class="comparison-insights">
+        <article class="insight-card">
+          <span class="eyebrow" data-en="CANDIDATE A STRENGTHS" data-ar="مميزات المرشح A">CANDIDATE A STRENGTHS</span>
+          <div id="strengthsA" class="factor-list positive"></div>
+        </article>
+        <article class="insight-card">
+          <span class="eyebrow" data-en="CANDIDATE B STRENGTHS" data-ar="مميزات المرشح B">CANDIDATE B STRENGTHS</span>
+          <div id="strengthsB" class="factor-list positive"></div>
+        </article>
+        <article class="insight-card">
+          <span class="eyebrow" data-en="CANDIDATE A GAPS" data-ar="نواقص المرشح A">CANDIDATE A GAPS</span>
+          <div id="gapsA" class="factor-list"></div>
+        </article>
+        <article class="insight-card">
+          <span class="eyebrow" data-en="CANDIDATE B GAPS" data-ar="نواقص المرشح B">CANDIDATE B GAPS</span>
+          <div id="gapsB" class="factor-list"></div>
+        </article>
+        <article class="insight-card decision-card">
+          <span class="eyebrow" data-en="DOCUMENTED MATCH SUMMARY" data-ar="ملخص المطابقة الموثقة">DOCUMENTED MATCH SUMMARY</span>
+          <h3 id="matchSummaryTitle">—</h3>
+          <p id="matchSummaryText"></p>
+          <p class="decision-note" data-en="Use this as a structured review aid. Interview evidence, references, work samples, and human judgment should remain part of the hiring process." data-ar="استخدم هذه النتيجة كأداة مراجعة منظمة فقط. يجب أن تبقى المقابلة والمراجع ونماذج العمل والحكم البشري جزءًا من عملية التوظيف.">Use this as a structured review aid. Interview evidence, references, work samples, and human judgment should remain part of the hiring process.</p>
+        </article>
+      </div>
+    </section>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <strong>NAVIGATE</strong>
+      <span data-en="Customer Retention Intelligence" data-ar="ذكاء الاحتفاظ بالعملاء">Customer Retention Intelligence</span>
+    </div>
+    <div class="footer-links">
+      <a href="support.html" data-en="Support" data-ar="الدعم">Support</a>
+      <a href="support.html">navigate.support@gmail.com</a>
+    </div>
+    <span data-en="Built for earlier, clearer retention decisions." data-ar="صُمم لقرارات احتفاظ أبكر وأكثر وضوحًا.">Built for earlier, clearer retention decisions.</span>
+  </div>
+</footer>
+
+<script type="module" src="compare.js"></script>
+</body>
+</html>
