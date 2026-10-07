@@ -70,7 +70,24 @@
       </article>
 
       <article class="form-panel">
-        <div class="panel-heading"><div><span class="panel-number">02</span><h2 data-en="Behavior signals" data-ar="إشارات السلوك">Behavior signals</h2></div><span class="model-chip" data-en="Model inputs" data-ar="مدخلات النموذج">Model inputs</span></div>
+        <div class="panel-heading"><div><span class="panel-number">02</span><h2 data-en="Key skills" data-ar="المهارات الأساسية">Key skills</h2></div><span class="model-chip" data-en="Business impact" data-ar="تأثير على الشركة">Business impact</span></div>
+        <p class="skills-intro" data-en="Search and select the customer's key skills. For each selected skill, set how critical that skill is to the company. This affects the Skills Impact score only, not the churn probability." data-ar="ابحثي عن المهارات الأساسية للعميل وحددي مدى أهميتها للشركة. تؤثر هذه الخانة على درجة تأثير المهارات فقط، ولا تغيّر احتمال المغادرة الذي ينتجه المودل.">Search and select the customer's key skills. For each selected skill, set how critical that skill is to the company. This affects the Skills Impact score only, not the churn probability.</p>
+
+        <div class="skills-picker">
+          <label class="field full">
+            <span data-en="Search skills" data-ar="البحث عن مهارة">Search skills</span>
+            <div class="skill-search-wrap">
+              <input id="skillSearch" type="search" autocomplete="off" data-placeholder-en="Type a skill, e.g. Python, SAP, Sales..." data-placeholder-ar="اكتب مهارة مثل Python أو SAP أو المبيعات..." placeholder="Type a skill, e.g. Python, SAP, Sales..." />
+              <div id="skillSuggestions" class="skill-suggestions" hidden></div>
+            </div>
+          </label>
+          <div id="selectedSkills" class="selected-skills"></div>
+          <p id="skillsEmpty" class="skills-empty" data-en="No skills selected yet." data-ar="لم يتم اختيار مهارات بعد.">No skills selected yet.</p>
+        </div>
+      </article>
+
+      <article class="form-panel">
+        <div class="panel-heading"><div><span class="panel-number">03</span><h2 data-en="Behavior signals" data-ar="إشارات السلوك">Behavior signals</h2></div><span class="model-chip" data-en="Model inputs" data-ar="مدخلات النموذج">Model inputs</span></div>
         <div class="field-grid">
           <label class="field"><span data-en="Customer tenure (months)" data-ar="مدة العلاقة بالعميل (بالأشهر)">Customer tenure (months)</span><input id="TenureMonths" type="number" min="0" step="1" required /><small data-en="Time since the customer relationship began." data-ar="المدة منذ بداية علاقة العميل بالشركة.">Time since the customer relationship began.</small></label>
           <label class="field"><span data-en="Satisfaction score (1–5)" data-ar="درجة الرضا (1–5)">Satisfaction score (1–5)</span><input id="SatisfactionScore" type="number" min="1" max="5" step="1" required /><small data-en="Latest available customer satisfaction score." data-ar="أحدث تقييم متاح لرضا العميل.">Latest available customer satisfaction score.</small></label>
@@ -101,6 +118,7 @@
       <article class="metric-card accent"><span data-en="Churn risk" data-ar="خطر المغادرة">Churn risk</span><strong id="metricRisk">0%</strong><small id="metricRiskLabel">—</small></article>
       <article class="metric-card"><span data-en="Retention urgency" data-ar="إلحاح الاحتفاظ">Retention urgency</span><strong id="metricPriority">0</strong><small>/ 100</small></article>
       <article class="metric-card"><span data-en="Customer value" data-ar="قيمة العميل">Customer value</span><strong id="metricValue">0</strong><small>/ 100</small></article>
+      <article class="metric-card"><span data-en="Skills impact" data-ar="تأثير المهارات">Skills impact</span><strong id="metricSkills">0</strong><small>/ 100</small></article>
       <article class="metric-card"><span data-en="Relationship health" data-ar="صحة العلاقة">Relationship health</span><strong id="metricEngagement">0</strong><small>/ 100</small></article>
       <article class="metric-card"><span data-en="Activity recency" data-ar="حداثة النشاط">Activity recency</span><strong id="metricRecency">0</strong><small>/ 100</small></article>
       <article class="metric-card"><span data-en="Satisfaction health" data-ar="صحة الرضا">Satisfaction health</span><strong id="metricSatisfaction">0</strong><small>/ 100</small></article>
@@ -144,6 +162,10 @@
       <article class="insight-card"><span class="eyebrow" data-en="RETENTION SIGNALS" data-ar="إشارات داعمة للاحتفاظ">RETENTION SIGNALS</span><div id="retentionSignals" class="factor-list positive"></div></article>
       <article class="insight-card"><span class="eyebrow" data-en="RECOMMENDED ACTIONS" data-ar="الإجراءات المقترحة">RECOMMENDED ACTIONS</span><div id="recommendedActions" class="action-list"></div></article>
       <article class="insight-card"><span class="eyebrow" data-en="FOLLOW-UP PLAN" data-ar="خطة المتابعة">FOLLOW-UP PLAN</span><div id="followUpPlan" class="action-list"></div></article>
+      <article class="insight-card">
+        <span class="eyebrow" data-en="KEY SKILLS IMPACT" data-ar="تأثير المهارات الأساسية">KEY SKILLS IMPACT</span>
+        <div id="skillsImpactList" class="skills-impact-list"></div>
+      </article>
       <article class="insight-card transparency-card">
         <span class="eyebrow" data-en="MODEL TRANSPARENCY" data-ar="شفافية النموذج">MODEL TRANSPARENCY</span>
         <p data-en="The churn probability comes from a calibrated logistic-regression model trained on an e-commerce churn dataset. The six model inputs remain unchanged until the model is retrained; NAVIGATE does not pretend that extra UI fields affect the ML score." data-ar="احتمال المغادرة ناتج عن نموذج Logistic Regression مُعاير ومدرّب على بيانات فقدان عملاء في التجارة الإلكترونية. تبقى مدخلات النموذج الستة كما هي إلى أن تتم إعادة تدريب النموذج، ولا تدّعي NAVIGATE أن أي حقول إضافية في الواجهة تؤثر في نتيجة التعلم الآلي.">The churn probability comes from a calibrated logistic-regression model trained on an e-commerce churn dataset. The six model inputs remain unchanged until the model is retrained; NAVIGATE does not pretend that extra UI fields affect the ML score.</p>
