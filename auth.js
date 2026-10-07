@@ -10,22 +10,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const signInTab = $("signInTab");
   const createTab = $("createTab");
+
   const emailForm = $("emailForm");
   const otpForm = $("otpForm");
+
   const createFields = $("createFields");
   const fullNameInput = $("authFullName");
   const phoneInput = $("authPhone");
   const emailInput = $("authEmail");
   const otpInput = $("authOtp");
+
   const otpEmailLabel = $("otpEmailLabel");
+
   const sendCodeButton = $("sendCodeButton");
   const verifyButton = $("verifyButton");
+
   const authHeading = $("authHeading");
   const authIntro = $("authIntro");
   const authStatus = $("authStatus");
+
   const signedOutView = $("signedOutView");
   const signedInView = $("signedInView");
   const signedInEmail = $("signedInEmail");
+
   const signOutButton = $("signOutButton");
   const resendOtp = $("resendOtp");
   const changeEmail = $("changeEmail");
@@ -40,13 +47,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function setStatus(message, type = "info") {
     if (!authStatus) return;
+
     authStatus.hidden = false;
     authStatus.textContent = message;
     authStatus.dataset.type = type;
   }
 
   function clearStatus() {
-    if (authStatus) authStatus.hidden = true;
+    if (authStatus) {
+      authStatus.hidden = true;
+      authStatus.textContent = "";
+      authStatus.dataset.type = "";
+    }
   }
 
   function applyLanguage() {
@@ -113,19 +125,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (authHeading) {
       authHeading.textContent = creating
-        ? tr("Create your NAVIGATE account.", "أنشئ حسابك في NAVIGATE.")
-        : tr("Welcome back.", "مرحبًا بعودتك.");
+        ? tr(
+            "Create your NAVIGATE account.",
+            "أنشئ حسابك في NAVIGATE."
+          )
+        : tr(
+            "Welcome back.",
+            "مرحبًا بعودتك."
+          );
     }
 
     if (authIntro) {
       authIntro.textContent = creating
         ? tr(
-            "Enter your name, phone number, and email. We will save the profile details and send a 6-digit code to verify your email.",
-            "أدخل اسمك ورقم جوالك وبريدك الإلكتروني. سنحفظ بيانات الحساب ونرسل رمزًا من 6 أرقام للتحقق من البريد."
+            "Enter your name, phone number, and email. We will send an 8-digit verification code to confirm your email.",
+            "أدخل اسمك ورقم الجوال والبريد الإلكتروني. سنرسل رمز تحقق مكوّنًا من 8 أرقام لتأكيد بريدك."
           )
         : tr(
-            "Sign in with your existing email and a 6-digit verification code.",
-            "سجّل الدخول ببريدك الحالي ورمز تحقق مكوّن من 6 أرقام."
+            "Sign in with your existing email and an 8-digit verification code.",
+            "سجّل الدخول ببريدك الحالي ورمز تحقق مكوّن من 8 أرقام."
           );
     }
 
@@ -157,6 +175,11 @@ document.addEventListener("DOMContentLoaded", () => {
       if (emailForm) emailForm.hidden = false;
       if (otpForm) otpForm.hidden = true;
       if (otpInput) otpInput.value = "";
+
+      pendingEmail = "";
+      pendingFullName = "";
+      pendingPhone = "";
+
       clearStatus();
     }
   }
@@ -181,11 +204,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       setStatus(
         tr(
-          "Supabase is not configured yet. Check config.js.",
-          "لم يتم ربط Supabase بعد. تحققي من config.js."
+          "Supabase is not configured yet.",
+          "لم يتم ربط Supabase بعد."
         ),
         "warning"
       );
+
       return;
     }
 
@@ -197,12 +221,54 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const user = data?.session?.user || null;
 
-    if (signedOutView) signedOutView.hidden = !!user;
-    if (signedInView) signedInView.hidden = !user;
+    if (signedOutView) {
+      signedOutView.hidden = Boolean(user);
+    }
+
+    if (signedInView) {
+      signedInView.hidden = !user;
+    }
 
     if (user && signedInEmail) {
       signedInEmail.textContent = user.email || "";
     }
+  }
+
+  function validateCreateFields() {
+    if (authMode !== "create") {
+      return true;
+    }
+
+    pendingFullName = (fullNameInput?.value || "").trim();
+    pendingPhone = (phoneInput?.value || "").trim();
+
+    if (!pendingFullName) {
+      setStatus(
+        tr(
+          "Enter your full name.",
+          "أدخل الاسم الكامل."
+        ),
+        "error"
+      );
+
+      fullNameInput?.focus();
+      return false;
+    }
+
+    if (!pendingPhone) {
+      setStatus(
+        tr(
+          "Enter your phone number.",
+          "أدخل رقم الجوال."
+        ),
+        "error"
+      );
+
+      phoneInput?.focus();
+      return false;
+    }
+
+    return true;
   }
 
   async function sendOtp() {
@@ -211,11 +277,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!supabaseConfigured || !supabase) {
       setStatus(
         tr(
-          "Supabase is not configured yet. Check config.js.",
-          "لم يتم ربط Supabase بعد. تحققي من config.js."
+          "Supabase is not configured yet.",
+          "لم يتم ربط Supabase بعد."
         ),
         "warning"
       );
+
       return;
     }
 
@@ -231,49 +298,13 @@ document.addEventListener("DOMContentLoaded", () => {
         ),
         "error"
       );
+
       emailInput?.focus();
       return;
     }
 
-    if (authMode === "create") {
-      pendingFullName = (fullNameInput?.value || "").trim();
-      pendingPhone = (phoneInput?.value || "").trim();
-
-      if (!pendingFullName) {
-        setStatus(
-          tr(
-            "Enter your full name.",
-            "أدخل اسمك الكامل."
-          ),
-          "error"
-        );
-        fullNameInput?.focus();
-        return;
-      }
-
-      if (!pendingPhone) {
-        setStatus(
-          tr(
-            "Enter your phone number.",
-            "أدخل رقم جوالك."
-          ),
-          "error"
-        );
-        phoneInput?.focus();
-        return;
-      }
-
-      if (!/^\+?[0-9\s()-]{7,20}$/.test(pendingPhone)) {
-        setStatus(
-          tr(
-            "Enter a valid phone number.",
-            "أدخل رقم جوال صحيح."
-          ),
-          "error"
-        );
-        phoneInput?.focus();
-        return;
-      }
+    if (!validateCreateFields()) {
+      return;
     }
 
     if (sendCodeButton) {
@@ -304,14 +335,17 @@ document.addEventListener("DOMContentLoaded", () => {
       if (error) {
         console.error("OTP send error:", error);
 
-        const mailError =
-          /sending confirmation email|error sending/i.test(error.message || "");
+        const message = (error.message || "").toLowerCase();
 
-        if (mailError) {
+        if (
+          message.includes("send") ||
+          message.includes("smtp") ||
+          message.includes("email")
+        ) {
           setStatus(
             tr(
               "The account request reached Supabase, but the verification email could not be sent. Check the custom SMTP settings in Supabase.",
-              "وصل طلب إنشاء الحساب إلى Supabase، لكن تعذر إرسال رسالة التحقق. تحققي من إعدادات SMTP المخصصة في Supabase."
+              "وصل طلب الحساب إلى Supabase، لكن تعذر إرسال رسالة التحقق. تحققي من إعدادات SMTP المخصصة في Supabase."
             ),
             "error"
           );
@@ -326,6 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {
             "error"
           );
         }
+
         return;
       }
 
@@ -333,36 +368,44 @@ document.addEventListener("DOMContentLoaded", () => {
         otpEmailLabel.textContent = pendingEmail;
       }
 
-      if (emailForm) emailForm.hidden = true;
-      if (otpForm) otpForm.hidden = false;
+      if (emailForm) {
+        emailForm.hidden = true;
+      }
+
+      if (otpForm) {
+        otpForm.hidden = false;
+      }
 
       setStatus(
         authMode === "create"
           ? tr(
-              "Verification code sent. Enter the 6-digit code below to finish creating your account.",
-              "تم إرسال رمز التحقق. أدخل رمز الـ6 أرقام بالأسفل لإكمال إنشاء الحساب."
+              "Verification code sent. Enter the 8-digit code below to finish creating your account.",
+              "تم إرسال رمز التحقق. أدخل رمز الـ8 أرقام بالأسفل لإكمال إنشاء الحساب."
             )
           : tr(
-              "Sign-in code sent. Enter the 6-digit code below.",
-              "تم إرسال رمز تسجيل الدخول. أدخل رمز الـ6 أرقام بالأسفل."
+              "Sign-in code sent. Enter the 8-digit code below.",
+              "تم إرسال رمز تسجيل الدخول. أدخل رمز الـ8 أرقام بالأسفل."
             ),
         "success"
       );
 
       setTimeout(() => otpInput?.focus(), 50);
+
     } catch (error) {
       console.error("Unexpected OTP error:", error);
 
       setStatus(
         tr(
-          "Something went wrong while requesting the verification code. Open the browser console for details.",
-          "حدث خطأ أثناء طلب رمز التحقق. افتحي Console في المتصفح لرؤية التفاصيل."
+          "Something went wrong while requesting the verification code. Please try again.",
+          "حدث خطأ أثناء طلب رمز التحقق. حاول مرة أخرى."
         ),
         "error"
       );
+
     } finally {
       if (sendCodeButton) {
         sendCodeButton.disabled = false;
+
         sendCodeButton.textContent =
           authMode === "create"
             ? tr(
@@ -390,22 +433,32 @@ document.addEventListener("DOMContentLoaded", () => {
     await sendOtp();
   });
 
+  otpInput?.addEventListener("input", () => {
+    otpInput.value = otpInput.value
+      .replace(/\D/g, "")
+      .slice(0, 8);
+  });
+
   otpForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
     clearStatus();
 
-    if (!supabase) return;
+    if (!supabase) {
+      return;
+    }
 
     const token = (otpInput?.value || "").trim();
 
-    if (!/^\d{6}$/.test(token)) {
+    if (!/^\d{8}$/.test(token)) {
       setStatus(
         tr(
-          "Enter the 6-digit code from your email.",
-          "أدخل رمز التحقق المكوّن من 6 أرقام."
+          "Enter the 8-digit code from your email.",
+          "أدخل رمز التحقق المكوّن من 8 أرقام."
         ),
         "error"
       );
+
+      otpInput?.focus();
       return;
     }
 
@@ -441,8 +494,10 @@ document.addEventListener("DOMContentLoaded", () => {
           "error"
         );
       }
+
     } catch (error) {
       console.error("Unexpected verification error:", error);
+
       setStatus(
         tr(
           "Verification failed unexpectedly. Please try again.",
@@ -450,9 +505,11 @@ document.addEventListener("DOMContentLoaded", () => {
         ),
         "error"
       );
+
     } finally {
       if (verifyButton) {
         verifyButton.disabled = false;
+
         verifyButton.textContent =
           authMode === "create"
             ? tr(
@@ -468,41 +525,75 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   resendOtp?.addEventListener("click", async () => {
-    if (!pendingEmail) return;
+    if (!pendingEmail) {
+      return;
+    }
 
     if (emailInput) {
       emailInput.value = pendingEmail;
+    }
+
+    if (authMode === "create") {
+      if (fullNameInput) {
+        fullNameInput.value = pendingFullName;
+      }
+
+      if (phoneInput) {
+        phoneInput.value = pendingPhone;
+      }
     }
 
     await sendOtp();
   });
 
   changeEmail?.addEventListener("click", () => {
-    if (emailForm) emailForm.hidden = false;
-    if (otpForm) otpForm.hidden = true;
-    if (otpInput) otpInput.value = "";
+    if (emailForm) {
+      emailForm.hidden = false;
+    }
+
+    if (otpForm) {
+      otpForm.hidden = true;
+    }
+
+    if (otpInput) {
+      otpInput.value = "";
+    }
+
     clearStatus();
     emailInput?.focus();
   });
 
   signOutButton?.addEventListener("click", async () => {
-    if (!supabase) return;
+    if (!supabase) {
+      return;
+    }
 
     await supabase.auth.signOut();
+
     await renderSession();
     applyMode("signin");
   });
 
   languageButton?.addEventListener("click", () => {
     language = language === "en" ? "ar" : "en";
-    localStorage.setItem("navigate_language", language);
+
+    localStorage.setItem(
+      "navigate_language",
+      language
+    );
+
     applyLanguage();
     applyTheme();
   });
 
   themeButton?.addEventListener("click", () => {
     theme = theme === "light" ? "dark" : "light";
-    localStorage.setItem("navigate_theme", theme);
+
+    localStorage.setItem(
+      "navigate_theme",
+      theme
+    );
+
     applyTheme();
   });
 
