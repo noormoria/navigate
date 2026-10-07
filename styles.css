@@ -670,3 +670,31 @@ html[dir='rtl'] .main-nav.open{
     flex-direction:column;
   }
 }
+
+
+/* ===== Menu overlay fix ===== */
+.site-header{
+  z-index:100!important;
+}
+
+.main-nav{
+  z-index:120!important;
+  filter:none!important;
+  opacity:1!important;
+}
+
+.menu-toggle{
+  z-index:130!important;
+}
+
+.menu-backdrop{
+  z-index:90!important;
+  backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);
+}
+
+/* Keep the drawer crisp while only the page behind it is dimmed */
+.main-nav.open{
+  backdrop-filter:blur(24px)!important;
+  -webkit-backdrop-filter:blur(24px)!important;
+}
