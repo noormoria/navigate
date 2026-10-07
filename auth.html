@@ -1,604 +1,402 @@
-import { supabase, supabaseConfigured } from "./supabase-client.js";
-
-document.addEventListener("DOMContentLoaded", () => {
-  const $ = (id) => document.getElementById(id);
-
-  let authMode = "signin";
-  let pendingEmail = "";
-  let pendingFullName = "";
-  let pendingPhone = "";
-
-  const signInTab = $("signInTab");
-  const createTab = $("createTab");
-
-  const emailForm = $("emailForm");
-  const otpForm = $("otpForm");
-
-  const createFields = $("createFields");
-  const fullNameInput = $("authFullName");
-  const phoneInput = $("authPhone");
-  const emailInput = $("authEmail");
-  const otpInput = $("authOtp");
-
-  const otpEmailLabel = $("otpEmailLabel");
-
-  const sendCodeButton = $("sendCodeButton");
-  const verifyButton = $("verifyButton");
-
-  const authHeading = $("authHeading");
-  const authIntro = $("authIntro");
-  const authStatus = $("authStatus");
-
-  const signedOutView = $("signedOutView");
-  const signedInView = $("signedInView");
-  const signedInEmail = $("signedInEmail");
-
-  const signOutButton = $("signOutButton");
-  const resendOtp = $("resendOtp");
-  const changeEmail = $("changeEmail");
-
-  const languageButton = document.querySelector("[data-language-toggle]");
-  const themeButton = document.querySelector("[data-theme-toggle]");
-
-  let language = localStorage.getItem("navigate_language") || "en";
-  let theme = localStorage.getItem("navigate_theme") || "light";
-
-  const tr = (en, ar) => (language === "ar" ? ar : en);
-
-  function setStatus(message, type = "info") {
-    if (!authStatus) return;
-
-    authStatus.hidden = false;
-    authStatus.textContent = message;
-    authStatus.dataset.type = type;
-  }
-
-  function clearStatus() {
-    if (authStatus) {
-      authStatus.hidden = true;
-      authStatus.textContent = "";
-      authStatus.dataset.type = "";
-    }
-  }
-
-  function applyLanguage() {
-    const isArabic = language === "ar";
-
-    document.documentElement.lang = isArabic ? "ar" : "en";
-    document.documentElement.dir = isArabic ? "rtl" : "ltr";
-
-    document.querySelectorAll("[data-en][data-ar]").forEach((el) => {
-      el.textContent = isArabic ? el.dataset.ar : el.dataset.en;
-    });
-
-    document
-      .querySelectorAll("[data-placeholder-en][data-placeholder-ar]")
-      .forEach((el) => {
-        el.placeholder = isArabic
-          ? el.dataset.placeholderAr
-          : el.dataset.placeholderEn;
-      });
-
-    if (languageButton) {
-      languageButton.textContent = isArabic ? "EN" : "عربي";
-    }
-
-    applyMode(authMode, false);
-  }
-
-  function applyTheme() {
-    document.documentElement.dataset.theme = theme;
-
-    if (themeButton) {
-      themeButton.innerHTML =
-        theme === "dark"
-          ? `<span>☀</span><span>${tr("Light", "نهاري")}</span>`
-          : `<span>☾</span><span>${tr("Dark", "ليلي")}</span>`;
-    }
-  }
-
-  function applyMode(mode, resetForms = true) {
-    authMode = mode;
-    const creating = mode === "create";
-
-    if (signInTab) {
-      signInTab.classList.toggle("active", !creating);
-      signInTab.setAttribute("aria-selected", String(!creating));
-    }
-
-    if (createTab) {
-      createTab.classList.toggle("active", creating);
-      createTab.setAttribute("aria-selected", String(creating));
-    }
-
-    if (createFields) {
-      createFields.hidden = !creating;
-    }
-
-    if (fullNameInput) {
-      fullNameInput.required = creating;
-    }
-
-    if (phoneInput) {
-      phoneInput.required = creating;
-    }
-
-    if (authHeading) {
-      authHeading.textContent = creating
-        ? tr(
-            "Create your NAVIGATE account.",
-            "أنشئ حسابك في NAVIGATE."
-          )
-        : tr(
-            "Welcome back.",
-            "مرحبًا بعودتك."
-          );
-    }
-
-    if (authIntro) {
-      authIntro.textContent = creating
-        ? tr(
-            "Enter your name, phone number, and email. We will send an 8-digit verification code to confirm your email.",
-            "أدخل اسمك ورقم الجوال والبريد الإلكتروني. سنرسل رمز تحقق مكوّنًا من 8 أرقام لتأكيد بريدك."
-          )
-        : tr(
-            "Sign in with your existing email and an 8-digit verification code.",
-            "سجّل الدخول ببريدك الحالي ورمز تحقق مكوّن من 8 أرقام."
-          );
-    }
-
-    if (sendCodeButton) {
-      sendCodeButton.textContent = creating
-        ? tr(
-            "Create account and send code",
-            "إنشاء الحساب وإرسال الرمز"
-          )
-        : tr(
-            "Send sign-in code",
-            "إرسال رمز تسجيل الدخول"
-          );
-    }
-
-    if (verifyButton) {
-      verifyButton.textContent = creating
-        ? tr(
-            "Verify and create account",
-            "تحقق وأنشئ الحساب"
-          )
-        : tr(
-            "Verify and sign in",
-            "تحقق وسجّل الدخول"
-          );
-    }
-
-    if (resetForms) {
-      if (emailForm) emailForm.hidden = false;
-      if (otpForm) otpForm.hidden = true;
-      if (otpInput) otpInput.value = "";
-
-      pendingEmail = "";
-      pendingFullName = "";
-      pendingPhone = "";
-
-      clearStatus();
-    }
-  }
-
-  function safeReturnTo() {
-    const raw = new URLSearchParams(window.location.search).get("returnTo");
-
-    if (
-      raw &&
-      /^[a-zA-Z0-9_-]+\.html(?:\?.*)?$/.test(raw)
-    ) {
-      return raw;
-    }
-
-    return "analyze.html";
-  }
-
-  async function renderSession() {
-    if (!supabaseConfigured || !supabase) {
-      if (signedOutView) signedOutView.hidden = false;
-      if (signedInView) signedInView.hidden = true;
-
-      setStatus(
-        tr(
-          "Supabase is not configured yet.",
-          "لم يتم ربط Supabase بعد."
-        ),
-        "warning"
-      );
-
-      return;
-    }
-
-    const { data, error } = await supabase.auth.getSession();
-
-    if (error) {
-      console.error("Session error:", error);
-    }
-
-    const user = data?.session?.user || null;
-
-    if (signedOutView) {
-      signedOutView.hidden = Boolean(user);
-    }
-
-    if (signedInView) {
-      signedInView.hidden = !user;
-    }
-
-    if (user && signedInEmail) {
-      signedInEmail.textContent = user.email || "";
-    }
-  }
-
-  function validateCreateFields() {
-    if (authMode !== "create") {
-      return true;
-    }
-
-    pendingFullName = (fullNameInput?.value || "").trim();
-    pendingPhone = (phoneInput?.value || "").trim();
-
-    if (!pendingFullName) {
-      setStatus(
-        tr(
-          "Enter your full name.",
-          "أدخل الاسم الكامل."
-        ),
-        "error"
-      );
-
-      fullNameInput?.focus();
-      return false;
-    }
-
-    if (!pendingPhone) {
-      setStatus(
-        tr(
-          "Enter your phone number.",
-          "أدخل رقم الجوال."
-        ),
-        "error"
-      );
-
-      phoneInput?.focus();
-      return false;
-    }
-
-    return true;
-  }
-
-  async function sendOtp() {
-    clearStatus();
-
-    if (!supabaseConfigured || !supabase) {
-      setStatus(
-        tr(
-          "Supabase is not configured yet.",
-          "لم يتم ربط Supabase بعد."
-        ),
-        "warning"
-      );
-
-      return;
-    }
-
-    pendingEmail = (emailInput?.value || "")
-      .trim()
-      .toLowerCase();
-
-    if (!pendingEmail) {
-      setStatus(
-        tr(
-          "Enter your email address first.",
-          "أدخل بريدك الإلكتروني أولًا."
-        ),
-        "error"
-      );
-
-      emailInput?.focus();
-      return;
-    }
-
-    if (!validateCreateFields()) {
-      return;
-    }
-
-    if (sendCodeButton) {
-      sendCodeButton.disabled = true;
-      sendCodeButton.textContent = tr(
-        "Sending...",
-        "جارٍ الإرسال..."
-      );
-    }
-
-    try {
-      const otpOptions = {
-        shouldCreateUser: authMode === "create",
-      };
-
-      if (authMode === "create") {
-        otpOptions.data = {
-          full_name: pendingFullName,
-          phone_number: pendingPhone,
-        };
-      }
-
-      const { error } = await supabase.auth.signInWithOtp({
-        email: pendingEmail,
-        options: otpOptions,
-      });
-
-      if (error) {
-        console.error("OTP send error:", error);
-
-        const message = (error.message || "").toLowerCase();
-
-        if (
-          message.includes("send") ||
-          message.includes("smtp") ||
-          message.includes("email")
-        ) {
-          setStatus(
-            tr(
-              "The account request reached Supabase, but the verification email could not be sent. Check the custom SMTP settings in Supabase.",
-              "وصل طلب الحساب إلى Supabase، لكن تعذر إرسال رسالة التحقق. تحققي من إعدادات SMTP المخصصة في Supabase."
-            ),
-            "error"
-          );
-        } else {
-          setStatus(
-            authMode === "signin"
-              ? tr(
-                  `${error.message} If you do not have an account yet, choose Create account.`,
-                  `${error.message} إذا لم يكن لديك حساب بعد، اختر إنشاء حساب.`
-                )
-              : error.message,
-            "error"
-          );
-        }
-
-        return;
-      }
-
-      if (otpEmailLabel) {
-        otpEmailLabel.textContent = pendingEmail;
-      }
-
-      if (emailForm) {
-        emailForm.hidden = true;
-      }
-
-      if (otpForm) {
-        otpForm.hidden = false;
-      }
-
-      setStatus(
-        authMode === "create"
-          ? tr(
-              "Verification code sent. Enter the 8-digit code below to finish creating your account.",
-              "تم إرسال رمز التحقق. أدخل رمز الـ8 أرقام بالأسفل لإكمال إنشاء الحساب."
-            )
-          : tr(
-              "Sign-in code sent. Enter the 8-digit code below.",
-              "تم إرسال رمز تسجيل الدخول. أدخل رمز الـ8 أرقام بالأسفل."
-            ),
-        "success"
-      );
-
-      setTimeout(() => otpInput?.focus(), 50);
-
-    } catch (error) {
-      console.error("Unexpected OTP error:", error);
-
-      setStatus(
-        tr(
-          "Something went wrong while requesting the verification code. Please try again.",
-          "حدث خطأ أثناء طلب رمز التحقق. حاول مرة أخرى."
-        ),
-        "error"
-      );
-
-    } finally {
-      if (sendCodeButton) {
-        sendCodeButton.disabled = false;
-
-        sendCodeButton.textContent =
-          authMode === "create"
-            ? tr(
-                "Create account and send code",
-                "إنشاء الحساب وإرسال الرمز"
-              )
-            : tr(
-                "Send sign-in code",
-                "إرسال رمز تسجيل الدخول"
-              );
-      }
-    }
-  }
-
-  signInTab?.addEventListener("click", () => {
-    applyMode("signin");
-  });
-
-  createTab?.addEventListener("click", () => {
-    applyMode("create");
-  });
-
-  emailForm?.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    await sendOtp();
-  });
-
-  otpInput?.addEventListener("input", () => {
-    otpInput.value = otpInput.value
-      .replace(/\D/g, "")
-      .slice(0, 8);
-  });
-
-  otpForm?.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    clearStatus();
-
-    if (!supabase) {
-      return;
-    }
-
-    const token = (otpInput?.value || "").trim();
-
-    if (!/^\d{8}$/.test(token)) {
-      setStatus(
-        tr(
-          "Enter the 8-digit code from your email.",
-          "أدخل رمز التحقق المكوّن من 8 أرقام."
-        ),
-        "error"
-      );
-
-      otpInput?.focus();
-      return;
-    }
-
-    if (verifyButton) {
-      verifyButton.disabled = true;
-      verifyButton.textContent = tr(
-        "Verifying...",
-        "جارٍ التحقق..."
-      );
-    }
-
-    try {
-      const { data, error } = await supabase.auth.verifyOtp({
-        email: pendingEmail,
-        token,
-        type: "email",
-      });
-
-      if (error) {
-        console.error("OTP verify error:", error);
-        setStatus(error.message, "error");
-        return;
-      }
-
-      if (data?.session) {
-        window.location.href = safeReturnTo();
-      } else {
-        setStatus(
-          tr(
-            "The code was accepted but no session was created. Please request a new code.",
-            "تم قبول الرمز لكن لم يتم إنشاء جلسة دخول. اطلب رمزًا جديدًا."
-          ),
-          "error"
-        );
-      }
-
-    } catch (error) {
-      console.error("Unexpected verification error:", error);
-
-      setStatus(
-        tr(
-          "Verification failed unexpectedly. Please try again.",
-          "حدث خطأ غير متوقع أثناء التحقق. حاول مرة أخرى."
-        ),
-        "error"
-      );
-
-    } finally {
-      if (verifyButton) {
-        verifyButton.disabled = false;
-
-        verifyButton.textContent =
-          authMode === "create"
-            ? tr(
-                "Verify and create account",
-                "تحقق وأنشئ الحساب"
-              )
-            : tr(
-                "Verify and sign in",
-                "تحقق وسجّل الدخول"
-              );
-      }
-    }
-  });
-
-  resendOtp?.addEventListener("click", async () => {
-    if (!pendingEmail) {
-      return;
-    }
-
-    if (emailInput) {
-      emailInput.value = pendingEmail;
-    }
-
-    if (authMode === "create") {
-      if (fullNameInput) {
-        fullNameInput.value = pendingFullName;
-      }
-
-      if (phoneInput) {
-        phoneInput.value = pendingPhone;
-      }
-    }
-
-    await sendOtp();
-  });
-
-  changeEmail?.addEventListener("click", () => {
-    if (emailForm) {
-      emailForm.hidden = false;
-    }
-
-    if (otpForm) {
-      otpForm.hidden = true;
-    }
-
-    if (otpInput) {
-      otpInput.value = "";
-    }
-
-    clearStatus();
-    emailInput?.focus();
-  });
-
-  signOutButton?.addEventListener("click", async () => {
-    if (!supabase) {
-      return;
-    }
-
-    await supabase.auth.signOut();
-
-    await renderSession();
-    applyMode("signin");
-  });
-
-  languageButton?.addEventListener("click", () => {
-    language = language === "en" ? "ar" : "en";
-
-    localStorage.setItem(
-      "navigate_language",
-      language
-    );
-
-    applyLanguage();
-    applyTheme();
-  });
-
-  themeButton?.addEventListener("click", () => {
-    theme = theme === "light" ? "dark" : "light";
-
-    localStorage.setItem(
-      "navigate_theme",
-      theme
-    );
-
-    applyTheme();
-  });
-
-  applyTheme();
-  applyLanguage();
-  applyMode("signin");
-  renderSession();
-});
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Account | NAVIGATE</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+
+<body data-page="auth">
+
+<header class="site-header">
+  <div class="header-inner">
+
+    <a class="brand" href="index.html">
+      <span class="brand-mark">NA</span>
+      <span class="brand-copy">
+        <strong>NAVIGATE</strong>
+        <small
+          data-en="Customer Retention Intelligence"
+          data-ar="ذكاء الاحتفاظ بالعملاء"
+        >
+          Customer Retention Intelligence
+        </small>
+      </span>
+    </a>
+
+    <button class="menu-toggle" data-menu-toggle>
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <nav class="main-nav">
+      <a href="index.html" data-nav="home" data-en="Home" data-ar="الرئيسية">Home</a>
+      <a href="analyze.html" data-nav="analyze" data-en="Analyze" data-ar="تحليل">Analyze</a>
+      <a href="history.html" data-nav="history" data-en="History" data-ar="السجل">History</a>
+      <a href="about.html" data-nav="about" data-en="About" data-ar="عن المنصة">About</a>
+    </nav>
+
+    <div class="header-actions">
+      <button class="utility-button" data-language-toggle>عربي</button>
+
+      <button class="utility-button" data-theme-toggle>
+        <span>☾</span>
+        <span>Dark</span>
+      </button>
+
+      <a
+        class="account-button sign-in-button"
+        data-account-button
+        href="auth.html"
+      >
+        <span class="account-dot signed-out"></span>
+        <span data-en="Sign in" data-ar="تسجيل الدخول">Sign in</span>
+      </a>
+    </div>
+
+  </div>
+</header>
+
+<main class="auth-page page-shell">
+  <section class="auth-card">
+
+    <div id="signedOutView">
+
+      <span
+        class="eyebrow"
+        data-en="SECURE ACCOUNT"
+        data-ar="حساب آمن"
+      >
+        SECURE ACCOUNT
+      </span>
+
+      <h1
+        id="authHeading"
+        data-en="Welcome back."
+        data-ar="مرحبًا بعودتك."
+      >
+        Welcome back.
+      </h1>
+
+      <p
+        id="authIntro"
+        data-en="Sign in with your email and an 8-digit verification code."
+        data-ar="سجّل الدخول ببريدك الإلكتروني ورمز تحقق مكوّن من 8 أرقام."
+      >
+        Sign in with your email and an 8-digit verification code.
+      </p>
+
+      <div
+        class="auth-tabs"
+        role="tablist"
+        aria-label="Account options"
+      >
+        <button
+          id="signInTab"
+          class="auth-tab active"
+          type="button"
+          role="tab"
+          aria-selected="true"
+          data-mode="signin"
+          data-en="Sign in"
+          data-ar="تسجيل الدخول"
+        >
+          Sign in
+        </button>
+
+        <button
+          id="createTab"
+          class="auth-tab"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          data-mode="create"
+          data-en="Create account"
+          data-ar="إنشاء حساب"
+        >
+          Create account
+        </button>
+      </div>
+
+      <form id="emailForm" class="auth-form">
+
+        <div id="createFields" class="field-grid" hidden>
+
+          <label class="field">
+            <span data-en="Full name *" data-ar="الاسم الكامل *">
+              Full name *
+            </span>
+
+            <input
+              id="authFullName"
+              type="text"
+              maxlength="120"
+              autocomplete="name"
+              data-placeholder-en="Your full name"
+              data-placeholder-ar="الاسم الكامل"
+              placeholder="Your full name"
+            />
+          </label>
+
+          <label class="field">
+            <span data-en="Phone number *" data-ar="رقم الجوال *">
+              Phone number *
+            </span>
+
+            <input
+              id="authPhone"
+              type="tel"
+              maxlength="30"
+              autocomplete="tel"
+              data-placeholder-en="+966 5X XXX XXXX"
+              data-placeholder-ar="+966 5X XXX XXXX"
+              placeholder="+966 5X XXX XXXX"
+            />
+
+            <small
+              data-en="Saved to your account profile. Phone sign-in can be added later."
+              data-ar="يُحفظ في ملف حسابك. ويمكن إضافة تسجيل الدخول بالجوال لاحقًا."
+            >
+              Saved to your account profile. Phone sign-in can be added later.
+            </small>
+          </label>
+
+        </div>
+
+        <label class="field">
+          <span data-en="Email address *" data-ar="البريد الإلكتروني *">
+            Email address *
+          </span>
+
+          <input
+            id="authEmail"
+            type="email"
+            required
+            autocomplete="email"
+            data-placeholder-en="you@company.com"
+            data-placeholder-ar="you@company.com"
+            placeholder="you@company.com"
+          />
+        </label>
+
+        <button
+          id="sendCodeButton"
+          class="primary-button full-button"
+          type="submit"
+          data-en="Send sign-in code"
+          data-ar="إرسال رمز تسجيل الدخول"
+        >
+          Send sign-in code
+        </button>
+
+      </form>
+
+      <form id="otpForm" class="auth-form otp-form" hidden>
+
+        <div class="otp-message">
+          <span
+            id="otpMessagePrefix"
+            data-en="A verification code was sent to"
+            data-ar="تم إرسال رمز التحقق إلى"
+          >
+            A verification code was sent to
+          </span>
+
+          <strong id="otpEmailLabel"></strong>
+        </div>
+
+        <label class="field">
+          <span
+            data-en="8-digit verification code"
+            data-ar="رمز التحقق المكوّن من 8 أرقام"
+          >
+            8-digit verification code
+          </span>
+
+          <input
+            id="authOtp"
+            class="otp-input"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            minlength="8"
+            maxlength="8"
+            pattern="[0-9]{8}"
+            required
+            placeholder="00000000"
+          />
+        </label>
+
+        <button
+          id="verifyButton"
+          class="primary-button full-button"
+          type="submit"
+          data-en="Verify and sign in"
+          data-ar="تحقق وسجّل الدخول"
+        >
+          Verify and sign in
+        </button>
+
+        <div class="otp-actions">
+
+          <button
+            id="resendOtp"
+            class="text-button"
+            type="button"
+            data-en="Send a new code"
+            data-ar="إرسال رمز جديد"
+          >
+            Send a new code
+          </button>
+
+          <button
+            id="changeEmail"
+            class="text-button"
+            type="button"
+            data-en="Use another email"
+            data-ar="استخدام بريد آخر"
+          >
+            Use another email
+          </button>
+
+        </div>
+
+      </form>
+
+      <div id="authStatus" class="auth-status" hidden></div>
+
+      <div class="support-box">
+
+        <div>
+          <strong data-en="Need help?" data-ar="تحتاج مساعدة؟">
+            Need help?
+          </strong>
+
+          <span
+            data-en="Contact NAVIGATE Support"
+            data-ar="تواصل مع دعم NAVIGATE"
+          >
+            Contact NAVIGATE Support
+          </span>
+        </div>
+
+        <a href="mailto:navigate.support@gmail.com?subject=NAVIGATE%20Support">
+          navigate.support@gmail.com
+        </a>
+
+      </div>
+
+    </div>
+
+    <div id="signedInView" hidden>
+
+      <span class="eyebrow" data-en="YOUR ACCOUNT" data-ar="حسابك">
+        YOUR ACCOUNT
+      </span>
+
+      <h1 data-en="You're signed in." data-ar="تم تسجيل دخولك.">
+        You're signed in.
+      </h1>
+
+      <div class="account-summary">
+        <span class="account-avatar">@</span>
+
+        <div>
+          <small data-en="Signed in as" data-ar="مسجل الدخول باسم">
+            Signed in as
+          </small>
+
+          <strong id="signedInEmail"></strong>
+        </div>
+      </div>
+
+      <div class="auth-account-actions">
+
+        <a
+          class="primary-button"
+          href="analyze.html"
+          data-en="Analyze a customer"
+          data-ar="تحليل عميل"
+        >
+          Analyze a customer
+        </a>
+
+        <a
+          class="secondary-button"
+          href="history.html"
+          data-en="Open history"
+          data-ar="فتح السجل"
+        >
+          Open history
+        </a>
+
+        <a
+          class="secondary-button"
+          href="mailto:navigate.support@gmail.com?subject=NAVIGATE%20Support"
+          data-en="Contact support"
+          data-ar="تواصل مع الدعم"
+        >
+          Contact support
+        </a>
+
+        <button
+          id="signOutButton"
+          class="danger-button"
+          type="button"
+          data-en="Sign out"
+          data-ar="تسجيل الخروج"
+        >
+          Sign out
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+
+    <div class="footer-brand">
+      <strong>NAVIGATE</strong>
+
+      <span
+        data-en="Customer Retention Intelligence"
+        data-ar="ذكاء الاحتفاظ بالعملاء"
+      >
+        Customer Retention Intelligence
+      </span>
+    </div>
+
+    <div class="footer-links">
+      <a
+        href="mailto:navigate.support@gmail.com?subject=NAVIGATE%20Support"
+        data-en="Support"
+        data-ar="الدعم"
+      >
+        Support
+      </a>
+
+      <a href="mailto:navigate.support@gmail.com?subject=NAVIGATE%20Support">
+        navigate.support@gmail.com
+      </a>
+    </div>
+
+    <span
+      data-en="Built for earlier, clearer retention decisions."
+      data-ar="صُمم لقرارات احتفاظ أبكر وأكثر وضوحًا."
+    >
+      Built for earlier, clearer retention decisions.
+    </span>
+
+  </div>
+</footer>
+
+<script type="module" src="auth.js"></script>
+
+</body>
+</html>
