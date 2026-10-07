@@ -54,8 +54,10 @@ function renderAccount() {
       const email = state.user.email || "";
       button.innerHTML = `<span class="account-dot"></span><span>${email.length > 20 ? email.slice(0, 18) + "…" : email}</span>`;
       button.title = email;
+      button.classList.remove("signed-out-button");
     } else {
       button.innerHTML = `<span class="account-dot signed-out"></span><span>${translate("Sign in", "تسجيل الدخول")}</span>`;
+      button.classList.add("signed-out-button");
       button.removeAttribute("title");
     }
   });
