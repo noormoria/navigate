@@ -1,3 +1,3 @@
-// NAVIGATE configuration
-export const SUPABASE_URL = "YOUR_SUPABASE_URL";
-export const SUPABASE_PUBLISHABLE_KEY = "YOUR_SUPABASE_PUBLISHABLE_KEY";
+export const SUPABASE_URL = "https://ixrpgrpbthllzxgvyhor.supabase.co";
+
+export const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_HzYHjl28QUAu3hA-Dkz5oQ_gOFy0VN9";
