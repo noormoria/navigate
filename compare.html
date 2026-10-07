@@ -78,6 +78,14 @@
             <div><span class="panel-number">A</span><h2 data-en="Candidate A" data-ar="المرشح A">Candidate A</h2></div>
           </div>
           <label class="field"><span data-en="Candidate label" data-ar="اسم / رمز المرشح">Candidate label</span><input id="candidateAName" type="text" value="Candidate A"/></label>
+          <label class="field">
+            <span data-en="Candidate status" data-ar="حالة المرشح">Candidate status</span>
+            <select id="candidateAStatus" required>
+              <option value="employee" data-en="Current employee" data-ar="موظف حالي">Current employee</option>
+              <option value="applicant" data-en="Job applicant" data-ar="متقدم للوظيفة">Job applicant</option>
+            </select>
+            <small data-en="Used as context only. It does not change the comparison score." data-ar="للسياق فقط ولا يغيّر درجة المقارنة.">Used as context only. It does not change the comparison score.</small>
+          </label>
           <label class="upload-zone" for="candidateAFile">
             <strong data-en="Upload CV" data-ar="ارفع السيرة الذاتية">Upload CV</strong>
             <span data-en="PDF, DOCX or TXT" data-ar="PDF أو DOCX أو TXT">PDF, DOCX or TXT</span>
@@ -91,6 +99,14 @@
             <div><span class="panel-number">B</span><h2 data-en="Candidate B" data-ar="المرشح B">Candidate B</h2></div>
           </div>
           <label class="field"><span data-en="Candidate label" data-ar="اسم / رمز المرشح">Candidate label</span><input id="candidateBName" type="text" value="Candidate B"/></label>
+          <label class="field">
+            <span data-en="Candidate status" data-ar="حالة المرشح">Candidate status</span>
+            <select id="candidateBStatus" required>
+              <option value="employee" data-en="Current employee" data-ar="موظف حالي">Current employee</option>
+              <option value="applicant" data-en="Job applicant" data-ar="متقدم للوظيفة">Job applicant</option>
+            </select>
+            <small data-en="Used as context only. It does not change the comparison score." data-ar="للسياق فقط ولا يغيّر درجة المقارنة.">Used as context only. It does not change the comparison score.</small>
+          </label>
           <label class="upload-zone" for="candidateBFile">
             <strong data-en="Upload CV" data-ar="ارفع السيرة الذاتية">Upload CV</strong>
             <span data-en="PDF, DOCX or TXT" data-ar="PDF أو DOCX أو TXT">PDF, DOCX or TXT</span>
@@ -118,12 +134,14 @@
       <div class="candidate-score-grid">
         <article class="candidate-score-card">
           <span id="scoreNameA">Candidate A</span>
+          <small id="scoreStatusA">—</small>
           <strong id="scoreA">0</strong>
           <small>/ 100 criteria coverage</small>
           <div class="score-track"><i id="scoreBarA"></i></div>
         </article>
         <article class="candidate-score-card">
           <span id="scoreNameB">Candidate B</span>
+          <small id="scoreStatusB">—</small>
           <strong id="scoreB">0</strong>
           <small>/ 100 criteria coverage</small>
           <div class="score-track"><i id="scoreBarB"></i></div>
