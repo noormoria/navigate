@@ -1,6 +1,6 @@
 import { supabase } from './supabase-client.js';
 import './shared.js';
-import { requireAuth, translate, getLanguage, setToast } from './shared.js';
+import { refreshUser, translate, getLanguage, setToast, supabaseConfigured } from './shared.js';
 
 let modelData = null;
 let activeUser = null;
@@ -45,14 +45,23 @@ function computeIndicators(values, probability) {
   const frequency = normalize(values.OrderCount, range('OrderCount').min, range('OrderCount').max);
   const valueIndex = clamp(0.72 * spend + 0.28 * frequency);
   const tenure = normalize(values.TenureMonths, range('TenureMonths').min, range('TenureMonths').max);
-  const satisfaction = clamp(((values.SatisfactionScore - 1) / 4) * 100);
-  const recency = inverseNormalize(values.DaysSinceLastOrder, range('DaysSinceLastOrder').min, range('DaysSinceLastOrder').max);
+  const satisfactionHealth = clamp(((values.SatisfactionScore - 1) / 4) * 100);
+  const recencyHealth = inverseNormalize(values.DaysSinceLastOrder, range('DaysSinceLastOrder').min, range('DaysSinceLastOrder').max);
   const complaintHealth = values.Complain === 1 ? 25 : 100;
-  const engagement = clamp(0.18*tenure + 0.28*satisfaction + 0.20*frequency + 0.24*recency + 0.10*complaintHealth);
+  const engagement = clamp(0.18*tenure + 0.28*satisfactionHealth + 0.20*frequency + 0.24*recencyHealth + 0.10*complaintHealth);
   const risk = pct(probability);
   const priority = clamp(0.70*risk + 0.30*valueIndex);
   const threshold = modelData.decision_threshold * 100;
-  return { risk, valueIndex, engagement, priority, threshold, decisionMargin: Math.abs(risk-threshold) };
+  return {
+    risk,
+    valueIndex,
+    engagement,
+    priority,
+    threshold,
+    decisionMargin: Math.abs(risk-threshold),
+    recencyHealth,
+    satisfactionHealth
+  };
 }
 
 function riskLevel(probability) {
@@ -164,6 +173,95 @@ function renderSignalChart(values) {
   ];
   $('signalChart').innerHTML = items.map(x=>`<div class="signal-row"><div class="signal-meta"><span>${getLanguage()==='ar'?x.ar:x.en}</span><strong>${Math.round(x.v)}</strong></div><div class="signal-track"><i style="width:${Math.round(x.v)}%"></i></div></div>`).join('');
 }
+
+function renderBenchmarkChart(values) {
+  const specs = [
+    {key:'TenureMonths', en:'Tenure', ar:'مدة العلاقة', inverse:false},
+    {key:'SatisfactionScore', en:'Satisfaction', ar:'الرضا', satisfaction:true},
+    {key:'OrderCount', en:'Transactions', ar:'المعاملات', inverse:false},
+    {key:'TotalSpend', en:'Value', ar:'القيمة', inverse:false},
+    {key:'DaysSinceLastOrder', en:'Recency', ar:'حداثة النشاط', inverse:true},
+  ];
+
+  const rows = specs.map((spec) => {
+    const r = range(spec.key);
+    let customer;
+    let median;
+
+    if (spec.satisfaction) {
+      customer = clamp(((values[spec.key] - 1) / 4) * 100);
+      median = clamp(((r.median - 1) / 4) * 100);
+    } else if (spec.inverse) {
+      customer = inverseNormalize(values[spec.key], r.min, r.max);
+      median = inverseNormalize(r.median, r.min, r.max);
+    } else {
+      customer = normalize(values[spec.key], r.min, r.max);
+      median = normalize(r.median, r.min, r.max);
+    }
+
+    const label = getLanguage() === 'ar' ? spec.ar : spec.en;
+
+    return `<div class="benchmark-row">
+      <div class="benchmark-label"><span>${label}</span><strong>${Math.round(customer)}</strong></div>
+      <div class="benchmark-pair">
+        <div class="benchmark-track customer"><i style="width:${Math.round(customer)}%"></i></div>
+        <div class="benchmark-track median"><i style="width:${Math.round(median)}%"></i></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  $('benchmarkChart').innerHTML =
+    `<div class="benchmark-legend">
+      <span><i class="customer-dot"></i>${translate('Customer','العميل')}</span>
+      <span><i class="median-dot"></i>${translate('Training median','وسيط التدريب')}</span>
+    </div>${rows}`;
+}
+
+function renderSensitivityChart(values) {
+  const r = range('DaysSinceLastOrder');
+  const points = 9;
+  const samples = Array.from({length: points}, (_, index) => {
+    const x = r.min + ((r.max - r.min) * index / (points - 1));
+    const scenario = {...values, DaysSinceLastOrder: x};
+    return {x, risk: predictProbability(scenario) * 100};
+  });
+
+  const width = 620;
+  const height = 220;
+  const padX = 34;
+  const padY = 24;
+  const plotW = width - padX * 2;
+  const plotH = height - padY * 2;
+
+  const sx = (x) => padX + ((x - r.min) / Math.max(1, r.max - r.min)) * plotW;
+  const sy = (risk) => padY + (1 - clamp(risk) / 100) * plotH;
+
+  const path = samples.map((point, index) =>
+    `${index === 0 ? 'M' : 'L'} ${sx(point.x).toFixed(1)} ${sy(point.risk).toFixed(1)}`
+  ).join(' ');
+
+  const currentX = clamp(values.DaysSinceLastOrder, r.min, r.max);
+  const currentRisk = predictProbability({...values, DaysSinceLastOrder: currentX}) * 100;
+
+  const yLines = [0,25,50,75,100].map(v =>
+    `<g><line x1="${padX}" y1="${sy(v)}" x2="${width-padX}" y2="${sy(v)}" class="chart-gridline"/>
+    <text x="4" y="${sy(v)+4}" class="chart-axis-text">${v}</text></g>`
+  ).join('');
+
+  $('sensitivityChart').innerHTML = `
+    <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${translate('Risk sensitivity line chart','رسم خطي لحساسية الخطر')}">
+      ${yLines}
+      <path d="${path}" class="sensitivity-line" />
+      <circle cx="${sx(currentX)}" cy="${sy(currentRisk)}" r="6" class="sensitivity-point"/>
+      <text x="${padX}" y="${height-2}" class="chart-axis-text">${Math.round(r.min)}d</text>
+      <text x="${width-padX-24}" y="${height-2}" class="chart-axis-text">${Math.round(r.max)}d</text>
+    </svg>
+    <div class="sensitivity-summary">
+      <span>${translate('Current inactivity','عدم النشاط الحالي')} <strong>${Math.round(values.DaysSinceLastOrder)} ${translate('days','يوم')}</strong></span>
+      <span>${translate('Current model risk','الخطر الحالي')} <strong>${Math.round(currentRisk)}%</strong></span>
+    </div>`;
+}
+
 function formatDate(value=new Date()) {
   return new Intl.DateTimeFormat(getLanguage()==='ar'?'ar-SA':'en-US',{dateStyle:'medium',timeStyle:'short'}).format(new Date(value));
 }
@@ -203,6 +301,8 @@ function renderResults(payload, createdAt=new Date()) {
     engagement:Number(payload.engagement_health),
     decisionMargin:Number(payload.decision_margin),
     threshold:Number(payload.model_threshold)*100,
+    recencyHealth: inverseNormalize(values.DaysSinceLastOrder, range('DaysSinceLastOrder').min, range('DaysSinceLastOrder').max),
+    satisfactionHealth: clamp(((values.SatisfactionScore - 1) / 4) * 100),
   };
   const level = riskLevel(probability), priority = priorityLevel(ind.priority), seg = customerSegment(ind);
   const derivedFactors = factorData(values,ind), derivedRecs = recommendationData(probability,values,ind);
@@ -216,8 +316,10 @@ function renderResults(payload, createdAt=new Date()) {
   $('metricPriority').textContent = Math.round(ind.priority);
   $('metricValue').textContent = Math.round(ind.valueIndex);
   $('metricEngagement').textContent = Math.round(ind.engagement);
-  $('metricMargin').textContent = Math.round(ind.decisionMargin);
-  $('metricThreshold').textContent = `${Math.round(ind.threshold)}%`;
+  $('metricRecency').textContent = Math.round(ind.recencyHealth);
+  $('metricSatisfaction').textContent = Math.round(ind.satisfactionHealth);
+  $('transparencyThreshold').textContent = `${Math.round(ind.threshold)}%`;
+  $('transparencyMargin').textContent = `${Math.round(ind.decisionMargin)} ${translate('pts','نقطة')}`;
 
   $('riskCategoryBadge').dataset.level = level.key;
   $('riskCategoryBadge').textContent = getLanguage()==='ar'?level.ar:level.en;
@@ -232,6 +334,8 @@ function renderResults(payload, createdAt=new Date()) {
     : translate('Estimated churn risk is below NAVIGATE’s decision threshold. Continue monitoring for meaningful behavior changes.','خطر المغادرة المتوقع أقل من حد القرار في NAVIGATE. استمر في المتابعة لرصد أي تغيرات سلوكية مهمة.');
 
   renderSignalChart(values);
+  renderBenchmarkChart(values);
+  renderSensitivityChart(values);
   $('decisionTitle').textContent = above ? translate('Retention attention recommended','يوصى باهتمام احتفاظي') : translate('No strong churn signal currently','لا توجد إشارة مغادرة قوية حاليًا');
   $('decisionSummary').textContent = above
     ? translate(`The model estimates a ${Math.round(ind.risk)}% churn risk. Combined with customer value, the current retention priority is ${Math.round(ind.priority)}/100.`,`يقدّر النموذج خطر المغادرة بـ ${Math.round(ind.risk)}٪. وبدمج الخطر مع قيمة العميل تصبح أولوية الاحتفاظ الحالية ${Math.round(ind.priority)}/100.`)
@@ -248,7 +352,14 @@ function renderResults(payload, createdAt=new Date()) {
 }
 
 async function saveAnalysis(payload) {
-  const {data,error} = await supabase.from('customer_analyses').insert({user_id:activeUser.id,...payload}).select().single();
+  if (!supabaseConfigured || !supabase || !activeUser) return null;
+
+  const {data,error} = await supabase
+    .from('customer_analyses')
+    .insert({user_id:activeUser.id,...payload})
+    .select()
+    .single();
+
   if (error) throw error;
   return data;
 }
@@ -274,11 +385,40 @@ $('analysisForm').addEventListener('submit',async(e)=>{
   renderResults(payload);
   try {
     const saved=await saveAnalysis(payload);
-    latestAnalysis={payload:saved,createdAt:saved.created_at};
-    const url=new URL(window.location.href); url.searchParams.set('id',saved.id); history.replaceState({},'',url);
-    setToast(translate('Analysis saved to your history.','تم حفظ التحليل في السجل.'),'success');
+
+    if (saved) {
+      latestAnalysis={payload:saved,createdAt:saved.created_at};
+      const url=new URL(window.location.href);
+      url.searchParams.set('id',saved.id);
+      history.replaceState({},'',url);
+
+      setToast(
+        translate(
+          'Analysis complete and saved to your history.',
+          'اكتمل التحليل وتم حفظه في السجل.'
+        ),
+        'success'
+      );
+    } else {
+      latestAnalysis={payload,createdAt:new Date()};
+      setToast(
+        translate(
+          'Analysis complete. Sign in to save it permanently to History.',
+          'اكتمل التحليل. سجّل الدخول لحفظه بشكل دائم في السجل.'
+        ),
+        'info'
+      );
+    }
   } catch(error) {
-    console.error(error); setToast(translate('The analysis ran, but it could not be saved. Check Supabase setup and security policies.','تم تشغيل التحليل، لكن تعذر حفظه. تحققي من إعداد Supabase وسياسات الحماية.'),'error');
+    console.error(error);
+    latestAnalysis={payload,createdAt:new Date()};
+    setToast(
+      translate(
+        'Analysis complete, but saving failed. Your result is still shown below.',
+        'اكتمل التحليل، لكن تعذر الحفظ. النتيجة ما زالت معروضة بالأسفل.'
+      ),
+      'error'
+    );
   }
   $('resultsSection').scrollIntoView({behavior:'smooth',block:'start'});
 });
@@ -286,9 +426,51 @@ $('printReport').addEventListener('click',()=>window.print());
 window.addEventListener('navigate:language',()=>{ if(latestAnalysis) renderResults(latestAnalysis.payload,latestAnalysis.createdAt); });
 
 async function init(){
-  activeUser=await requireAuth(`analyze.html${window.location.search}`); if(!activeUser)return;
-  try{await loadModel();}catch(e){setToast(translate('Could not load navigate_web_model.json.','تعذر تحميل navigate_web_model.json.'),'error');return;}
-  const id=new URLSearchParams(window.location.search).get('id');
-  if(id){try{await loadSavedAnalysis(id);$('resultsSection').scrollIntoView({behavior:'smooth',block:'start'});}catch(e){setToast(translate('Saved analysis could not be opened.','تعذر فتح التحليل المحفوظ.'),'error');}}
+  // Analysis must work even before Supabase is configured or before the user signs in.
+  // Signing in is only required for permanent History storage.
+  activeUser = await refreshUser();
+
+  try {
+    await loadModel();
+  } catch(e) {
+    console.error(e);
+    setToast(
+      translate(
+        'Could not load navigate_web_model.json. Make sure the file is uploaded beside the website files.',
+        'تعذر تحميل navigate_web_model.json. تأكدي أن الملف مرفوع بجانب ملفات الموقع.'
+      ),
+      'error'
+    );
+    return;
+  }
+
+  const id = new URLSearchParams(window.location.search).get('id');
+
+  if (id) {
+    if (!supabaseConfigured || !supabase || !activeUser) {
+      setToast(
+        translate(
+          'Sign in to open a saved analysis from History.',
+          'سجّل الدخول لفتح تحليل محفوظ من السجل.'
+        ),
+        'warning'
+      );
+      return;
+    }
+
+    try {
+      await loadSavedAnalysis(id);
+      $('resultsSection').scrollIntoView({behavior:'smooth',block:'start'});
+    } catch(e) {
+      console.error(e);
+      setToast(
+        translate(
+          'Saved analysis could not be opened.',
+          'تعذر فتح التحليل المحفوظ.'
+        ),
+        'error'
+      );
+    }
+  }
 }
 init();
