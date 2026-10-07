@@ -1,1 +1,49 @@
+<!doctype html><html lang="en" dir="ltr"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>History | NAVIGATE</title><link rel="stylesheet" href="styles.css"/></head><body data-page="history">
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">NA</span>
+      <span class="brand-copy">
+        <strong>NAVIGATE</strong>
+        <small data-en="Customer Retention Intelligence" data-ar="ذكاء الاحتفاظ بالعملاء">Customer Retention Intelligence</small>
+      </span>
+    </a>
 
+    <button class="menu-toggle" data-menu-toggle aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="main-nav" aria-label="Main navigation">
+      <div class="menu-kicker" data-en="NAVIGATE MENU" data-ar="قائمة NAVIGATE">NAVIGATE MENU</div>
+      <a href="index.html" data-nav="home"><span>01</span><strong data-en="Home" data-ar="الرئيسية">Home</strong></a>
+      <a href="analyze.html" data-nav="analyze"><span>02</span><strong data-en="Analyze customer" data-ar="تحليل عميل">Analyze customer</strong></a>
+      <a href="compare.html" data-nav="compare"><span>03</span><strong data-en="Compare candidates" data-ar="مقارنة مرشحين">Compare candidates</strong></a>
+      <a href="history.html" data-nav="history"><span>04</span><strong data-en="History" data-ar="السجل">History</strong></a>
+      <a href="about.html" data-nav="about"><span>05</span><strong data-en="About" data-ar="عن المنصة">About</strong></a>
+      <a href="support.html" data-nav="support"><span>06</span><strong data-en="Support" data-ar="الدعم">Support</strong></a>
+    </nav>
+
+    <div class="header-actions">
+      <button class="utility-button" data-language-toggle>عربي</button>
+      <button class="utility-button" data-theme-toggle><span>☾</span><span>Dark</span></button>
+      <a class="account-button sign-in-button" data-account-button href="auth.html">
+        <span class="account-dot signed-out"></span>
+        <span data-en="Sign in" data-ar="تسجيل الدخول">Sign in</span>
+      </a>
+    </div>
+  </div>
+</header>
+<main class="page-shell inner-page"><section class="page-heading history-heading"><div><span class="eyebrow" data-en="SAVED ANALYSES" data-ar="التحليلات المحفوظة">SAVED ANALYSES</span><h1 data-en="Your customer analysis history." data-ar="سجل تحليلات عملائك.">Your customer analysis history.</h1><p data-en="Every analysis is stored under your signed-in account so it remains available when you return." data-ar="يُحفظ كل تحليل تحت حسابك المسجل ليبقى متاحًا عند عودتك.">Every analysis is stored under your signed-in account so it remains available when you return.</p></div><a class="primary-button" href="analyze.html"><span data-en="New analysis" data-ar="تحليل جديد">New analysis</span><span>＋</span></a></section><section class="history-panel"><div class="history-tools"><label class="search-box"><span>⌕</span><input id="historySearch" type="search" data-placeholder-en="Search by customer name, email, phone or ID..." data-placeholder-ar="ابحث باسم العميل أو بريده أو جواله أو المعرّف..." placeholder="Search by customer name, email, phone or ID..."/></label><div class="history-count"><strong id="historyCount">0</strong><span data-en="saved analyses" data-ar="تحليل محفوظ">saved analyses</span></div></div><div id="historyLoading" class="empty-state"><div class="loader"></div><p data-en="Loading your analysis history..." data-ar="جارٍ تحميل سجل التحليلات...">Loading your analysis history...</p></div><div id="historyEmpty" class="empty-state" hidden><div class="empty-icon">⌁</div><h2 data-en="No saved analyses yet." data-ar="لا توجد تحليلات محفوظة حتى الآن.">No saved analyses yet.</h2><p data-en="Run your first customer analysis and it will appear here automatically." data-ar="شغّل أول تحليل لعميل وسيظهر هنا تلقائيًا.">Run your first customer analysis and it will appear here automatically.</p><a class="primary-button" href="analyze.html" data-en="Analyze a customer" data-ar="تحليل عميل">Analyze a customer</a></div><div id="historyList" class="history-list" hidden></div></section></main>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <strong>NAVIGATE</strong>
+      <span data-en="Customer Retention Intelligence" data-ar="ذكاء الاحتفاظ بالعملاء">Customer Retention Intelligence</span>
+    </div>
+    <div class="footer-links">
+      <a href="support.html" data-en="Support" data-ar="الدعم">Support</a>
+      <a href="support.html">navigate.support@gmail.com</a>
+    </div>
+    <span data-en="Built for earlier, clearer retention decisions." data-ar="صُمم لقرارات احتفاظ أبكر وأكثر وضوحًا.">Built for earlier, clearer retention decisions.</span>
+  </div>
+</footer><script type="module" src="history.js"></script></body></html>
