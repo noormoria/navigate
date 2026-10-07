@@ -11,51 +11,36 @@
 
 <header class="site-header">
   <div class="header-inner">
-
     <a class="brand" href="index.html">
       <span class="brand-mark">NA</span>
       <span class="brand-copy">
         <strong>NAVIGATE</strong>
-        <small
-          data-en="Customer Retention Intelligence"
-          data-ar="ذكاء الاحتفاظ بالعملاء"
-        >
-          Customer Retention Intelligence
-        </small>
+        <small data-en="Customer Retention Intelligence" data-ar="ذكاء الاحتفاظ بالعملاء">Customer Retention Intelligence</small>
       </span>
     </a>
 
-    <button class="menu-toggle" data-menu-toggle>
-      <span></span>
-      <span></span>
-      <span></span>
+    <button class="menu-toggle" data-menu-toggle aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
     </button>
 
-    <nav class="main-nav">
-      <a href="index.html" data-nav="home" data-en="Home" data-ar="الرئيسية">Home</a>
-      <a href="analyze.html" data-nav="analyze" data-en="Analyze" data-ar="تحليل">Analyze</a>
-      <a href="history.html" data-nav="history" data-en="History" data-ar="السجل">History</a>
-      <a href="about.html" data-nav="about" data-en="About" data-ar="عن المنصة">About</a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <div class="menu-kicker" data-en="NAVIGATE MENU" data-ar="قائمة NAVIGATE">NAVIGATE MENU</div>
+      <a href="index.html" data-nav="home"><span>01</span><strong data-en="Home" data-ar="الرئيسية">Home</strong></a>
+      <a href="analyze.html" data-nav="analyze"><span>02</span><strong data-en="Analyze customer" data-ar="تحليل عميل">Analyze customer</strong></a>
+      <a href="compare.html" data-nav="compare"><span>03</span><strong data-en="Compare candidates" data-ar="مقارنة مرشحين">Compare candidates</strong></a>
+      <a href="history.html" data-nav="history"><span>04</span><strong data-en="History" data-ar="السجل">History</strong></a>
+      <a href="about.html" data-nav="about"><span>05</span><strong data-en="About" data-ar="عن المنصة">About</strong></a>
+      <a href="support.html" data-nav="support"><span>06</span><strong data-en="Support" data-ar="الدعم">Support</strong></a>
     </nav>
 
     <div class="header-actions">
       <button class="utility-button" data-language-toggle>عربي</button>
-
-      <button class="utility-button" data-theme-toggle>
-        <span>☾</span>
-        <span>Dark</span>
-      </button>
-
-      <a
-        class="account-button sign-in-button"
-        data-account-button
-        href="auth.html"
-      >
+      <button class="utility-button" data-theme-toggle><span>☾</span><span>Dark</span></button>
+      <a class="account-button sign-in-button" data-account-button href="auth.html">
         <span class="account-dot signed-out"></span>
         <span data-en="Sign in" data-ar="تسجيل الدخول">Sign in</span>
       </a>
     </div>
-
   </div>
 </header>
 
@@ -82,10 +67,10 @@
 
       <p
         id="authIntro"
-        data-en="Sign in with your email and an 8-digit verification code."
+        data-en="Sign in with your email and a verification code."
         data-ar="سجّل الدخول ببريدك الإلكتروني ورمز تحقق مكوّن من 8 أرقام."
       >
-        Sign in with your email and an 8-digit verification code.
+        Sign in with your email and a verification code.
       </p>
 
       <div
@@ -165,20 +150,29 @@
 
         </div>
 
-        <label class="field">
-          <span data-en="Email address *" data-ar="البريد الإلكتروني *">
-            Email address *
-          </span>
-
+        <label class="field" id="emailAuthField">
+          <span data-en="Email address *" data-ar="البريد الإلكتروني *">Email address *</span>
           <input
             id="authEmail"
             type="email"
-            required
             autocomplete="email"
             data-placeholder-en="you@company.com"
             data-placeholder-ar="you@company.com"
             placeholder="you@company.com"
           />
+        </label>
+
+        <label class="field" id="phoneAuthField" hidden>
+          <span data-en="Phone number *" data-ar="رقم الجوال *">Phone number *</span>
+          <input
+            id="authPhoneLogin"
+            type="tel"
+            autocomplete="tel"
+            data-placeholder-en="+9665XXXXXXXX"
+            data-placeholder-ar="+9665XXXXXXXX"
+            placeholder="+9665XXXXXXXX"
+          />
+          <small data-en="Use international format, for example +9665XXXXXXXX." data-ar="استخدم الصيغة الدولية، مثال +9665XXXXXXXX.">Use international format, for example +9665XXXXXXXX.</small>
         </label>
 
         <button
@@ -209,10 +203,10 @@
 
         <label class="field">
           <span
-            data-en="8-digit verification code"
-            data-ar="رمز التحقق المكوّن من 8 أرقام"
+            data-en="Verification code"
+            data-ar="رمز التحقق"
           >
-            8-digit verification code
+            Verification code
           </span>
 
           <input
@@ -221,9 +215,9 @@
             type="text"
             inputmode="numeric"
             autocomplete="one-time-code"
-            minlength="8"
+            minlength="6"
             maxlength="8"
-            pattern="[0-9]{8}"
+            pattern="[0-9]{6,8}"
             required
             placeholder="00000000"
           />
@@ -360,39 +354,15 @@
 
 <footer class="site-footer">
   <div class="footer-inner">
-
     <div class="footer-brand">
       <strong>NAVIGATE</strong>
-
-      <span
-        data-en="Customer Retention Intelligence"
-        data-ar="ذكاء الاحتفاظ بالعملاء"
-      >
-        Customer Retention Intelligence
-      </span>
+      <span data-en="Customer Retention Intelligence" data-ar="ذكاء الاحتفاظ بالعملاء">Customer Retention Intelligence</span>
     </div>
-
     <div class="footer-links">
-      <a
-        href="mailto:navigate.support@gmail.com?subject=NAVIGATE%20Support"
-        data-en="Support"
-        data-ar="الدعم"
-      >
-        Support
-      </a>
-
-      <a href="mailto:navigate.support@gmail.com?subject=NAVIGATE%20Support">
-        navigate.support@gmail.com
-      </a>
+      <a href="support.html" data-en="Support" data-ar="الدعم">Support</a>
+      <a href="support.html">navigate.support@gmail.com</a>
     </div>
-
-    <span
-      data-en="Built for earlier, clearer retention decisions."
-      data-ar="صُمم لقرارات احتفاظ أبكر وأكثر وضوحًا."
-    >
-      Built for earlier, clearer retention decisions.
-    </span>
-
+    <span data-en="Built for earlier, clearer retention decisions." data-ar="صُمم لقرارات احتفاظ أبكر وأكثر وضوحًا.">Built for earlier, clearer retention decisions.</span>
   </div>
 </footer>
 
