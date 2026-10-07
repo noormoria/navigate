@@ -66,7 +66,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function applyLanguage() {
     const isArabic = language === "ar";
     document.documentElement.lang = isArabic ? "ar" : "en";
-    document.documentElement.dir = isArabic ? "rtl" : "ltr";
+    document.documentElement.dir = "ltr";
+    document.documentElement.dataset.language = isArabic ? "ar" : "en";
 
     document.querySelectorAll("[data-en][data-ar]").forEach((el) => {
       el.textContent = isArabic ? el.dataset.ar : el.dataset.en;
