@@ -831,3 +831,101 @@ html[dir='rtl'] .main-nav a>strong{
 .menu-toggle{
   transform:none!important;
 }
+
+
+/* ===== Language switch: translate text without moving the layout ===== */
+
+/* Keep the entire interface geometry LTR in both languages.
+   Arabic text still renders right-to-left inside text content only. */
+html,
+html[lang='ar'],
+html[data-language='ar']{
+  direction:ltr!important;
+}
+
+/* Arabic font without flipping layout order */
+html[lang='ar'] body,
+html[data-language='ar'] body{
+  font-family:'Noto Sans Arabic',Arial,sans-serif!important;
+}
+
+/* Arabic text direction/alignment only — no grid/flex reordering */
+html[lang='ar'] [data-ar],
+html[data-language='ar'] [data-ar],
+html[lang='ar'] p,
+html[data-language='ar'] p,
+html[lang='ar'] h1,
+html[data-language='ar'] h1,
+html[lang='ar'] h2,
+html[data-language='ar'] h2,
+html[lang='ar'] h3,
+html[data-language='ar'] h3{
+  direction:rtl;
+  unicode-bidi:plaintext;
+}
+
+/* Keep header, menu, cards and buttons fixed in the same physical positions */
+html[lang='ar'] .header-inner,
+html[data-language='ar'] .header-inner,
+html[lang='ar'] .main-nav,
+html[data-language='ar'] .main-nav,
+html[lang='ar'] .hero,
+html[data-language='ar'] .hero,
+html[lang='ar'] .analysis-layout,
+html[data-language='ar'] .analysis-layout,
+html[lang='ar'] .field-grid,
+html[data-language='ar'] .field-grid,
+html[lang='ar'] .metric-grid,
+html[data-language='ar'] .metric-grid{
+  direction:ltr!important;
+}
+
+/* Text inside those fixed-layout components can still read naturally in Arabic */
+html[lang='ar'] .main-nav a>strong,
+html[data-language='ar'] .main-nav a>strong,
+html[lang='ar'] .hero-copy,
+html[data-language='ar'] .hero-copy,
+html[lang='ar'] .page-heading,
+html[data-language='ar'] .page-heading,
+html[lang='ar'] .field,
+html[data-language='ar'] .field,
+html[lang='ar'] .metric-card,
+html[data-language='ar'] .metric-card{
+  direction:rtl;
+}
+
+/* Keep fullscreen menu anchored identically in both languages */
+html[lang='ar'] .main-nav,
+html[data-language='ar'] .main-nav{
+  left:0!important;
+  right:0!important;
+  transform:translateX(-100%)!important;
+}
+
+html[lang='ar'] .main-nav.open,
+html[data-language='ar'] .main-nav.open{
+  transform:translateX(0)!important;
+}
+
+/* Arabic typography spacing without changing page positions */
+html[lang='ar'] .hero h1,
+html[data-language='ar'] .hero h1{
+  line-height:1.16!important;
+  letter-spacing:-0.025em!important;
+}
+
+html[lang='ar'] .hero-lead,
+html[data-language='ar'] .hero-lead{
+  line-height:1.95!important;
+  margin-top:28px!important;
+}
+
+html[lang='ar'] .page-heading h1,
+html[data-language='ar'] .page-heading h1,
+html[lang='ar'] .about-hero h1,
+html[data-language='ar'] .about-hero h1,
+html[lang='ar'] .auth-card h1,
+html[data-language='ar'] .auth-card h1{
+  line-height:1.16!important;
+  letter-spacing:-0.02em!important;
+}
