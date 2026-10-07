@@ -12,7 +12,8 @@ export const translate = (en, ar) => (state.language === "ar" ? ar : en);
 function applyLanguage() {
   const ar = state.language === "ar";
   document.documentElement.lang = ar ? "ar" : "en";
-  document.documentElement.dir = ar ? "rtl" : "ltr";
+  document.documentElement.dir = "ltr";
+  document.documentElement.dataset.language = ar ? "ar" : "en";
 
   document.querySelectorAll("[data-en][data-ar]").forEach((el) => {
     el.textContent = ar ? el.dataset.ar : el.dataset.en;
