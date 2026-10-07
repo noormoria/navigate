@@ -138,6 +138,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     emailChannel?.classList.toggle("active", !isPhone);
     phoneChannel?.classList.toggle("active", isPhone);
+    emailChannel?.setAttribute("aria-selected", String(!isPhone));
+    phoneChannel?.setAttribute("aria-selected", String(isPhone));
 
     if (emailAuthField) emailAuthField.hidden = isPhone;
     if (phoneAuthField) phoneAuthField.hidden = !isPhone || (isPhone && authMode === "create");
@@ -164,6 +166,12 @@ document.addEventListener("DOMContentLoaded", () => {
       otpInput.maxLength = isPhone ? 6 : 8;
       otpInput.minLength = isPhone ? 6 : 8;
       otpInput.placeholder = isPhone ? "000000" : "00000000";
+    }
+
+    if (changeEmail) {
+      changeEmail.textContent = isPhone
+        ? tr("Use another phone number", "استخدام رقم جوال آخر")
+        : tr("Use another email", "استخدام بريد آخر");
     }
 
     if (resetOtp) {
