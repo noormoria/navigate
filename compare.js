@@ -222,10 +222,20 @@ function renderCriteriaChart(terms, a, b) {
     )}</p>`;
 }
 
-function renderResults(role, nameA, nameB, terms, resultA, resultB) {
+
+function candidateStatusText(value) {
+  if (value === "employee") {
+    return translate("Current employee", "موظف حالي");
+  }
+  return translate("Job applicant", "متقدم للوظيفة");
+}
+
+function renderResults(role, nameA, nameB, statusA, statusB, terms, resultA, resultB) {
   $("comparisonRole").textContent = role;
   $("scoreNameA").textContent = nameA;
   $("scoreNameB").textContent = nameB;
+  $("scoreStatusA").textContent = candidateStatusText(statusA);
+  $("scoreStatusB").textContent = candidateStatusText(statusB);
 
   $("scoreA").textContent = String(Math.round(resultA.score));
   $("scoreB").textContent = String(Math.round(resultB.score));
@@ -306,6 +316,8 @@ $("compareForm")?.addEventListener("submit", async (event) => {
   const fileB = $("candidateBFile").files?.[0];
   const nameA = $("candidateAName").value.trim() || "Candidate A";
   const nameB = $("candidateBName").value.trim() || "Candidate B";
+  const statusA = $("candidateAStatus").value;
+  const statusB = $("candidateBStatus").value;
 
   if (!role || !criteria || !fileA || !fileB) {
     setToast(
@@ -351,7 +363,7 @@ $("compareForm")?.addEventListener("submit", async (event) => {
     const resultA = analyzeCv(textA, terms);
     const resultB = analyzeCv(textB, terms);
 
-    renderResults(role, nameA, nameB, terms, resultA, resultB);
+    renderResults(role, nameA, nameB, statusA, statusB, terms, resultA, resultB);
 
     setToast(
       translate("Comparison complete.", "اكتملت المقارنة."),
