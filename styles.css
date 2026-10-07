@@ -774,3 +774,60 @@ body.menu-open{
     min-height:66px!important;
   }
 }
+
+
+/* ===== Language switch stability + Arabic typography ===== */
+
+/* Keep the full-screen menu anchored and animated from the SAME side
+   in both English and Arabic. */
+.main-nav,
+html[dir='rtl'] .main-nav{
+  left:0!important;
+  right:0!important;
+  width:100vw!important;
+  transform:translateX(-100%)!important;
+  text-align:start;
+}
+
+.main-nav.open,
+html[dir='rtl'] .main-nav.open{
+  transform:translateX(0)!important;
+}
+
+/* Prevent any RTL rule from moving the menu to the opposite side. */
+html[dir='rtl'] .main-nav{
+  border-left:0!important;
+  border-right:0!important;
+}
+
+/* Arabic hero headline: more vertical breathing room so lines never collide. */
+html[dir='rtl'] .hero h1{
+  line-height:1.16!important;
+  letter-spacing:-0.025em!important;
+  word-spacing:.02em;
+}
+
+/* Give the Arabic hero copy a little more space below the headline. */
+html[dir='rtl'] .hero-lead{
+  margin-top:28px!important;
+  line-height:1.95!important;
+}
+
+/* Other large Arabic headings also get safer line-height. */
+html[dir='rtl'] .page-heading h1,
+html[dir='rtl'] .about-hero h1,
+html[dir='rtl'] .auth-card h1{
+  line-height:1.16!important;
+  letter-spacing:-0.02em!important;
+}
+
+/* Menu Arabic text spacing */
+html[dir='rtl'] .main-nav a>strong{
+  line-height:1.45!important;
+  letter-spacing:0!important;
+}
+
+/* Keep the close button visually fixed in the same place on language switch. */
+.menu-toggle{
+  transform:none!important;
+}
