@@ -38,35 +38,6 @@
       background:var(--surface2,#fffdfd)!important;
       box-shadow:var(--shadow-sm,0 10px 28px rgba(74,23,38,.06))!important;
     }
-    .auth-channel-switch{
-      margin-top:18px!important;
-      padding:4px!important;
-      display:grid!important;
-      grid-template-columns:1fr 1fr!important;
-      gap:4px!important;
-      border:1px solid var(--line,#ead8dd)!important;
-      border-radius:13px!important;
-      background:var(--soft,#f6e9ed)!important;
-    }
-    .auth-channel{
-      min-height:40px!important;
-      padding:0 12px!important;
-      border:0!important;
-      border-radius:9px!important;
-      background:transparent!important;
-      color:var(--muted,#7b6870)!important;
-      cursor:pointer!important;
-      font:inherit!important;
-      font-size:10px!important;
-      font-weight:800!important;
-      appearance:none!important;
-      -webkit-appearance:none!important;
-    }
-    .auth-channel.active{
-      color:var(--deep,#641323)!important;
-      background:var(--surface2,#fffdfd)!important;
-      box-shadow:var(--shadow-sm,0 10px 28px rgba(74,23,38,.06))!important;
-    }
     .support-box{
       margin-top:25px!important;
       padding:15px!important;
@@ -201,43 +172,7 @@
           Create account
         </button>
       </div>
-
-      <div class="auth-tabs auth-channel-tabs" role="tablist" aria-label="Verification method">
-        <button
-          id="emailChannel"
-          class="auth-tab active"
-          type="button"
-          role="tab"
-          aria-selected="true"
-          data-en="Email code"
-          data-ar="التفعيل بالبريد"
-        >
-          Email code
-        </button>
-
-        <button
-          id="phoneChannel"
-          class="auth-tab"
-          type="button"
-          role="tab"
-          aria-selected="false"
-          data-en="SMS code"
-          data-ar="التفعيل بالجوال"
-        >
-          SMS code
-        </button>
-      </div>
-
-      <div id="phoneSetupNote" class="auth-status" data-type="info" hidden>
-        <span
-          data-en="SMS verification requires Phone Auth and an SMS provider to be enabled in Supabase."
-          data-ar="التفعيل بالجوال يحتاج تفعيل Phone Auth وربط مزود SMS في Supabase."
-        >
-          SMS verification requires Phone Auth and an SMS provider to be enabled in Supabase.
-        </span>
-      </div>
-
-      <form id="emailForm" class="auth-form">
+<form id="emailForm" class="auth-form">
 
         <div id="createFields" class="field-grid" hidden>
 
@@ -256,31 +191,7 @@
               placeholder="Your full name"
             />
           </label>
-
-          <label class="field">
-            <span data-en="Phone number *" data-ar="رقم الجوال *">
-              Phone number *
-            </span>
-
-            <input
-              id="authPhone"
-              type="tel"
-              maxlength="30"
-              autocomplete="tel"
-              data-placeholder-en="+966 5X XXX XXXX"
-              data-placeholder-ar="+966 5X XXX XXXX"
-              placeholder="+966 5X XXX XXXX"
-            />
-
-            <small
-              data-en="Saved to your account profile."
-              data-ar="يُحفظ في ملف حسابك."
-            >
-              Saved to your account profile.
-            </small>
-          </label>
-
-        </div>
+</div>
 
         <label class="field" id="emailAuthField">
           <span data-en="Email address *" data-ar="البريد الإلكتروني *">Email address *</span>
@@ -293,21 +204,7 @@
             placeholder="you@company.com"
           />
         </label>
-
-        <label class="field" id="phoneAuthField" hidden>
-          <span data-en="Phone number *" data-ar="رقم الجوال *">Phone number *</span>
-          <input
-            id="authPhoneLogin"
-            type="tel"
-            autocomplete="tel"
-            data-placeholder-en="+9665XXXXXXXX"
-            data-placeholder-ar="+9665XXXXXXXX"
-            placeholder="+9665XXXXXXXX"
-          />
-          <small data-en="Use international format, for example +9665XXXXXXXX." data-ar="استخدم الصيغة الدولية، مثال +9665XXXXXXXX.">Use international format, for example +9665XXXXXXXX.</small>
-        </label>
-
-        <button
+<button
           id="sendCodeButton"
           class="primary-button full-button"
           type="submit"
@@ -347,9 +244,9 @@
             type="text"
             inputmode="numeric"
             autocomplete="one-time-code"
-            minlength="6"
+            minlength="8"
             maxlength="8"
-            pattern="[0-9]{6,8}"
+            pattern="[0-9]{8}"
             required
             placeholder="00000000"
           />
