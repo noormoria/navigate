@@ -57,7 +57,7 @@
       <article class="form-panel">
         <div class="panel-heading">
           <div><span class="panel-number">01</span><h2 data-en="Role criteria" data-ar="متطلبات الوظيفة">Role criteria</h2></div>
-          <span class="required-note" data-en="Required" data-ar="مطلوب">Required</span>
+          <span class="required-note" data-en="CVs required" data-ar="السير الذاتية مطلوبة">CVs required</span>
         </div>
 
         <label class="field full">
@@ -66,9 +66,9 @@
         </label>
 
         <label class="field full">
-          <span data-en="Job requirements / must-have skills" data-ar="متطلبات الوظيفة / المهارات الأساسية">Job requirements / must-have skills</span>
-          <textarea id="roleCriteria" rows="6" required data-placeholder-en="Example: SQL, Power BI, Excel, Python, dashboarding, 2+ years analytics experience..." data-placeholder-ar="مثال: SQL وPower BI وExcel وPython ولوحات المعلومات وخبرة سنتين في التحليل..."></textarea>
-          <small data-en="The numeric score measures documented CV coverage of these criteria. It is not a hiring score." data-ar="الدرجة الرقمية تقيس تغطية السيرة الذاتية للمتطلبات المكتوبة، وليست درجة توظيف.">The numeric score measures documented CV coverage of these criteria. It is not a hiring score.</small>
+          <span data-en="Job requirements / must-have skills (optional)" data-ar="متطلبات الوظيفة / المهارات الأساسية (اختياري)">Job requirements / must-have skills (optional)</span>
+          <textarea id="roleCriteria" rows="6" data-placeholder-en="Optional: add requirements now, or compare first and refine them afterward. Example: SQL, Power BI, Excel, Python..." data-placeholder-ar="اختياري: أضف المتطلبات الآن أو ابدأ المقارنة ثم عدّلها بعد ظهور النتيجة. مثال: SQL وPower BI وExcel وPython..."></textarea>
+          <small data-en="Optional. If left blank, NAVIGATE creates a general comparison from job-related evidence found in both CVs. You can edit these requirements after the first comparison and run it again." data-ar="اختياري. إذا تركته فارغًا، تنشئ NAVIGATE مقارنة عامة من الأدلة المهنية الموجودة في السيرتين. ويمكنك تعديل المتطلبات بعد أول مقارنة وتشغيلها مرة أخرى.">Optional. If left blank, NAVIGATE creates a general comparison from job-related evidence found in both CVs. You can edit these requirements after the first comparison and run it again.</small>
         </label>
       </article>
 
@@ -156,6 +156,13 @@
           </div>
         </div>
         <div id="criteriaComparisonChart" class="criteria-comparison-chart"></div>
+        <div class="compare-edit-actions">
+          <button id="editCriteriaButton" class="secondary-button" type="button"
+                  data-en="Edit requirements & compare again"
+                  data-ar="تعديل المتطلبات وإعادة المقارنة">
+            Edit requirements & compare again
+          </button>
+        </div>
       </div>
 
       <div class="comparison-insights">
