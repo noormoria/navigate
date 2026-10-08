@@ -25,7 +25,14 @@
 
     <div class="header-actions">
       <button class="utility-button" data-language-toggle>عربي</button>
-      <button class="utility-button" data-theme-toggle><span>☾</span><span>Dark</span></button>
+      <button class="utility-button" data-theme-toggle>
+        <span aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </span>
+        <span>Dark</span>
+      </button>
       <a class="account-button sign-in-button" data-account-button href="auth.html">
         <span class="account-dot signed-out"></span>
         <span data-en="Sign in" data-ar="تسجيل الدخول">Sign in</span>
