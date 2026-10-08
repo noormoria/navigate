@@ -302,18 +302,6 @@ document.addEventListener("DOMContentLoaded", () => {
         shouldCreateUser: authMode === "create"
       };
 
-      if (authMode === "create") {
-        options.data = {
-          first_name: pendingFirstName,
-          last_name: pendingLastName,
-          full_name: `${pendingFirstName} ${pendingLastName}`.trim(),
-          phone_number: pendingPhone,
-          country: pendingCountry,
-          organization: pendingOrganization || null,
-          email_address: pendingIdentifier
-        };
-      }
-
       const { error } = await supabase.auth.signInWithOtp({
         email: pendingIdentifier,
         options
@@ -409,6 +397,49 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       if (data?.session) {
+        if (authMode === "create") {
+          const userId = data.user?.id || data.session.user?.id;
+
+          if (!userId) {
+            setStatus(
+              tr(
+                "Your account was verified, but the profile could not be linked. Please sign in again.",
+                "تم توثيق الحساب، لكن تعذر ربط الملف الشخصي. سجّل الدخول مرة أخرى."
+              ),
+              "error"
+            );
+            return;
+          }
+
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .upsert(
+              {
+                id: userId,
+                first_name: pendingFirstName,
+                last_name: pendingLastName,
+                phone_number: pendingPhone,
+                country: pendingCountry,
+                organization: pendingOrganization || null
+              },
+              {
+                onConflict: "id"
+              }
+            );
+
+          if (profileError) {
+            console.error("Profile save error:", profileError);
+            setStatus(
+              tr(
+                "Your account was verified, but your profile details could not be saved. Please try again.",
+                "تم توثيق الحساب، لكن تعذر حفظ بيانات الملف الشخصي. حاول مرة أخرى."
+              ),
+              "error"
+            );
+            return;
+          }
+        }
+
         window.location.href = safeReturnTo();
       } else {
         setStatus(
