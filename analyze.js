@@ -267,17 +267,33 @@ function getWarnings(values) {
 
 function renderWarning(fields) {
   const box = $('rangeWarning');
+
   if (!fields.length) {
     box.hidden = true;
     return;
   }
 
+  const fieldLabels = {
+    Tenure: { en: 'Customer tenure', ar: 'مدة تعامل العميل' },
+    TotalSpend: { en: 'Customer revenue / total spend', ar: 'إيراد العميل / إجمالي الإنفاق' },
+    LastInteraction: { en: 'Days since last activity', ar: 'الأيام منذ آخر نشاط' },
+    UsageFrequency: { en: 'Usage frequency', ar: 'تكرار الاستخدام' },
+    SupportCalls: { en: 'Support calls', ar: 'مكالمات الدعم' },
+    PaymentDelay: { en: 'Payment delay', ar: 'تأخر الدفع' }
+  };
+
+  const details = fields.map((name) => {
+    const r = range(name);
+    const label = getLanguage() === 'ar' ? fieldLabels[name].ar : fieldLabels[name].en;
+    return `${label}: ${r.min}–${r.max}`;
+  }).join(' · ');
+
   box.hidden = false;
   box.innerHTML = `
-    <strong>${translate('Outside training range', 'خارج نطاق بيانات التدريب')}</strong>
+    <strong>${translate('Value outside the usual input range', 'قيمة خارج النطاق المعتاد')}</strong>
     <span>${translate(
-      `Some values are outside the training range (${fields.join(', ')}). The analysis can still run, but the estimate is less supported by the training data.`,
-      `بعض القيم خارج نطاق بيانات التدريب (${fields.join(', ')}). يمكن تشغيل التحليل، لكن النتيجة تكون أقل دعمًا من بيانات التدريب.`
+      `Training range means the minimum and maximum values the model saw while learning from the dataset. Your real value can still be entered and the analysis will run, but the prediction is less supported when a value is outside that familiar range. Do not change a correct value just to fit the range. Model ranges: ${details}`,
+      `نطاق التدريب يعني أقل وأعلى قيم شاهدها النموذج أثناء التعلّم من البيانات. يمكنك إدخال القيمة الحقيقية وسيعمل التحليل بشكل طبيعي، لكن تكون النتيجة أقل دعمًا عندما تكون القيمة خارج النطاق الذي تعلّم عليه النموذج. لا تغيّر قيمة صحيحة فقط لتدخل داخل النطاق. نطاقات النموذج: ${details}`
     )}</span>
   `;
 }
@@ -407,90 +423,95 @@ function factorData(values, ind) {
   const risk = [];
   const positive = [];
 
-  if (values.LastInteraction > range('LastInteraction').median) {
+  if (values.LastInteraction >= 20) {
     risk.push({
-      en: 'The time since the last interaction is above the training-data median.',
-      ar: 'المدة منذ آخر تفاعل أعلى من وسيط بيانات التدريب.'
+      en: `The customer has had no meaningful activity for ${Math.round(values.LastInteraction)} days, which is a strong disengagement signal.`,
+      ar: `لم يسجل العميل نشاطًا مهمًا منذ ${Math.round(values.LastInteraction)} يومًا، وهذه إشارة قوية على انخفاض التفاعل.`
+    });
+  } else if (values.LastInteraction >= 10) {
+    risk.push({
+      en: `It has been ${Math.round(values.LastInteraction)} days since the customer’s last meaningful activity, so re-engagement should not be delayed.`,
+      ar: `مرّ ${Math.round(values.LastInteraction)} يومًا منذ آخر نشاط مهم للعميل، لذلك لا يُفضّل تأخير إعادة التفاعل معه.`
     });
   } else {
     positive.push({
-      en: 'Recent activity is stronger than the training-data median.',
-      ar: 'حداثة النشاط أفضل من وسيط بيانات التدريب.'
+      en: `The customer was active recently (${Math.round(values.LastInteraction)} days since the last meaningful activity).`,
+      ar: `العميل كان نشطًا مؤخرًا، إذ مرّ ${Math.round(values.LastInteraction)} يومًا فقط منذ آخر نشاط مهم.`
     });
   }
 
   if (values.UsageFrequency !== null) {
-    if (values.UsageFrequency < range('UsageFrequency').median) {
+    if (values.UsageFrequency <= 8) {
       risk.push({
-        en: 'Usage frequency is below the training-data median.',
-        ar: 'تكرار الاستخدام أقل من وسيط بيانات التدريب.'
+        en: `Usage frequency is limited (${Math.round(values.UsageFrequency)}), which may indicate weakening engagement.`,
+        ar: `تكرار الاستخدام منخفض (${Math.round(values.UsageFrequency)}) وقد يشير إلى تراجع التفاعل.`
       });
-    } else {
+    } else if (values.UsageFrequency >= 20) {
       positive.push({
-        en: 'Usage frequency is at or above the training-data median.',
-        ar: 'تكرار الاستخدام عند أو أعلى من وسيط بيانات التدريب.'
+        en: `Usage is strong (${Math.round(values.UsageFrequency)}), showing that the customer still engages with the service.`,
+        ar: `الاستخدام مرتفع (${Math.round(values.UsageFrequency)}) مما يدل على استمرار تفاعل العميل مع الخدمة.`
       });
     }
   }
 
   if (values.SupportCalls !== null) {
-    if (values.SupportCalls > range('SupportCalls').median) {
+    if (values.SupportCalls >= 5) {
       risk.push({
-        en: 'Support-call volume is above the training-data median.',
-        ar: 'عدد مكالمات الدعم أعلى من وسيط بيانات التدريب.'
+        en: `The customer has contacted support ${Math.round(values.SupportCalls)} times. Review whether there is unresolved friction.`,
+        ar: `تواصل العميل مع الدعم ${Math.round(values.SupportCalls)} مرات. راجع ما إذا كانت هناك مشكلة متكررة أو غير محلولة.`
       });
-    } else {
+    } else if (values.SupportCalls <= 2) {
       positive.push({
-        en: 'Support-call volume is not elevated relative to the training-data median.',
-        ar: 'عدد مكالمات الدعم غير مرتفع مقارنة بوسيط بيانات التدريب.'
+        en: `Support demand is currently low (${Math.round(values.SupportCalls)} calls), with no obvious sign of repeated service friction.`,
+        ar: `الحاجة للدعم منخفضة حاليًا (${Math.round(values.SupportCalls)} مكالمات)، ولا توجد إشارة واضحة على احتكاك متكرر بالخدمة.`
       });
     }
   }
 
   if (values.PaymentDelay !== null) {
-    if (values.PaymentDelay > range('PaymentDelay').median) {
+    if (values.PaymentDelay >= 10) {
       risk.push({
-        en: 'Payment delay is above the training-data median.',
-        ar: 'تأخر الدفع أعلى من وسيط بيانات التدريب.'
+        en: `Payment is delayed by ${Math.round(values.PaymentDelay)} days. Check for billing friction, affordability concerns, or payment-process issues.`,
+        ar: `يوجد تأخر في الدفع بمقدار ${Math.round(values.PaymentDelay)} يومًا. تحقق من وجود مشكلة في الفوترة أو القدرة على الدفع أو إجراءات السداد.`
       });
-    } else {
+    } else if (values.PaymentDelay <= 3) {
       positive.push({
-        en: 'Payment delay is at or below the training-data median.',
-        ar: 'تأخر الدفع عند أو أقل من وسيط بيانات التدريب.'
+        en: `Payment behavior is healthy, with only ${Math.round(values.PaymentDelay)} days of delay.`,
+        ar: `سلوك الدفع جيد، إذ يبلغ التأخر ${Math.round(values.PaymentDelay)} أيام فقط.`
       });
     }
   }
 
-  if (values.Tenure < range('Tenure').median) {
+  if (values.Tenure < 6) {
     risk.push({
-      en: 'Customer tenure is relatively short.',
-      ar: 'مدة تعامل العميل قصيرة نسبيًا.'
+      en: `The customer relationship is still new (${Math.round(values.Tenure)} months), so early onboarding and value reinforcement are important.`,
+      ar: `علاقة العميل ما زالت حديثة (${Math.round(values.Tenure)} أشهر)، لذلك يعد تحسين البداية وتوضيح القيمة أمرًا مهمًا.`
     });
-  } else {
+  } else if (values.Tenure >= 24) {
     positive.push({
-      en: 'Customer tenure is relatively established.',
-      ar: 'مدة تعامل العميل مستقرة نسبيًا.'
+      en: `The customer has a long relationship with the company (${Math.round(values.Tenure)} months), which is worth protecting.`,
+      ar: `للعميل علاقة طويلة مع الشركة (${Math.round(values.Tenure)} شهرًا)، وهي علاقة تستحق الحفاظ عليها.`
     });
   }
 
-  if (ind.valueIndex >= 70) {
+  if (values.TotalSpend >= 1000) {
     positive.push({
-      en: 'Customer revenue is high relative to the training-data range.',
-      ar: 'إيراد العميل مرتفع مقارنة بنطاق بيانات التدريب.'
+      en: `Customer revenue is substantial (${Number(values.TotalSpend).toLocaleString()}), so losing this account may have meaningful financial impact.`,
+      ar: `إيراد العميل مرتفع (${Number(values.TotalSpend).toLocaleString()}), لذلك فقدان هذا الحساب قد يترك أثرًا ماليًا مهمًا.`
     });
   }
 
   if (!risk.length) {
     risk.push({
-      en: 'No single operational review factor stands out; the score reflects the combined profile.',
-      ar: 'لا يوجد عامل تشغيلي منفرد بارز؛ النتيجة تعكس الملف الكامل للعميل.'
+      en: 'No single warning signal dominates the profile. The churn score appears to come from the combined customer pattern.',
+      ar: 'لا توجد إشارة تحذير منفردة تسيطر على الملف. يبدو أن خطر المغادرة ناتج عن مجموعة المؤشرات معًا.'
     });
   }
 
   if (!positive.length) {
     positive.push({
-      en: 'No strong supporting retention signal stands out in the current profile.',
-      ar: 'لا توجد إشارة قوية داعمة للاحتفاظ بارزة في الملف الحالي.'
+      en: 'There is no strong positive signal to rely on right now, so the account should be managed proactively.',
+      ar: 'لا توجد إشارة إيجابية قوية يمكن الاعتماد عليها حاليًا، لذلك يفضّل إدارة الحساب بشكل استباقي.'
     });
   }
 
@@ -503,72 +524,76 @@ function recommendationData(probability, values, ind, threshold) {
 
   if (probability >= 0.75) {
     actions.push({
-      en: 'Prioritize immediate retention outreach and review the most recent customer interactions.',
-      ar: 'أعطِ الأولوية لتواصل احتفاظ سريع وراجع أحدث تفاعلات العميل.'
+      en: 'Assign an owner to this account today and contact the customer within 24 hours.',
+      ar: 'عيّن مسؤولًا واضحًا لهذا الحساب اليوم وتواصل مع العميل خلال 24 ساعة.'
     });
-    followUp.push({
-      en: 'Contact the customer within 24–48 hours.',
-      ar: 'تواصل مع العميل خلال 24–48 ساعة.'
-    });
-  } else if (probability >= threshold) {
     actions.push({
-      en: 'Start proactive outreach before the churn risk increases further.',
-      ar: 'ابدأ تواصلًا استباقيًا قبل ارتفاع خطر المغادرة أكثر.'
+      en: 'Ask one direct question: “What is the main reason you may reduce or stop using our service?” Record the answer before offering a solution.',
+      ar: 'اسأل سؤالًا مباشرًا: «ما السبب الرئيسي الذي قد يجعلك تقلل أو توقف استخدام الخدمة؟» وسجّل الإجابة قبل تقديم الحل.'
     });
     followUp.push({
-      en: 'Review the account within the next 3–7 days.',
-      ar: 'راجع الحساب خلال 3–7 أيام القادمة.'
+      en: 'Create a 7-day retention plan with a named owner, next-contact date, and a clear success measure.',
+      ar: 'أنشئ خطة احتفاظ لمدة 7 أيام تتضمن اسم المسؤول وموعد التواصل القادم ومقياس نجاح واضح.'
+    });
+  } else if (probability >= 0.50) {
+    actions.push({
+      en: 'Contact the customer within 48 hours and identify the strongest source of friction.',
+      ar: 'تواصل مع العميل خلال 48 ساعة وحدد أقوى سبب للاحتكاك أو عدم الرضا.'
+    });
+    followUp.push({
+      en: 'Review the account again within 3–5 days after the first intervention.',
+      ar: 'أعد مراجعة الحساب خلال 3–5 أيام بعد أول تدخل.'
     });
   } else {
     actions.push({
-      en: 'Maintain regular engagement and continue monitoring operational behavior.',
-      ar: 'حافظ على تفاعل منتظم واستمر في متابعة المؤشرات التشغيلية.'
+      en: 'Maintain regular engagement and watch for a decline in activity, usage, or payment behavior.',
+      ar: 'حافظ على تواصل منتظم وراقب أي انخفاض في النشاط أو الاستخدام أو سلوك الدفع.'
     });
     followUp.push({
       en: 'Reassess after the next meaningful customer interaction.',
-      ar: 'أعد التقييم بعد التفاعل المهم التالي مع العميل.'
+      ar: 'أعد التحليل بعد التفاعل المهم التالي مع العميل.'
     });
   }
 
-  if (values.LastInteraction > range('LastInteraction').median) {
+  if (values.LastInteraction >= 10) {
     actions.push({
-      en: 'Use a relevant re-engagement message based on the customer’s recent history.',
-      ar: 'استخدم تواصل إعادة تفاعل مناسبًا بناءً على سجل العميل الحديث.'
+      en: `Use a re-engagement message tied to the customer’s actual history, not a generic campaign. Mention the most relevant service or benefit and ask for a reply.`,
+      ar: 'أرسل تواصل إعادة تفاعل مرتبطًا بتاريخ العميل الفعلي وليس حملة عامة. اذكر الخدمة أو الفائدة الأكثر صلة واطلب ردًا واضحًا.'
     });
   }
 
-  if (values.SupportCalls !== null && values.SupportCalls > range('SupportCalls').median) {
+  if (values.UsageFrequency !== null && values.UsageFrequency <= 8) {
     actions.push({
-      en: 'Review recent support contacts for unresolved friction.',
-      ar: 'راجع تواصلات الدعم الحديثة بحثًا عن مشكلة لم تُحل.'
+      en: 'Identify one feature or service the customer previously used successfully and guide them back to it with a simple next step.',
+      ar: 'حدد ميزة أو خدمة سبق أن استخدمها العميل بنجاح، ووجّهه للعودة إليها بخطوة بسيطة وواضحة.'
     });
   }
 
-  if (values.PaymentDelay !== null && values.PaymentDelay > range('PaymentDelay').median) {
+  if (values.SupportCalls !== null && values.SupportCalls >= 5) {
     actions.push({
-      en: 'Check whether payment friction is affecting the customer relationship.',
-      ar: 'تحقق مما إذا كانت مشاكل الدفع تؤثر على علاقة العميل بالشركة.'
+      en: 'Audit the latest support cases, confirm what remains unresolved, and close the loop with the customer personally.',
+      ar: 'راجع آخر حالات الدعم، وحدد ما لم يُحل، ثم أغلق المشكلة مع العميل بتواصل شخصي.'
     });
   }
 
-  if (ind.valueIndex >= 70 && probability >= threshold) {
+  if (values.PaymentDelay !== null && values.PaymentDelay >= 10) {
     actions.push({
-      en: 'Consider a personalized retention option that reflects the customer’s revenue value.',
-      ar: 'فكّر في خيار احتفاظ مخصص يعكس قيمة إيراد العميل.'
+      en: 'Check whether the issue is invoice clarity, payment method, billing timing, or affordability; solve the exact payment obstacle instead of sending a generic reminder.',
+      ar: 'تحقق هل المشكلة في وضوح الفاتورة أو وسيلة الدفع أو توقيت الفوترة أو القدرة على الدفع، ثم عالج العائق الحقيقي بدل إرسال تذكير عام.'
     });
   }
 
-  followUp.push(
-    ind.engagement < 45
-      ? {
-          en: 'Track activity after the next retention intervention.',
-          ar: 'تابع النشاط بعد إجراء الاحتفاظ التالي.'
-        }
-      : {
-          en: 'Keep the customer engagement trend under periodic review.',
-          ar: 'استمر في مراجعة اتجاه تفاعل العميل بشكل دوري.'
-        }
-  );
+  if (ind.valueIndex >= 70 && probability >= 0.50) {
+    actions.push({
+      en: 'Because this account has strong revenue value, consider a tailored retention offer only after the root cause is identified.',
+      ar: 'لأن إيراد هذا الحساب مرتفع، فكّر في عرض احتفاظ مخصص بعد تحديد السبب الحقيقي للمشكلة، وليس قبله.'
+    });
+  }
+
+  followUp.push({
+    en: 'After each action, record whether activity, usage, support demand, or payment behavior improved, then run the analysis again.',
+    ar: 'بعد كل إجراء، سجّل هل تحسن النشاط أو الاستخدام أو الحاجة للدعم أو سلوك الدفع، ثم أعد تشغيل التحليل.'
+  });
 
   return { actions, followUp };
 }
@@ -645,9 +670,9 @@ function renderSignalChart(values) {
 
 function renderBenchmarkChart(values) {
   const specs = [
-    { key: 'Tenure', en: 'Tenure', ar: 'مدة التعامل', inverse: false },
+    { key: 'Tenure', en: 'Relationship', ar: 'العلاقة', inverse: false },
     { key: 'TotalSpend', en: 'Revenue', ar: 'الإيراد', inverse: false },
-    { key: 'LastInteraction', en: 'Recency', ar: 'حداثة النشاط', inverse: true },
+    { key: 'LastInteraction', en: 'Activity', ar: 'النشاط', inverse: true },
     { key: 'UsageFrequency', en: 'Usage', ar: 'الاستخدام', inverse: false },
     { key: 'SupportCalls', en: 'Support health', ar: 'سلامة الدعم', inverse: true },
     { key: 'PaymentDelay', en: 'Payment health', ar: 'سلامة الدفع', inverse: true }
@@ -658,9 +683,6 @@ function renderBenchmarkChart(values) {
     const raw = values[spec.key];
 
     let customer = 50;
-    let median = spec.inverse
-      ? inverseNormalize(r.median, r.min, r.max)
-      : normalize(r.median, r.min, r.max);
 
     if (raw !== null && Number.isFinite(raw)) {
       customer = spec.inverse
@@ -678,19 +700,12 @@ function renderBenchmarkChart(values) {
         </div>
         <div class="benchmark-pair">
           <div class="benchmark-track customer"><i style="width:${Math.round(customer)}%"></i></div>
-          <div class="benchmark-track median"><i style="width:${Math.round(median)}%"></i></div>
         </div>
       </div>
     `;
   }).join('');
 
-  $('benchmarkChart').innerHTML = `
-    <div class="benchmark-legend">
-      <span><i class="customer-dot"></i>${translate('Customer', 'العميل')}</span>
-      <span><i class="median-dot"></i>${translate('Training median', 'وسيط التدريب')}</span>
-    </div>
-    ${rows}
-  `;
+  $('benchmarkChart').innerHTML = rows;
 }
 
 async function renderSensitivityChart(values) {
@@ -770,6 +785,23 @@ async function renderSensitivityChart(values) {
         </span>
       </div>
     `;
+
+    const minRisk = Math.min(...samples.map((x) => x.risk));
+    const maxRisk = Math.max(...samples.map((x) => x.risk));
+    const change = maxRisk - minRisk;
+    const sensitivityLabel = change >= 20
+      ? translate('strong', 'قوي')
+      : change >= 8
+        ? translate('moderate', 'متوسط')
+        : translate('limited', 'محدود');
+
+    const explanation = $('sensitivityExplanation');
+    if (explanation) {
+      explanation.textContent = translate(
+        `For this customer, inactivity has a ${sensitivityLabel} effect on churn risk. Across the scenarios shown, risk moves from about ${Math.round(minRisk)}% to ${Math.round(maxRisk)}%. The current point is ${Math.round(currentRisk)}% at ${Math.round(values.LastInteraction)} days since the last activity. If the line rises as days increase, faster re-engagement is likely to matter more.`,
+        `بالنسبة لهذا العميل، تأثير عدم النشاط على خطر المغادرة ${sensitivityLabel}. عبر السيناريوهات المعروضة يتغير الخطر تقريبًا من ${Math.round(minRisk)}٪ إلى ${Math.round(maxRisk)}٪. النقطة الحالية هي ${Math.round(currentRisk)}٪ عند مرور ${Math.round(values.LastInteraction)} يومًا منذ آخر نشاط. إذا كان الخط يرتفع مع زيادة الأيام فهذا يعني أن سرعة إعادة التفاعل تصبح أكثر أهمية.`
+      );
+    }
   } catch (error) {
     console.error(error);
     container.innerHTML = `<p class="chart-note">${translate(
@@ -866,28 +898,43 @@ async function renderResults(payload, createdAt = new Date()) {
   $('metricRecency').textContent = Math.round(ind.recencyHealth);
   $('metricOperational').textContent = Math.round(ind.operationalHealth);
 
-  $('transparencyThreshold').textContent = `${Math.round(ind.threshold)}%`;
-  $('transparencyMargin').textContent = `${Math.round(ind.decisionMargin)} ${translate('pts', 'نقطة')}`;
-
   $('riskCategoryBadge').dataset.level = level.key;
   $('riskCategoryBadge').textContent = getLanguage() === 'ar' ? level.ar : level.en;
 
   $('gaugeRisk').textContent = `${Math.round(ind.risk)}%`;
   $('riskGauge').style.setProperty('--risk-angle', `${ind.risk * 3.6}deg`);
-  $('thresholdMarker').style.left = `${clamp(ind.threshold)}%`;
   $('riskMarker').style.left = `${clamp(ind.risk)}%`;
 
   const above = probability >= threshold;
-
-  $('riskDecisionText').textContent = above
+  const riskText = probability >= 0.75
     ? translate(
-        'Estimated churn risk is above NAVIGATE’s model decision threshold. The customer deserves proactive retention review.',
-        'خطر المغادرة المتوقع أعلى من حد قرار النموذج في NAVIGATE، لذلك يستحق العميل مراجعة استباقية للاحتفاظ.'
+        `This customer is at very high risk of leaving (${Math.round(ind.risk)}%). The marker is near the high-risk end, so this account should be treated as urgent. Focus first on the weakest customer signals and contact the customer quickly.`,
+        `هذا العميل في مستوى خطر مرتفع جدًا للمغادرة (${Math.round(ind.risk)}٪). المؤشر قريب من الطرف الأعلى للخطر، لذلك يُفضّل التعامل مع الحساب كحالة عاجلة. ابدأ بأضعف مؤشرات العميل وتواصل معه بسرعة.`
       )
-    : translate(
-        'Estimated churn risk is below NAVIGATE’s model decision threshold. Continue monitoring for meaningful behavior changes.',
-        'خطر المغادرة المتوقع أقل من حد قرار النموذج في NAVIGATE. استمر في المتابعة لرصد أي تغيرات مهمة.'
-      );
+    : probability >= 0.50
+      ? translate(
+          `This customer has a high churn risk (${Math.round(ind.risk)}%). The position is clearly on the higher-risk side, so proactive retention action is recommended before engagement weakens further.`,
+          `خطر مغادرة هذا العميل مرتفع (${Math.round(ind.risk)}٪). موضع المؤشر واضح في جهة الخطر الأعلى، لذلك يُنصح بإجراء احتفاظ استباقي قبل أن يضعف التفاعل أكثر.`
+        )
+      : probability >= 0.25
+        ? translate(
+            `This customer has a moderate churn risk (${Math.round(ind.risk)}%). The account is not yet in the highest-risk zone, but specific warning signals should be addressed early.`,
+            `خطر مغادرة هذا العميل متوسط (${Math.round(ind.risk)}٪). الحساب ليس في أعلى منطقة خطر حاليًا، لكن يفضّل معالجة إشارات التحذير مبكرًا.`
+          )
+        : translate(
+            `This customer currently shows a low churn risk (${Math.round(ind.risk)}%). Keep the relationship active and monitor for meaningful changes in behavior.`,
+            `خطر مغادرة هذا العميل منخفض حاليًا (${Math.round(ind.risk)}٪). حافظ على نشاط العلاقة وراقب أي تغيرات مهمة في السلوك.`
+          );
+
+  $('riskDecisionText').textContent = riskText;
+
+  const riskPositionExplanation = $('riskPositionExplanation');
+  if (riskPositionExplanation) {
+    riskPositionExplanation.textContent = translate(
+      `The horizontal marker shows this customer's current risk position from lower to higher risk. A position farther to the right means the account needs faster and more focused retention action.`,
+      `المؤشر الأفقي يوضح موضع خطر هذا العميل من خطر أقل إلى خطر أعلى. كلما اتجه المؤشر أكثر إلى اليمين احتاج الحساب إلى تدخل احتفاظ أسرع وأكثر تركيزًا.`
+    );
+  }
 
   renderSignalChart(values);
   renderBenchmarkChart(values);
@@ -899,12 +946,12 @@ async function renderResults(payload, createdAt = new Date()) {
 
   $('decisionSummary').textContent = above
     ? translate(
-        `The Python model estimates a ${Math.round(ind.risk)}% churn risk. Combined with customer revenue, the current retention priority is ${Math.round(ind.priority)}/100.`,
-        `يقدّر نموذج Python خطر المغادرة بـ ${Math.round(ind.risk)}٪. وبدمج الخطر مع إيراد العميل تصبح أولوية الاحتفاظ الحالية ${Math.round(ind.priority)}/100.`
+        `This customer has a ${Math.round(ind.risk)}% churn risk. Considering both churn risk and revenue strength, the current retention priority is ${Math.round(ind.priority)}/100.`,
+        `خطر مغادرة هذا العميل هو ${Math.round(ind.risk)}٪. وبالنظر إلى خطر المغادرة وقوة الإيراد معًا، تصبح أولوية الاحتفاظ الحالية ${Math.round(ind.priority)}/100.`
       )
     : translate(
-        `The Python model estimates a ${Math.round(ind.risk)}% churn risk, currently below the decision threshold. Continue monitoring the customer as operational behavior changes.`,
-        `يقدّر نموذج Python خطر المغادرة بـ ${Math.round(ind.risk)}٪، وهو أقل حاليًا من حد القرار. استمر في متابعة العميل مع تغير المؤشرات التشغيلية.`
+        `This customer has a ${Math.round(ind.risk)}% churn risk. Continue monitoring the account and respond quickly if activity, usage, support, or payment behavior weakens.`,
+        `خطر مغادرة هذا العميل هو ${Math.round(ind.risk)}٪. استمر في متابعة الحساب وتدخل بسرعة إذا تراجع النشاط أو الاستخدام أو سلوك الدعم أو الدفع.`
       );
 
   $('summaryRiskLevel').textContent = getLanguage() === 'ar' ? level.ar : level.en;
