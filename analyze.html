@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Analyze | NAVIGATE</title>
   <link rel="stylesheet" href="styles.css" />
+  <style>
+    .skills-scale-help { margin-top: 18px; padding: 16px; border: 1px solid rgba(126, 30, 58, .14); border-radius: 18px; background: rgba(255,255,255,.34); }
+    .skills-scale-help > p { margin: 0 0 12px; font-size: .92rem; line-height: 1.65; opacity: .78; }
+    .skills-scale-grid { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 9px; }
+    .skill-scale-box { min-height: 88px; padding: 11px 12px; border: 1px solid rgba(126, 30, 58, .13); border-radius: 14px; background: rgba(255,255,255,.55); }
+    .skill-scale-box strong { display: block; margin-bottom: 5px; font-size: .88rem; }
+    .skill-scale-box span { display: block; font-size: .76rem; line-height: 1.45; opacity: .72; }
+    @media (max-width: 900px) { .skills-scale-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 520px) { .skills-scale-grid { grid-template-columns: 1fr; } }
+  </style>
 </head>
 <body data-page="analyze">
 <header class="site-header">
@@ -83,6 +93,21 @@
           </label>
           <div id="selectedSkills" class="selected-skills"></div>
           <p id="skillsEmpty" class="skills-empty" data-en="No skills selected yet." data-ar="لم يتم اختيار مهارات بعد.">No skills selected yet.</p>
+        </div>
+
+        <div class="skills-scale-help">
+          <p
+            data-en="What does the skill strength mean? It measures how important that skill is to the company if this person leaves — not how skilled the person is."
+            data-ar="ماذا تعني قوة المهارة؟ هي تقيس مدى أهمية هذه المهارة للشركة إذا غادر هذا الشخص، وليست تقييمًا لمستوى إتقانه للمهارة.">
+            What does the skill strength mean? It measures how important that skill is to the company if this person leaves — not how skilled the person is.
+          </p>
+          <div class="skills-scale-grid">
+            <div class="skill-scale-box"><strong data-en="1 · Low" data-ar="1 · منخفض">1 · Low</strong><span data-en="Limited business impact and relatively easy to replace." data-ar="تأثيرها على العمل محدود ويمكن تعويضها بسهولة نسبيًا.">Limited business impact and relatively easy to replace.</span></div>
+            <div class="skill-scale-box"><strong data-en="2 · Moderate" data-ar="2 · متوسط">2 · Moderate</strong><span data-en="Useful skill, but the company can usually replace or cover it." data-ar="مهارة مفيدة، لكن غالبًا يمكن للشركة تعويضها أو تغطيتها.">Useful skill, but the company can usually replace or cover it.</span></div>
+            <div class="skill-scale-box"><strong data-en="3 · Strong" data-ar="3 · قوي">3 · Strong</strong><span data-en="Important to the role or team and its loss would be noticeable." data-ar="مهمة للدور أو الفريق، وفقدانها سيكون ملحوظًا.">Important to the role or team and its loss would be noticeable.</span></div>
+            <div class="skill-scale-box"><strong data-en="4 · Very strong" data-ar="4 · قوي جدًا">4 · Very strong</strong><span data-en="Hard to replace and has high business impact." data-ar="يصعب تعويضها ولها تأثير مرتفع على العمل.">Hard to replace and has high business impact.</span></div>
+            <div class="skill-scale-box"><strong data-en="5 · Critical" data-ar="5 · حرج">5 · Critical</strong><span data-en="Rare or core skill; losing it could strongly affect operations or results." data-ar="مهارة نادرة أو أساسية، وقد يؤثر فقدانها بشكل كبير على العمليات أو النتائج.">Rare or core skill; losing it could strongly affect operations or results.</span></div>
+          </div>
         </div>
       </article>
 
