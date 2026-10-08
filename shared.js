@@ -12,8 +12,7 @@ export const translate = (en, ar) => (state.language === "ar" ? ar : en);
 function applyLanguage() {
   const ar = state.language === "ar";
   document.documentElement.lang = ar ? "ar" : "en";
-  document.documentElement.dir = "ltr";
-  document.documentElement.dataset.language = ar ? "ar" : "en";
+  document.documentElement.dir = ar ? "rtl" : "ltr";
 
   document.querySelectorAll("[data-en][data-ar]").forEach((el) => {
     el.textContent = ar ? el.dataset.ar : el.dataset.en;
@@ -34,9 +33,31 @@ function applyTheme() {
   const btn = document.querySelector("[data-theme-toggle]");
 
   if (btn) {
+    const sunIcon = `
+      <span aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2"></path>
+          <path d="M12 20v2"></path>
+          <path d="M4.93 4.93l1.41 1.41"></path>
+          <path d="M17.66 17.66l1.41 1.41"></path>
+          <path d="M2 12h2"></path>
+          <path d="M20 12h2"></path>
+          <path d="M6.34 17.66l-1.41 1.41"></path>
+          <path d="M19.07 4.93l-1.41 1.41"></path>
+        </svg>
+      </span>`;
+
+    const moonIcon = `
+      <span aria-hidden="true" style="display:inline-flex;align-items:center;justify-content:center">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </span>`;
+
     btn.innerHTML = state.theme === "dark"
-      ? `<span>☀</span><span>${translate("Light", "نهاري")}</span>`
-      : `<span>☾</span><span>${translate("Dark", "ليلي")}</span>`;
+      ? `${sunIcon}<span>${translate("Light", "نهاري")}</span>`
+      : `${moonIcon}<span>${translate("Dark", "ليلي")}</span>`;
   }
 }
 
