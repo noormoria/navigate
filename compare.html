@@ -8,802 +8,263 @@
   <script src="https://cdn.jsdelivr.net/npm/mammoth@1.9.1/mammoth.browser.min.js"></script>
 
 <style>
-.criteria-bar-chart{
-  display:grid;
-  gap:14px;
+.criteria-analysis-wrap{
   margin-top:18px;
-}
-
-.criteria-row{
+  padding:20px 18px 16px;
   border:1px solid rgba(125,29,53,.12);
+  border-radius:22px;
   background:rgba(255,255,255,.48);
-  border-radius:18px;
-  padding:14px 16px;
 }
-
-.criteria-label{
-  font-weight:800;
-  text-transform:capitalize;
-  color:#6e1028;
-  margin-bottom:10px;
-}
-
-.candidate-bar-row{
-  display:grid;
-  grid-template-columns:26px minmax(0,1fr) 46px;
-  align-items:center;
-  gap:10px;
-  margin:8px 0;
-}
-
-.candidate-key{
-  font-size:.8rem;
-  font-weight:800;
-  color:#8b6c76;
-  text-align:center;
-}
-
-.candidate-bar-track{
-  height:13px;
-  border-radius:999px;
-  background:#f3e5e9;
-  overflow:hidden;
-}
-
-.candidate-bar{
-  display:block;
-  height:100%;
-  border-radius:999px;
-}
-
-.candidate-a{
-  background:linear-gradient(90deg,#7b112b,#a92243);
-}
-
-.candidate-b{
-  background:linear-gradient(90deg,#c45a73,#de9aac);
-}
-
-.candidate-bar-row strong{
-  font-size:.8rem;
-  color:#6e1028;
-  text-align:right;
-}
-
-.criteria-chart-note{
-  margin-top:12px;
-  color:#9b7b84;
+.criteria-analysis-legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:18px;
+  margin-bottom:14px;
   font-size:.86rem;
-  line-height:1.6;
+  color:#84656f;
 }
-
-.compare-edit-actions{
-  margin-top:18px;
+.criteria-analysis-legend span{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
 }
-
-@media (max-width:700px){
-  .criteria-row{
-    padding:12px;
-  }
-
-  .candidate-bar-row{
-    grid-template-columns:22px 1fr 42px;
-    gap:8px;
-  }
+.criteria-analysis-legend i{
+  width:12px;
+  height:12px;
+  border-radius:3px;
+  display:inline-block;
 }
+.criteria-analysis-legend .legend-a{background:#971c3c}
+.criteria-analysis-legend .legend-b{background:#d77f96}
+.criteria-axis-chart{
+  width:100%;
+  overflow-x:auto;
+}
+.criteria-axis-chart svg{
+  display:block;
+  width:100%;
+  min-width:720px;
+  height:auto;
+}
+.criteria-chart-note{
+  margin-top:14px;
+  color:#92747d;
+  font-size:.86rem;
+  line-height:1.65;
+}
+.compare-edit-actions{margin-top:18px}
 </style>
 
 </head>
-
 <body data-page="compare">
-
 <header class="site-header">
   <div class="header-inner">
-
     <a class="brand" href="index.html">
       <span class="brand-mark">NA</span>
-
       <span class="brand-copy">
         <strong>NAVIGATE</strong>
-
-        <small
-          data-en="Customer Retention Intelligence"
-          data-ar="ذكاء الاحتفاظ بالعملاء">
-          Customer Retention Intelligence
-        </small>
+        <small data-en="Customer Retention Intelligence" data-ar="ذكاء الاحتفاظ بالعملاء">Customer Retention Intelligence</small>
       </span>
     </a>
 
-    <button
-      class="menu-toggle"
-      data-menu-toggle
-      aria-label="Open menu"
-      aria-expanded="false">
-
-      <span></span>
-      <span></span>
-      <span></span>
-
+    <button class="menu-toggle" data-menu-toggle aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
     </button>
 
     <nav class="main-nav" aria-label="Main navigation">
-
-      <div
-        class="menu-kicker"
-        data-en="NAVIGATE MENU"
-        data-ar="قائمة NAVIGATE">
-        NAVIGATE MENU
-      </div>
-
-      <a href="index.html" data-nav="home">
-        <span>01</span>
-        <strong data-en="Home" data-ar="الرئيسية">Home</strong>
-      </a>
-
-      <a href="analyze.html" data-nav="analyze">
-        <span>02</span>
-        <strong
-          data-en="Analyze customer"
-          data-ar="تحليل عميل">
-          Analyze customer
-        </strong>
-      </a>
-
-      <a href="compare.html" data-nav="compare">
-        <span>03</span>
-        <strong
-          data-en="Compare candidates"
-          data-ar="مقارنة مرشحين">
-          Compare candidates
-        </strong>
-      </a>
-
-      <a href="history.html" data-nav="history">
-        <span>04</span>
-        <strong data-en="History" data-ar="السجل">History</strong>
-      </a>
-
-      <a href="about.html" data-nav="about">
-        <span>05</span>
-        <strong data-en="About" data-ar="عن المنصة">About</strong>
-      </a>
-
-      <a href="support.html" data-nav="support">
-        <span>06</span>
-        <strong data-en="Support" data-ar="الدعم">Support</strong>
-      </a>
-
+      <div class="menu-kicker" data-en="NAVIGATE MENU" data-ar="قائمة NAVIGATE">NAVIGATE MENU</div>
+      <a href="index.html" data-nav="home"><span>01</span><strong data-en="Home" data-ar="الرئيسية">Home</strong></a>
+      <a href="analyze.html" data-nav="analyze"><span>02</span><strong data-en="Analyze customer" data-ar="تحليل عميل">Analyze customer</strong></a>
+      <a href="compare.html" data-nav="compare"><span>03</span><strong data-en="Compare candidates" data-ar="مقارنة مرشحين">Compare candidates</strong></a>
+      <a href="history.html" data-nav="history"><span>04</span><strong data-en="History" data-ar="السجل">History</strong></a>
+      <a href="about.html" data-nav="about"><span>05</span><strong data-en="About" data-ar="عن المنصة">About</strong></a>
+      <a href="support.html" data-nav="support"><span>06</span><strong data-en="Support" data-ar="الدعم">Support</strong></a>
     </nav>
 
     <div class="header-actions">
-
-      <button class="utility-button" data-language-toggle>
-        عربي
-      </button>
-
-      <button class="utility-button" data-theme-toggle>
-        <span>☾</span>
-        <span>Dark</span>
-      </button>
-
-      <a
-        class="account-button sign-in-button"
-        data-account-button
-        href="auth.html">
-
+      <button class="utility-button" data-language-toggle>عربي</button>
+      <button class="utility-button" data-theme-toggle><span>☾</span><span>Dark</span></button>
+      <a class="account-button sign-in-button" data-account-button href="auth.html">
         <span class="account-dot signed-out"></span>
-
-        <span
-          data-en="Sign in"
-          data-ar="تسجيل الدخول">
-          Sign in
-        </span>
-
+        <span data-en="Sign in" data-ar="تسجيل الدخول">Sign in</span>
       </a>
-
     </div>
-
   </div>
 </header>
 
 <main class="page-shell inner-page">
-
   <section class="page-heading">
-
     <div>
-
-      <span
-        class="eyebrow"
-        data-en="CV COMPARISON"
-        data-ar="مقارنة السير الذاتية">
-        CV COMPARISON
-      </span>
-
-      <h1
-        data-en="Compare two CVs against the same role criteria."
-        data-ar="قارن سيرتين ذاتيتين وفق نفس متطلبات الوظيفة.">
-        Compare two CVs against the same role criteria.
-      </h1>
-
-      <p
-        data-en="NAVIGATE reviews documented job-related evidence only. It ignores protected or sensitive traits and does not make the hiring decision for you."
-        data-ar="تراجع NAVIGATE الأدلة المرتبطة بالوظيفة فقط، وتتجاهل الصفات الحساسة أو المحمية، ولا تتخذ قرار التوظيف بدلًا عنك.">
-        NAVIGATE reviews documented job-related evidence only.
-        It ignores protected or sensitive traits and does not
-        make the hiring decision for you.
-      </p>
-
+      <span class="eyebrow" data-en="CV COMPARISON" data-ar="مقارنة السير الذاتية">CV COMPARISON</span>
+      <h1 data-en="Compare two CVs against the same role criteria." data-ar="قارن سيرتين ذاتيتين وفق نفس متطلبات الوظيفة.">Compare two CVs against the same role criteria.</h1>
+      <p data-en="NAVIGATE reviews documented job-related evidence only. It ignores protected or sensitive traits and does not make the hiring decision for you." data-ar="تراجع NAVIGATE الأدلة المرتبطة بالوظيفة فقط، وتتجاهل الصفات الحساسة أو المحمية، ولا تتخذ قرار التوظيف بدلًا عنك.">NAVIGATE reviews documented job-related evidence only. It ignores protected or sensitive traits and does not make the hiring decision for you.</p>
     </div>
-
   </section>
 
   <section class="comparison-workspace">
-
     <form id="compareForm" class="comparison-form">
-
       <article class="form-panel">
-
         <div class="panel-heading">
-
-          <div>
-            <span class="panel-number">01</span>
-
-            <h2
-              data-en="Role criteria"
-              data-ar="متطلبات الوظيفة">
-              Role criteria
-            </h2>
-          </div>
-
-          <span
-            class="required-note"
-            data-en="CVs required"
-            data-ar="السير الذاتية مطلوبة">
-            CVs required
-          </span>
-
+          <div><span class="panel-number">01</span><h2 data-en="Role criteria" data-ar="متطلبات الوظيفة">Role criteria</h2></div>
+          <span class="required-note" data-en="CVs required" data-ar="السير الذاتية مطلوبة">CVs required</span>
         </div>
 
         <label class="field full">
-
-          <span
-            data-en="Role title"
-            data-ar="المسمى الوظيفي">
-            Role title
-          </span>
-
-          <input
-            id="roleTitle"
-            type="text"
-            required
-            placeholder="Data Analyst"
-            data-placeholder-en="Data Analyst"
-            data-placeholder-ar="محلل بيانات"
-          />
-
+          <span data-en="Role title" data-ar="المسمى الوظيفي">Role title</span>
+          <input id="roleTitle" type="text" required placeholder="Data Analyst" data-placeholder-en="Data Analyst" data-placeholder-ar="محلل بيانات"/>
         </label>
 
         <label class="field full">
-
-          <span
-            data-en="Job requirements / must-have skills (optional)"
-            data-ar="متطلبات الوظيفة / المهارات الأساسية (اختياري)">
-            Job requirements / must-have skills (optional)
-          </span>
-
-          <textarea
-            id="roleCriteria"
-            rows="6"
-            data-placeholder-en="Optional: add requirements now, or compare first and refine them afterward. Example: SQL, Power BI, Excel, Python..."
-            data-placeholder-ar="اختياري: أضف المتطلبات الآن أو ابدأ المقارنة ثم عدّلها بعد ظهور النتيجة. مثال: SQL وPower BI وExcel وPython...">
-          </textarea>
-
-          <small
-            data-en="Optional. If left blank, NAVIGATE creates a general comparison from job-related evidence found in both CVs. You can edit these requirements after the first comparison and run it again."
-            data-ar="اختياري. إذا تركته فارغًا، تنشئ NAVIGATE مقارنة عامة من الأدلة المهنية الموجودة في السيرتين. ويمكنك تعديل المتطلبات بعد أول مقارنة وتشغيلها مرة أخرى.">
-            Optional. If left blank, NAVIGATE creates a general
-            comparison from job-related evidence found in both CVs.
-            You can edit these requirements after the first comparison
-            and run it again.
-          </small>
-
+          <span data-en="Job requirements / must-have skills (optional)" data-ar="متطلبات الوظيفة / المهارات الأساسية (اختياري)">Job requirements / must-have skills (optional)</span>
+          <textarea id="roleCriteria" rows="6" data-placeholder-en="Optional: add requirements now, or compare first and refine them afterward. Example: SQL, Power BI, Excel, Python..." data-placeholder-ar="اختياري: أضف المتطلبات الآن أو ابدأ المقارنة ثم عدّلها بعد ظهور النتيجة. مثال: SQL وPower BI وExcel وPython..."></textarea>
+          <small data-en="Optional. If left blank, NAVIGATE creates a general comparison from job-related evidence found in both CVs. You can edit these requirements after the first comparison and run it again." data-ar="اختياري. إذا تركته فارغًا، تنشئ NAVIGATE مقارنة عامة من الأدلة المهنية الموجودة في السيرتين. ويمكنك تعديل المتطلبات بعد أول مقارنة وتشغيلها مرة أخرى.">Optional. If left blank, NAVIGATE creates a general comparison from job-related evidence found in both CVs. You can edit these requirements after the first comparison and run it again.</small>
         </label>
-
       </article>
 
       <div class="candidate-upload-grid">
-
         <article class="form-panel candidate-panel">
-
           <div class="panel-heading">
-
-            <div>
-              <span class="panel-number">A</span>
-
-              <h2
-                data-en="Candidate A"
-                data-ar="المرشح A">
-                Candidate A
-              </h2>
-            </div>
-
+            <div><span class="panel-number">A</span><h2 data-en="Candidate A" data-ar="المرشح A">Candidate A</h2></div>
           </div>
-
+          <label class="field"><span data-en="Candidate label" data-ar="اسم / رمز المرشح">Candidate label</span><input id="candidateAName" type="text" value="Candidate A"/></label>
           <label class="field">
-
-            <span
-              data-en="Candidate label"
-              data-ar="اسم / رمز المرشح">
-              Candidate label
-            </span>
-
-            <input
-              id="candidateAName"
-              type="text"
-              value="Candidate A"
-            />
-
-          </label>
-
-          <label class="field">
-
-            <span
-              data-en="Candidate status"
-              data-ar="حالة المرشح">
-              Candidate status
-            </span>
-
+            <span data-en="Candidate status" data-ar="حالة المرشح">Candidate status</span>
             <select id="candidateAStatus" required>
-
-              <option
-                value="employee"
-                data-en="Current employee"
-                data-ar="موظف حالي">
-                Current employee
-              </option>
-
-              <option
-                value="applicant"
-                data-en="Job applicant"
-                data-ar="متقدم للوظيفة">
-                Job applicant
-              </option>
-
+              <option value="employee" data-en="Current employee" data-ar="موظف حالي">Current employee</option>
+              <option value="applicant" data-en="Job applicant" data-ar="متقدم للوظيفة">Job applicant</option>
             </select>
-
-            <small
-              data-en="Used as context only. It does not change the comparison score."
-              data-ar="للسياق فقط ولا يغيّر درجة المقارنة.">
-              Used as context only. It does not change the comparison score.
-            </small>
-
+            <small data-en="Used as context only. It does not change the comparison score." data-ar="للسياق فقط ولا يغيّر درجة المقارنة.">Used as context only. It does not change the comparison score.</small>
           </label>
-
-          <label
-            class="upload-zone"
-            for="candidateAFile">
-
-            <strong
-              data-en="Upload CV"
-              data-ar="ارفع السيرة الذاتية">
-              Upload CV
-            </strong>
-
-            <span
-              data-en="PDF, DOCX or TXT"
-              data-ar="PDF أو DOCX أو TXT">
-              PDF, DOCX or TXT
-            </span>
-
-            <input
-              id="candidateAFile"
-              type="file"
-              accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
-              required
-            />
-
+          <label class="upload-zone" for="candidateAFile">
+            <strong data-en="Upload CV" data-ar="ارفع السيرة الذاتية">Upload CV</strong>
+            <span data-en="PDF, DOCX or TXT" data-ar="PDF أو DOCX أو TXT">PDF, DOCX or TXT</span>
+            <input id="candidateAFile" type="file" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" required/>
           </label>
-
-          <small
-            id="candidateAFileName"
-            class="file-name">
-          </small>
-
+          <small id="candidateAFileName" class="file-name"></small>
         </article>
 
         <article class="form-panel candidate-panel">
-
           <div class="panel-heading">
-
-            <div>
-              <span class="panel-number">B</span>
-
-              <h2
-                data-en="Candidate B"
-                data-ar="المرشح B">
-                Candidate B
-              </h2>
-            </div>
-
+            <div><span class="panel-number">B</span><h2 data-en="Candidate B" data-ar="المرشح B">Candidate B</h2></div>
           </div>
-
+          <label class="field"><span data-en="Candidate label" data-ar="اسم / رمز المرشح">Candidate label</span><input id="candidateBName" type="text" value="Candidate B"/></label>
           <label class="field">
-
-            <span
-              data-en="Candidate label"
-              data-ar="اسم / رمز المرشح">
-              Candidate label
-            </span>
-
-            <input
-              id="candidateBName"
-              type="text"
-              value="Candidate B"
-            />
-
-          </label>
-
-          <label class="field">
-
-            <span
-              data-en="Candidate status"
-              data-ar="حالة المرشح">
-              Candidate status
-            </span>
-
+            <span data-en="Candidate status" data-ar="حالة المرشح">Candidate status</span>
             <select id="candidateBStatus" required>
-
-              <option
-                value="employee"
-                data-en="Current employee"
-                data-ar="موظف حالي">
-                Current employee
-              </option>
-
-              <option
-                value="applicant"
-                data-en="Job applicant"
-                data-ar="متقدم للوظيفة">
-                Job applicant
-              </option>
-
+              <option value="employee" data-en="Current employee" data-ar="موظف حالي">Current employee</option>
+              <option value="applicant" data-en="Job applicant" data-ar="متقدم للوظيفة">Job applicant</option>
             </select>
-
-            <small
-              data-en="Used as context only. It does not change the comparison score."
-              data-ar="للسياق فقط ولا يغيّر درجة المقارنة.">
-              Used as context only. It does not change the comparison score.
-            </small>
-
+            <small data-en="Used as context only. It does not change the comparison score." data-ar="للسياق فقط ولا يغيّر درجة المقارنة.">Used as context only. It does not change the comparison score.</small>
           </label>
-
-          <label
-            class="upload-zone"
-            for="candidateBFile">
-
-            <strong
-              data-en="Upload CV"
-              data-ar="ارفع السيرة الذاتية">
-              Upload CV
-            </strong>
-
-            <span
-              data-en="PDF, DOCX or TXT"
-              data-ar="PDF أو DOCX أو TXT">
-              PDF, DOCX or TXT
-            </span>
-
-            <input
-              id="candidateBFile"
-              type="file"
-              accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
-              required
-            />
-
+          <label class="upload-zone" for="candidateBFile">
+            <strong data-en="Upload CV" data-ar="ارفع السيرة الذاتية">Upload CV</strong>
+            <span data-en="PDF, DOCX or TXT" data-ar="PDF أو DOCX أو TXT">PDF, DOCX or TXT</span>
+            <input id="candidateBFile" type="file" accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" required/>
           </label>
-
-          <small
-            id="candidateBFileName"
-            class="file-name">
-          </small>
-
+          <small id="candidateBFileName" class="file-name"></small>
         </article>
-
       </div>
 
-      <button
-        class="primary-button compare-button"
-        type="submit">
-
-        <span
-          data-en="Compare CV evidence"
-          data-ar="قارن أدلة السير الذاتية">
-          Compare CV evidence
-        </span>
-
+      <button class="primary-button compare-button" type="submit">
+        <span data-en="Compare CV evidence" data-ar="قارن أدلة السير الذاتية">Compare CV evidence</span>
         <span>↗</span>
-
       </button>
-
     </form>
 
-    <section
-      id="compareResults"
-      class="compare-results"
-      hidden>
-
+    <section id="compareResults" class="compare-results" hidden>
       <div class="results-toolbar">
-
         <div>
-
-          <span
-            class="eyebrow"
-            data-en="COMPARISON RESULT"
-            data-ar="نتيجة المقارنة">
-            COMPARISON RESULT
-          </span>
-
-          <h2 id="comparisonRole">
-            Role
-          </h2>
-
-          <p
-            data-en="Scores are whole numbers with no decimals."
-            data-ar="الدرجات أعداد صحيحة بدون فواصل عشرية.">
-            Scores are whole numbers with no decimals.
-          </p>
-
+          <span class="eyebrow" data-en="COMPARISON RESULT" data-ar="نتيجة المقارنة">COMPARISON RESULT</span>
+          <h2 id="comparisonRole">Role</h2>
+          <p data-en="Scores are whole numbers with no decimals." data-ar="الدرجات أعداد صحيحة بدون فواصل عشرية.">Scores are whole numbers with no decimals.</p>
         </div>
-
       </div>
 
       <div class="candidate-score-grid">
-
         <article class="candidate-score-card">
-
-          <span id="scoreNameA">
-            Candidate A
-          </span>
-
-          <small id="scoreStatusA">
-            —
-          </small>
-
-          <strong id="scoreA">
-            0
-          </strong>
-
-          <small>
-            / 100 criteria coverage
-          </small>
-
-          <div class="score-track">
-            <i id="scoreBarA"></i>
-          </div>
-
+          <span id="scoreNameA">Candidate A</span>
+          <small id="scoreStatusA">—</small>
+          <strong id="scoreA">0</strong>
+          <small>/ 100 criteria coverage</small>
+          <div class="score-track"><i id="scoreBarA"></i></div>
         </article>
-
         <article class="candidate-score-card">
-
-          <span id="scoreNameB">
-            Candidate B
-          </span>
-
-          <small id="scoreStatusB">
-            —
-          </small>
-
-          <strong id="scoreB">
-            0
-          </strong>
-
-          <small>
-            / 100 criteria coverage
-          </small>
-
-          <div class="score-track">
-            <i id="scoreBarB"></i>
-          </div>
-
+          <span id="scoreNameB">Candidate B</span>
+          <small id="scoreStatusB">—</small>
+          <strong id="scoreB">0</strong>
+          <small>/ 100 criteria coverage</small>
+          <div class="score-track"><i id="scoreBarB"></i></div>
         </article>
-
       </div>
 
       <div class="comparison-chart-card">
-
         <div class="card-heading-row">
-
           <div>
-
-            <span
-              class="eyebrow"
-              data-en="SIDE-BY-SIDE"
-              data-ar="مقارنة مباشرة">
-              SIDE-BY-SIDE
-            </span>
-
-            <h3
-              data-en="Criteria comparison"
-              data-ar="مقارنة المعايير">
-              Criteria comparison
-            </h3>
-
+            <span class="eyebrow" data-en="SIDE-BY-SIDE" data-ar="مقارنة مباشرة">SIDE-BY-SIDE</span>
+            <h3 data-en="Criteria coverage chart" data-ar="رسم تغطية المعايير">Criteria coverage chart</h3>
+          </div>
+        </div>
+        <div class="criteria-analysis-wrap">
+          <div class="criteria-analysis-legend">
+            <span><i class="legend-a"></i><b>A</b><span id="chartCandidateA">Candidate A</span></span>
+            <span><i class="legend-b"></i><b>B</b><span id="chartCandidateB">Candidate B</span></span>
           </div>
 
+          <div id="criteriaComparisonChart" class="criteria-axis-chart"></div>
+
+          <p id="criteriaChartSummary" class="criteria-chart-note"></p>
         </div>
-
-        <div
-          id="criteriaComparisonChart"
-          class="criteria-bar-chart">
-        </div>
-
-        <p
-          class="criteria-chart-note"
-          data-en="Each criterion is shown as two simple bars so you can compare both candidates quickly."
-          data-ar="يظهر كل معيار على شكل شريطين بسيطين لتسهيل مقارنة المرشحين بسرعة.">
-          Each criterion is shown as two simple bars so you can compare
-          both candidates quickly.
-        </p>
-
         <div class="compare-edit-actions">
-
-          <button
-            id="editCriteriaButton"
-            class="secondary-button"
-            type="button"
-            data-en="Edit requirements & compare again"
-            data-ar="تعديل المتطلبات وإعادة المقارنة">
+          <button id="editCriteriaButton" class="secondary-button" type="button"
+                  data-en="Edit requirements & compare again"
+                  data-ar="تعديل المتطلبات وإعادة المقارنة">
             Edit requirements & compare again
           </button>
-
         </div>
-
       </div>
 
       <div class="comparison-insights">
-
         <article class="insight-card">
-
-          <span
-            class="eyebrow"
-            data-en="CANDIDATE A STRENGTHS"
-            data-ar="مميزات المرشح A">
-            CANDIDATE A STRENGTHS
-          </span>
-
-          <div
-            id="strengthsA"
-            class="factor-list positive">
-          </div>
-
+          <span class="eyebrow" data-en="CANDIDATE A STRENGTHS" data-ar="مميزات المرشح A">CANDIDATE A STRENGTHS</span>
+          <div id="strengthsA" class="factor-list positive"></div>
         </article>
-
         <article class="insight-card">
-
-          <span
-            class="eyebrow"
-            data-en="CANDIDATE B STRENGTHS"
-            data-ar="مميزات المرشح B">
-            CANDIDATE B STRENGTHS
-          </span>
-
-          <div
-            id="strengthsB"
-            class="factor-list positive">
-          </div>
-
+          <span class="eyebrow" data-en="CANDIDATE B STRENGTHS" data-ar="مميزات المرشح B">CANDIDATE B STRENGTHS</span>
+          <div id="strengthsB" class="factor-list positive"></div>
         </article>
-
         <article class="insight-card">
-
-          <span
-            class="eyebrow"
-            data-en="CANDIDATE A GAPS"
-            data-ar="نواقص المرشح A">
-            CANDIDATE A GAPS
-          </span>
-
-          <div
-            id="gapsA"
-            class="factor-list">
-          </div>
-
+          <span class="eyebrow" data-en="CANDIDATE A GAPS" data-ar="نواقص المرشح A">CANDIDATE A GAPS</span>
+          <div id="gapsA" class="factor-list"></div>
         </article>
-
         <article class="insight-card">
-
-          <span
-            class="eyebrow"
-            data-en="CANDIDATE B GAPS"
-            data-ar="نواقص المرشح B">
-            CANDIDATE B GAPS
-          </span>
-
-          <div
-            id="gapsB"
-            class="factor-list">
-          </div>
-
+          <span class="eyebrow" data-en="CANDIDATE B GAPS" data-ar="نواقص المرشح B">CANDIDATE B GAPS</span>
+          <div id="gapsB" class="factor-list"></div>
         </article>
-
         <article class="insight-card decision-card">
-
-          <span
-            class="eyebrow"
-            data-en="DOCUMENTED MATCH SUMMARY"
-            data-ar="ملخص المطابقة الموثقة">
-            DOCUMENTED MATCH SUMMARY
-          </span>
-
-          <h3 id="matchSummaryTitle">
-            —
-          </h3>
-
+          <span class="eyebrow" data-en="DOCUMENTED MATCH SUMMARY" data-ar="ملخص المطابقة الموثقة">DOCUMENTED MATCH SUMMARY</span>
+          <h3 id="matchSummaryTitle">—</h3>
           <p id="matchSummaryText"></p>
-
-          <p
-            class="decision-note"
-            data-en="Use this as a structured review aid. Interview evidence, references, work samples, and human judgment should remain part of the hiring process."
-            data-ar="استخدم هذه النتيجة كأداة مراجعة منظمة فقط. يجب أن تبقى المقابلة والمراجع ونماذج العمل والحكم البشري جزءًا من عملية التوظيف.">
-            Use this as a structured review aid.
-            Interview evidence, references, work samples,
-            and human judgment should remain part of the hiring process.
-          </p>
-
+          <p class="decision-note" data-en="Use this as a structured review aid. Interview evidence, references, work samples, and human judgment should remain part of the hiring process." data-ar="استخدم هذه النتيجة كأداة مراجعة منظمة فقط. يجب أن تبقى المقابلة والمراجع ونماذج العمل والحكم البشري جزءًا من عملية التوظيف.">Use this as a structured review aid. Interview evidence, references, work samples, and human judgment should remain part of the hiring process.</p>
         </article>
-
       </div>
-
     </section>
-
   </section>
-
 </main>
 
 <footer class="site-footer">
-
   <div class="footer-inner">
-
     <div class="footer-brand">
-
-      <strong>
-        NAVIGATE
-      </strong>
-
-      <span
-        data-en="Customer Retention Intelligence"
-        data-ar="ذكاء الاحتفاظ بالعملاء">
-        Customer Retention Intelligence
-      </span>
-
+      <strong>NAVIGATE</strong>
+      <span data-en="Customer Retention Intelligence" data-ar="ذكاء الاحتفاظ بالعملاء">Customer Retention Intelligence</span>
     </div>
-
     <div class="footer-links">
-
-      <a
-        href="support.html"
-        data-en="Support"
-        data-ar="الدعم">
-        Support
-      </a>
-
-      <a href="support.html">
-        navigate.support@gmail.com
-      </a>
-
+      <a href="support.html" data-en="Support" data-ar="الدعم">Support</a>
+      <a href="support.html">navigate.support@gmail.com</a>
     </div>
-
-    <span
-      data-en="Built for earlier, clearer retention decisions."
-      data-ar="صُمم لقرارات احتفاظ أبكر وأكثر وضوحًا.">
-      Built for earlier, clearer retention decisions.
-    </span>
-
+    <span data-en="Built for earlier, clearer retention decisions." data-ar="صُمم لقرارات احتفاظ أبكر وأكثر وضوحًا.">Built for earlier, clearer retention decisions.</span>
   </div>
-
 </footer>
 
 <script type="module" src="compare.js"></script>
-
 </body>
 </html>
