@@ -6,7 +6,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let authMode = "signin";
   let pendingIdentifier = "";
-  let pendingFullName = "";
+  let pendingFirstName = "";
+  let pendingLastName = "";
+  let pendingPhone = "";
+  let pendingCountry = "";
+  let pendingOrganization = "";
 
   const signInTab = $("signInTab");
   const createTab = $("createTab");
@@ -14,7 +18,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const emailForm = $("emailForm");
   const otpForm = $("otpForm");
   const createFields = $("createFields");
-  const fullNameInput = $("authFullName");
+  const firstNameInput = $("authFirstName");
+  const lastNameInput = $("authLastName");
+  const phoneInput = $("authPhone");
+  const countryInput = $("authCountry");
+  const organizationInput = $("authOrganization");
   const emailInput = $("authEmail");
   const otpInput = $("authOtp");
   const otpEmailLabel = $("otpEmailLabel");
@@ -95,7 +103,10 @@ document.addEventListener("DOMContentLoaded", () => {
     createTab?.setAttribute("aria-selected", String(creating));
 
     if (createFields) createFields.hidden = !creating;
-    if (fullNameInput) fullNameInput.required = creating;
+    if (firstNameInput) firstNameInput.required = creating;
+    if (lastNameInput) lastNameInput.required = creating;
+    if (phoneInput) phoneInput.required = creating;
+    if (countryInput) countryInput.required = creating;
     if (emailInput) emailInput.required = true;
 
     if (authHeading) {
@@ -107,8 +118,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (authIntro) {
       authIntro.textContent = creating
         ? tr(
-            "Create your account with your email and an 8-digit verification code.",
-            "أنشئ حسابك ببريدك الإلكتروني ورمز تحقق مكوّن من 8 أرقام."
+            "Create your profile, then verify your account with an 8-digit code sent to your email.",
+            "أنشئ ملفك الشخصي ثم فعّل حسابك برمز تحقق من 8 أرقام يُرسل إلى بريدك الإلكتروني."
           )
         : tr(
             "Sign in with your email and an 8-digit verification code.",
@@ -224,14 +235,33 @@ document.addEventListener("DOMContentLoaded", () => {
   function validateCreateFields() {
     if (authMode !== "create") return true;
 
-    pendingFullName = (fullNameInput?.value || "").trim();
+    pendingFirstName = (firstNameInput?.value || "").trim();
+    pendingLastName = (lastNameInput?.value || "").trim();
+    pendingPhone = (phoneInput?.value || "").trim();
+    pendingCountry = (countryInput?.value || "").trim();
+    pendingOrganization = (organizationInput?.value || "").trim();
 
-    if (!pendingFullName) {
-      setStatus(
-        tr("Enter your full name.", "أدخل الاسم الكامل."),
-        "error"
-      );
-      fullNameInput?.focus();
+    if (!pendingFirstName) {
+      setStatus(tr("Enter your first name.", "أدخل الاسم الأول."), "error");
+      firstNameInput?.focus();
+      return false;
+    }
+
+    if (!pendingLastName) {
+      setStatus(tr("Enter your last name.", "أدخل اسم العائلة."), "error");
+      lastNameInput?.focus();
+      return false;
+    }
+
+    if (!pendingPhone) {
+      setStatus(tr("Enter your phone number.", "أدخل رقم الجوال."), "error");
+      phoneInput?.focus();
+      return false;
+    }
+
+    if (!pendingCountry) {
+      setStatus(tr("Select your country.", "اختر الدولة."), "error");
+      countryInput?.focus();
       return false;
     }
 
@@ -274,7 +304,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (authMode === "create") {
         options.data = {
-          full_name: pendingFullName,
+          first_name: pendingFirstName,
+          last_name: pendingLastName,
+          full_name: `${pendingFirstName} ${pendingLastName}`.trim(),
+          phone_number: pendingPhone,
+          country: pendingCountry,
+          organization: pendingOrganization || null,
           email_address: pendingIdentifier
         };
       }
