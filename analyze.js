@@ -11,7 +11,7 @@ const $ = (id) => document.getElementById(id);
   After the Python backend is deployed, replace this URL with the real API URL.
   Example: https://navigate-api.onrender.com
 */
-const API_BASE_URL = 'https://YOUR-BACKEND-URL';
+const API_BASE_URL = 'https://navigate-efxe.onrender.com';
 
 const MODEL_INFO = {
   name: 'Hist Gradient Boosting',
