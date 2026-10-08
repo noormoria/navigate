@@ -273,7 +273,7 @@ function renderWarning(fields) {
     return;
   }
 
-  const fieldLabels = {
+  const labels = {
     Tenure: { en: 'Customer tenure', ar: 'مدة تعامل العميل' },
     TotalSpend: { en: 'Customer revenue / total spend', ar: 'إيراد العميل / إجمالي الإنفاق' },
     LastInteraction: { en: 'Days since last activity', ar: 'الأيام منذ آخر نشاط' },
@@ -284,16 +284,18 @@ function renderWarning(fields) {
 
   const details = fields.map((name) => {
     const r = range(name);
-    const label = getLanguage() === 'ar' ? fieldLabels[name].ar : fieldLabels[name].en;
-    return `${label}: ${r.min}–${r.max}`;
-  }).join(' · ');
+    const label = labels[name] || { en: name, ar: name };
+    const text = getLanguage() === 'ar' ? label.ar : label.en;
+
+    return `${text}: ${Math.round(r.min)}–${Math.round(r.max)}`;
+  }).join(' • ');
 
   box.hidden = false;
   box.innerHTML = `
-    <strong>${translate('Value outside the usual input range', 'قيمة خارج النطاق المعتاد')}</strong>
+    <strong>${translate('Please double-check this value', 'يرجى التأكد من القيمة المدخلة')}</strong>
     <span>${translate(
-      `Training range means the minimum and maximum values the model saw while learning from the dataset. Your real value can still be entered and the analysis will run, but the prediction is less supported when a value is outside that familiar range. Do not change a correct value just to fit the range. Model ranges: ${details}`,
-      `نطاق التدريب يعني أقل وأعلى قيم شاهدها النموذج أثناء التعلّم من البيانات. يمكنك إدخال القيمة الحقيقية وسيعمل التحليل بشكل طبيعي، لكن تكون النتيجة أقل دعمًا عندما تكون القيمة خارج النطاق الذي تعلّم عليه النموذج. لا تغيّر قيمة صحيحة فقط لتدخل داخل النطاق. نطاقات النموذج: ${details}`
+      `One or more values are unusually high or low. Make sure the number was entered correctly. The analysis will still run. Typical input range: ${details}`,
+      `توجد قيمة واحدة أو أكثر مرتفعة أو منخفضة بشكل غير معتاد. تأكد من أن الرقم أُدخل بشكل صحيح. سيستمر التحليل بشكل طبيعي. النطاق المعتاد للإدخال: ${details}`
     )}</span>
   `;
 }
