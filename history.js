@@ -12,51 +12,6 @@ const $ = (id) => document.getElementById(id);
 const GUEST_HISTORY_KEY = 'navigate_guest_history';
 const COMPARISON_HISTORY_KEY = 'navigate_comparison_history';
 
-function ensureHistoryMenuWorks() {
-  const toggle = document.querySelector('[data-menu-toggle]');
-  const nav = document.querySelector('.main-nav');
-
-  if (!toggle || !nav) return;
-
-  // Avoid adding duplicate listeners if shared.js already initialized it.
-  if (toggle.dataset.historyMenuReady === '1') return;
-  toggle.dataset.historyMenuReady = '1';
-
-  let backdrop = document.querySelector('.menu-backdrop');
-
-  if (!backdrop) {
-    backdrop = document.createElement('button');
-    backdrop.type = 'button';
-    backdrop.className = 'menu-backdrop';
-    backdrop.setAttribute('aria-label', 'Close menu');
-    document.body.appendChild(backdrop);
-  }
-
-  const setOpen = (open) => {
-    nav.classList.toggle('open', open);
-    backdrop.classList.toggle('show', open);
-    document.body.classList.toggle('menu-open', open);
-    toggle.classList.toggle('open', open);
-    toggle.setAttribute('aria-expanded', String(open));
-  };
-
-  toggle.addEventListener('click', (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setOpen(!nav.classList.contains('open'));
-  });
-
-  backdrop.addEventListener('click', () => setOpen(false));
-
-  nav.querySelectorAll('a').forEach((link) => {
-    link.addEventListener('click', () => setOpen(false));
-  });
-
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') setOpen(false);
-  });
-}
-
 
 function escapeHtml(v) {
   return String(v ?? '')
@@ -226,7 +181,12 @@ function render(data=records) {
 
         <div class="history-actions">
           <a class="icon-button"
-            href="compare.html?id=${encodeURIComponent(r.id)}">↗</a>
+            href="compare.html?id=${encodeURIComponent(r.id)}"><span class="history-open-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 17L17 7"></path>
+                <path d="M8 7h9v9"></path>
+              </svg>
+            </span></a>
           <button class="icon-button danger"
             data-delete="${escapeHtml(id)}">×</button>
         </div>
@@ -275,7 +235,12 @@ function render(data=records) {
 
       <div class="history-actions">
         <a class="icon-button"
-          href="analyze.html?id=${encodeURIComponent(r.id)}">↗</a>
+          href="analyze.html?id=${encodeURIComponent(r.id)}"><span class="history-open-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 17L17 7"></path>
+                <path d="M8 7h9v9"></path>
+              </svg>
+            </span></a>
         <button class="icon-button danger"
           data-delete="${escapeHtml(id)}">×</button>
       </div>
@@ -521,5 +486,4 @@ window.addEventListener('navigate:language',()=>{
   filter();
 });
 
-ensureHistoryMenuWorks();
 init();
