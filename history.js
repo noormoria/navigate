@@ -487,3 +487,47 @@ window.addEventListener('navigate:language',()=>{
 });
 
 init();
+
+
+// History page menu: force one reliable handler even if another page script/cache is stale.
+function setupHistoryMenuFallback() {
+  const toggle = document.querySelector("[data-menu-toggle]");
+  const nav = document.querySelector(".main-nav");
+  if (!toggle || !nav) return;
+
+  let backdrop = document.querySelector(".menu-backdrop");
+  if (!backdrop) {
+    backdrop = document.createElement("button");
+    backdrop.type = "button";
+    backdrop.className = "menu-backdrop";
+    backdrop.setAttribute("aria-label", "Close menu");
+    document.body.appendChild(backdrop);
+  }
+
+  const setOpen = (open) => {
+    nav.classList.toggle("open", open);
+    backdrop.classList.toggle("show", open);
+    document.body.classList.toggle("menu-open", open);
+    toggle.classList.toggle("open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+  };
+
+  // Capture phase prevents a second stale listener from immediately undoing the click.
+  toggle.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    setOpen(!nav.classList.contains("open"));
+  }, true);
+
+  backdrop.addEventListener("click", () => setOpen(false));
+
+  nav.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", () => setOpen(false));
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") setOpen(false);
+  });
+}
+
+setupHistoryMenuFallback();
