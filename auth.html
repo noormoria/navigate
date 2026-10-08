@@ -177,21 +177,88 @@
         <div id="createFields" class="field-grid" hidden>
 
           <label class="field">
-            <span data-en="Full name *" data-ar="الاسم الكامل *">
-              Full name *
-            </span>
-
+            <span data-en="First name *" data-ar="الاسم الأول *">First name *</span>
             <input
-              id="authFullName"
+              id="authFirstName"
               type="text"
-              maxlength="120"
-              autocomplete="name"
-              data-placeholder-en="Your full name"
-              data-placeholder-ar="الاسم الكامل"
-              placeholder="Your full name"
+              maxlength="80"
+              autocomplete="given-name"
+              data-placeholder-en="e.g. Noor"
+              data-placeholder-ar="مثال: نور"
+              placeholder="e.g. Noor"
             />
           </label>
-</div>
+
+          <label class="field">
+            <span data-en="Last name *" data-ar="اسم العائلة *">Last name *</span>
+            <input
+              id="authLastName"
+              type="text"
+              maxlength="80"
+              autocomplete="family-name"
+              data-placeholder-en="e.g. Moria"
+              data-placeholder-ar="مثال: موريا"
+              placeholder="e.g. Moria"
+            />
+          </label>
+
+          <label class="field">
+            <span data-en="Phone number *" data-ar="رقم الجوال *">Phone number *</span>
+            <input
+              id="authPhone"
+              type="tel"
+              maxlength="30"
+              autocomplete="tel"
+              data-placeholder-en="e.g. +966 5X XXX XXXX"
+              data-placeholder-ar="مثال: +966 5X XXX XXXX"
+              placeholder="e.g. +966 5X XXX XXXX"
+            />
+            <small
+              data-en="Saved in your profile only. Verification is still sent by email."
+              data-ar="يُحفظ ضمن بيانات الحساب فقط، ويستمر التحقق عبر البريد الإلكتروني.">
+              Saved in your profile only. Verification is still sent by email.
+            </small>
+          </label>
+
+          <label class="field">
+            <span data-en="Country *" data-ar="الدولة *">Country *</span>
+            <select id="authCountry">
+              <option value="" selected disabled data-en="Select country" data-ar="اختر الدولة">Select country</option>
+              <option value="Saudi Arabia">Saudi Arabia</option>
+              <option value="United Arab Emirates">United Arab Emirates</option>
+              <option value="Kuwait">Kuwait</option>
+              <option value="Bahrain">Bahrain</option>
+              <option value="Qatar">Qatar</option>
+              <option value="Oman">Oman</option>
+              <option value="Egypt">Egypt</option>
+              <option value="Jordan">Jordan</option>
+              <option value="Lebanon">Lebanon</option>
+              <option value="Iraq">Iraq</option>
+              <option value="Yemen">Yemen</option>
+              <option value="United States">United States</option>
+              <option value="United Kingdom">United Kingdom</option>
+              <option value="Canada">Canada</option>
+              <option value="Australia">Australia</option>
+              <option value="India">India</option>
+              <option value="Pakistan">Pakistan</option>
+              <option value="Philippines">Philippines</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+
+          <label class="field full">
+            <span data-en="Organization (optional)" data-ar="المنظمة (اختياري)">Organization (optional)</span>
+            <input
+              id="authOrganization"
+              type="text"
+              maxlength="150"
+              autocomplete="organization"
+              data-placeholder-en="e.g. University of Jeddah"
+              data-placeholder-ar="مثال: جامعة جدة"
+              placeholder="e.g. University of Jeddah"
+            />
+          </label>
+        </div>
 
         <label class="field" id="emailAuthField">
           <span data-en="Email address *" data-ar="البريد الإلكتروني *">Email address *</span>
