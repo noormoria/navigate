@@ -10,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parent
 MODEL_PATH = BASE_DIR / "navigate_final_churn_model.pkl"
 
 MODEL = joblib.load(MODEL_PATH)
-THRESHOLD = 0.5537127026
+THRESHOLD = 0.5537
 
 app = FastAPI(
     title="NAVIGATE Churn API",
@@ -18,11 +18,11 @@ app = FastAPI(
     description="Python ML API for NAVIGATE customer churn prediction."
 )
 
-# GitHub Pages + local development
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://noormoria.github.io",
+        "https://app.navigateretention.site",
         "http://localhost:5500",
         "http://127.0.0.1:5500",
         "http://localhost:8000",
