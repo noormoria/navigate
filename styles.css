@@ -851,3 +851,60 @@ html[dir='rtl'] .main-nav a>strong{
   height: 18px;
 }
 
+
+/* ===== History controls: compact checkboxes + stacked equal actions ===== */
+.history-selection-tools{
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  gap:10px !important;
+  width:190px !important;
+  min-width:190px !important;
+  align-items:stretch !important;
+}
+
+.history-select-all,
+.history-delete-selected{
+  width:100% !important;
+  min-height:46px !important;
+  box-sizing:border-box !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:9px !important;
+  margin:0 !important;
+}
+
+.history-select-all input,
+.history-row-checkbox{
+  appearance:auto !important;
+  -webkit-appearance:checkbox !important;
+  width:18px !important;
+  height:18px !important;
+  min-width:18px !important;
+  min-height:18px !important;
+  max-width:18px !important;
+  max-height:18px !important;
+  padding:0 !important;
+  margin:0 !important;
+  border-radius:4px !important;
+  flex:0 0 18px !important;
+  accent-color:var(--primary) !important;
+}
+
+.history-row > .history-row-checkbox,
+.history-row .history-row-checkbox{
+  align-self:center !important;
+}
+
+@media(max-width:760px){
+  .history-selection-tools{
+    width:100% !important;
+    min-width:0 !important;
+  }
+
+  .history-select-all,
+  .history-delete-selected{
+    min-height:48px !important;
+  }
+}
+
