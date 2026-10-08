@@ -7,6 +7,9 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
 const $ = (id) => document.getElementById(id);
 
+let cachedCvTextA = "";
+let cachedCvTextB = "";
+
 const STOPWORDS = new Set([
   "and","or","the","a","an","of","to","in","for","with","on","at","by","from","as","is","are","be","this","that",
   "و","في","من","على","إلى","الى","عن","مع","أو","او","التي","الذي","هذه","هذا","خبرة","مهارة","مهارات"
@@ -54,6 +57,20 @@ function criterionTerms(criteria) {
   const terms = [...new Set([...skills, ...uniqueTokens])];
 
   return terms.slice(0, 36);
+}
+
+
+function inferredCriteriaTerms(textA, textB, role = "") {
+  const combined = `${textA || ""} ${textB || ""}`;
+  const roleTerms = criterionTerms(role);
+
+  const skillTerms = SKILL_LEXICON.filter((skill) =>
+    termPresent(combined, skill)
+  );
+
+  const terms = [...new Set([...roleTerms, ...skillTerms])];
+
+  return terms.slice(0, 24);
 }
 
 function termPresent(text, term) {
@@ -319,26 +336,13 @@ $("compareForm")?.addEventListener("submit", async (event) => {
   const statusA = $("candidateAStatus").value;
   const statusB = $("candidateBStatus").value;
 
-  if (!role || !criteria || !fileA || !fileB) {
+  if (!role || (!fileA && !cachedCvTextA) || (!fileB && !cachedCvTextB)) {
     setToast(
       translate(
-        "Complete the role criteria and upload both CVs.",
-        "أكمل متطلبات الوظيفة وارفع السيرتين الذاتيتين."
+        "Enter the role title and upload both CVs.",
+        "أدخل المسمى الوظيفي وارفع السيرتين الذاتيتين."
       ),
       "error"
-    );
-    return;
-  }
-
-  const terms = criterionTerms(criteria);
-
-  if (terms.length < 3) {
-    setToast(
-      translate(
-        "Add more specific role requirements so the comparison has enough criteria.",
-        "أضف متطلبات وظيفية أكثر تحديدًا حتى تكون المقارنة مفيدة."
-      ),
-      "warning"
     );
     return;
   }
@@ -346,10 +350,36 @@ $("compareForm")?.addEventListener("submit", async (event) => {
   try {
     setToast(translate("Reading both CVs...", "جارٍ قراءة السيرتين الذاتيتين..."), "info");
 
-    const [textA, textB] = await Promise.all([
-      readCv(fileA),
-      readCv(fileB),
-    ]);
+    const textA = fileA ? await readCv(fileA) : cachedCvTextA;
+    const textB = fileB ? await readCv(fileB) : cachedCvTextB;
+
+    cachedCvTextA = textA;
+    cachedCvTextB = textB;
+
+    const terms = criteria
+      ? criterionTerms(criteria)
+      : inferredCriteriaTerms(textA, textB, role);
+
+    if (terms.length < 3) {
+      setToast(
+        translate(
+          "Not enough job-related evidence was found for a useful comparison. Add a few requirements and run it again.",
+          "لم يتم العثور على أدلة مهنية كافية لمقارنة مفيدة. أضف بعض المتطلبات ثم أعد التشغيل."
+        ),
+        "warning"
+      );
+      return;
+    }
+
+    if (!criteria) {
+      setToast(
+        translate(
+          "General comparison created. You can now edit the requirements and compare again for a role-specific result.",
+          "تم إنشاء مقارنة عامة. يمكنك الآن تعديل المتطلبات وإعادة المقارنة للحصول على نتيجة أكثر تخصيصًا للوظيفة."
+        ),
+        "info"
+      );
+    }
 
     if (textA.trim().length < 80 || textB.trim().length < 80) {
       throw new Error(
@@ -385,4 +415,21 @@ window.addEventListener("navigate:language", () => {
       "info"
     );
   }
+});
+
+
+$("editCriteriaButton")?.addEventListener("click", () => {
+  const criteria = $("roleCriteria");
+  if (!criteria) return;
+
+  criteria.scrollIntoView({ behavior: "smooth", block: "center" });
+  setTimeout(() => criteria.focus(), 350);
+
+  setToast(
+    translate(
+      "Edit the requirements, then press Compare candidates again. You do not need to upload the CVs again.",
+      "عدّل المتطلبات ثم اضغط مقارنة المرشحين مرة أخرى. لا تحتاج إلى رفع السيرتين من جديد."
+    ),
+    "info"
+  );
 });
