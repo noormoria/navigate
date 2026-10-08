@@ -10,6 +10,53 @@ const selectedIds = new Set();
 
 const $ = (id) => document.getElementById(id);
 const GUEST_HISTORY_KEY = 'navigate_guest_history';
+const COMPARISON_HISTORY_KEY = 'navigate_comparison_history';
+
+function ensureHistoryMenuWorks() {
+  const toggle = document.querySelector('[data-menu-toggle]');
+  const nav = document.querySelector('.main-nav');
+
+  if (!toggle || !nav) return;
+
+  // Avoid adding duplicate listeners if shared.js already initialized it.
+  if (toggle.dataset.historyMenuReady === '1') return;
+  toggle.dataset.historyMenuReady = '1';
+
+  let backdrop = document.querySelector('.menu-backdrop');
+
+  if (!backdrop) {
+    backdrop = document.createElement('button');
+    backdrop.type = 'button';
+    backdrop.className = 'menu-backdrop';
+    backdrop.setAttribute('aria-label', 'Close menu');
+    document.body.appendChild(backdrop);
+  }
+
+  const setOpen = (open) => {
+    nav.classList.toggle('open', open);
+    backdrop.classList.toggle('show', open);
+    document.body.classList.toggle('menu-open', open);
+    toggle.classList.toggle('open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+  };
+
+  toggle.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setOpen(!nav.classList.contains('open'));
+  });
+
+  backdrop.addEventListener('click', () => setOpen(false));
+
+  nav.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => setOpen(false));
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') setOpen(false);
+  });
+}
+
 
 function escapeHtml(v) {
   return String(v ?? '')
@@ -30,6 +77,29 @@ function getGuestHistory() {
 
 function saveGuestHistory(data) {
   localStorage.setItem(GUEST_HISTORY_KEY, JSON.stringify(data));
+}
+
+function getComparisonHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(COMPARISON_HISTORY_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveComparisonHistory(data) {
+  localStorage.setItem(COMPARISON_HISTORY_KEY, JSON.stringify(data));
+}
+
+function isComparison(record) {
+  return record?.record_type === 'comparison' ||
+    String(record?.id || '').startsWith('compare-');
+}
+
+function sortHistory(items) {
+  return [...items].sort(
+    (a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)
+  );
 }
 
 function formatDate(v) {
@@ -112,6 +182,57 @@ function render(data=records) {
 
   $('historyList').innerHTML=data.map(r=>{
     const id = String(r.id);
+
+    if (isComparison(r)) {
+      const scoreA = Math.round(Number(r.score_a || 0));
+      const scoreB = Math.round(Number(r.score_b || 0));
+      const nameA = r.candidate_a_name || 'Candidate A';
+      const nameB = r.candidate_b_name || 'Candidate B';
+      const role = r.role_title || translate('Candidate comparison','مقارنة مرشحين');
+
+      return `<article class="history-row ${selectedIds.has(id) ? 'selected' : ''}">
+        <label class="history-row-select">
+          <input type="checkbox" class="history-row-checkbox"
+            data-select-id="${escapeHtml(id)}"
+            ${selectedIds.has(id) ? 'checked' : ''}/>
+        </label>
+
+        <div class="history-customer">
+          <span class="history-avatar">↔</span>
+          <div>
+            <h3>${escapeHtml(role)}</h3>
+            <p>${escapeHtml(nameA)} · ${escapeHtml(nameB)}</p>
+          </div>
+        </div>
+
+        <div class="history-stat">
+          <small>${translate('Candidate A','المرشح A')}</small>
+          <strong>${scoreA}/100</strong>
+        </div>
+
+        <div class="history-stat">
+          <small>${translate('Candidate B','المرشح B')}</small>
+          <strong>${scoreB}/100</strong>
+        </div>
+
+        <div class="history-level">
+          <span class="risk-badge" data-level="moderate">${translate('Comparison','مقارنة')}</span>
+        </div>
+
+        <div class="history-date">
+          <small>${translate('Compared','تاريخ المقارنة')}</small>
+          <span>${formatDate(r.created_at)}</span>
+        </div>
+
+        <div class="history-actions">
+          <a class="icon-button"
+            href="compare.html?id=${encodeURIComponent(r.id)}">↗</a>
+          <button class="icon-button danger"
+            data-delete="${escapeHtml(id)}">×</button>
+        </div>
+      </article>`;
+    }
+
     const risk=Math.round(Number(r.churn_risk||0)*100);
     const priority=Math.round(Number(r.retention_priority||0));
     const contact=[r.customer_email,r.customer_phone,r.customer_external_id]
@@ -119,13 +240,10 @@ function render(data=records) {
       .join(' · ');
 
     return `<article class="history-row ${selectedIds.has(id) ? 'selected' : ''}">
-      <label class="history-row-select" title="${translate('Select analysis','تحديد التحليل')}">
-        <input
-          type="checkbox"
-          class="history-row-checkbox"
+      <label class="history-row-select">
+        <input type="checkbox" class="history-row-checkbox"
           data-select-id="${escapeHtml(id)}"
-          ${selectedIds.has(id) ? 'checked' : ''}
-        />
+          ${selectedIds.has(id) ? 'checked' : ''}/>
       </label>
 
       <div class="history-customer">
@@ -156,8 +274,10 @@ function render(data=records) {
       </div>
 
       <div class="history-actions">
-        <a class="icon-button" href="analyze.html?id=${encodeURIComponent(r.id)}" title="${translate('Open analysis','فتح التحليل')}">↗</a>
-        <button class="icon-button danger" data-delete="${escapeHtml(id)}" title="${translate('Delete analysis','حذف التحليل')}">×</button>
+        <a class="icon-button"
+          href="analyze.html?id=${encodeURIComponent(r.id)}">↗</a>
+        <button class="icon-button danger"
+          data-delete="${escapeHtml(id)}">×</button>
       </div>
     </article>`;
   }).join('');
@@ -190,23 +310,38 @@ function filter() {
   }
 
   render(
-    records.filter(r=>
-      [r.customer_name,r.customer_email,r.customer_phone,r.customer_external_id,r.company_account_id]
+    records.filter(r=>{
+      const values = isComparison(r)
+        ? [r.role_title,r.candidate_a_name,r.candidate_b_name,r.criteria_text]
+        : [r.customer_name,r.customer_email,r.customer_phone,r.customer_external_id,r.company_account_id];
+
+      return values
         .filter(Boolean)
-        .some(v=>String(v).toLowerCase().includes(q))
-    )
+        .some(v=>String(v).toLowerCase().includes(q));
+    })
   );
 }
 
 async function deleteRecord(id) {
+  const record = records.find(r=>String(r.id)===String(id));
+  const comparison = isComparison(record);
+
   if(!confirm(
     translate(
-      'Delete this saved analysis? This cannot be undone.',
-      'حذف هذا التحليل المحفوظ؟ لا يمكن التراجع عن ذلك.'
+      comparison
+        ? 'Delete this saved comparison? This cannot be undone.'
+        : 'Delete this saved analysis? This cannot be undone.',
+      comparison
+        ? 'حذف هذه المقارنة المحفوظة؟ لا يمكن التراجع عن ذلك.'
+        : 'حذف هذا التحليل المحفوظ؟ لا يمكن التراجع عن ذلك.'
     )
   )) return;
 
-  if (historyScope === 'cloud') {
+  if (comparison) {
+    const next = getComparisonHistory()
+      .filter(r=>String(r.id)!==String(id));
+    saveComparisonHistory(next);
+  } else if (historyScope === 'cloud') {
     const {error}=await supabase
       .from('customer_analyses')
       .delete()
@@ -217,7 +352,8 @@ async function deleteRecord(id) {
       return;
     }
   } else {
-    const next = records.filter(r=>String(r.id)!==String(id));
+    const next = getGuestHistory()
+      .filter(r=>String(r.id)!==String(id));
     saveGuestHistory(next);
   }
 
@@ -226,7 +362,10 @@ async function deleteRecord(id) {
   filter();
 
   setToast(
-    translate('Analysis deleted.','تم حذف التحليل.'),
+    translate(
+      comparison ? 'Comparison deleted.' : 'Analysis deleted.',
+      comparison ? 'تم حذف المقارنة.' : 'تم حذف التحليل.'
+    ),
     'success'
   );
 }
@@ -238,8 +377,8 @@ async function deleteSelected() {
 
   const confirmed = confirm(
     translate(
-      `Delete ${ids.length} selected analyses? This cannot be undone.`,
-      `حذف ${ids.length} من التحليلات المحددة؟ لا يمكن التراجع عن ذلك.`
+      `Delete ${ids.length} selected saved items? This cannot be undone.`,
+      `حذف ${ids.length} من العناصر المحددة؟ لا يمكن التراجع عن ذلك.`
     )
   );
 
@@ -249,16 +388,35 @@ async function deleteSelected() {
   if (button) button.disabled = true;
 
   try {
-    if (historyScope === 'cloud') {
-      const {error}=await supabase
-        .from('customer_analyses')
-        .delete()
-        .in('id', ids);
+    const comparisonIds = ids.filter(id =>
+      isComparison(records.find(r=>String(r.id)===String(id)))
+    );
 
-      if(error) throw error;
-    } else {
-      const next = records.filter(r=>!selectedIds.has(String(r.id)));
-      saveGuestHistory(next);
+    const analysisIds = ids.filter(id => !comparisonIds.includes(id));
+
+    if (comparisonIds.length) {
+      saveComparisonHistory(
+        getComparisonHistory().filter(
+          r=>!comparisonIds.includes(String(r.id))
+        )
+      );
+    }
+
+    if (analysisIds.length) {
+      if (historyScope === 'cloud') {
+        const {error}=await supabase
+          .from('customer_analyses')
+          .delete()
+          .in('id', analysisIds);
+
+        if(error) throw error;
+      } else {
+        saveGuestHistory(
+          getGuestHistory().filter(
+            r=>!analysisIds.includes(String(r.id))
+          )
+        );
+      }
     }
 
     records = records.filter(r=>!selectedIds.has(String(r.id)));
@@ -267,8 +425,8 @@ async function deleteSelected() {
 
     setToast(
       translate(
-        `${ids.length} analyses deleted.`,
-        `تم حذف ${ids.length} من التحليلات.`
+        `${ids.length} saved items deleted.`,
+        `تم حذف ${ids.length} من العناصر المحفوظة.`
       ),
       'success'
     );
@@ -276,8 +434,8 @@ async function deleteSelected() {
     console.error(error);
     setToast(
       error.message || translate(
-        'Could not delete the selected analyses.',
-        'تعذر حذف التحليلات المحددة.'
+        'Could not delete the selected items.',
+        'تعذر حذف العناصر المحددة.'
       ),
       'error'
     );
@@ -309,7 +467,7 @@ async function withTimeout(promise, ms = 2500) {
 async function init() {
   // Always start with local history so the page never gets stuck loading.
   historyScope = 'local';
-  records = getGuestHistory();
+  records = sortHistory([...getGuestHistory(), ...getComparisonHistory()]);
 
   updateScopeMessage();
   render();
@@ -333,7 +491,7 @@ async function init() {
       if (error) throw error;
 
       historyScope = 'cloud';
-      records = data || [];
+      records = sortHistory([...(data || []), ...getComparisonHistory()]);
 
       updateScopeMessage();
       render();
@@ -343,7 +501,7 @@ async function init() {
 
     // Keep local history visible and usable.
     historyScope = 'local';
-    records = getGuestHistory();
+    records = sortHistory([...getGuestHistory(), ...getComparisonHistory()]);
 
     updateScopeMessage();
     render();
@@ -363,4 +521,5 @@ window.addEventListener('navigate:language',()=>{
   filter();
 });
 
+ensureHistoryMenuWorks();
 init();
