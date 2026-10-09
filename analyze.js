@@ -1050,6 +1050,23 @@ $('analysisForm')?.addEventListener('submit', async (event) => {
     return;
   }
 
+  const requiredOperational = ['Tenure', 'TotalSpend', 'LastInteraction'];
+  const invalidOperational = requiredOperational
+    .map(id => $(id))
+    .find(field => !field || !field.value.trim() || !field.checkValidity());
+  if (invalidOperational) {
+    // Step 3 has hidden the operational inputs; reveal them before focusing.
+    $('navigatePrevious')?.click();
+    setToast(
+      translate('Complete the three required operational fields before running the analysis.',
+        'يجب إكمال المؤشرات التشغيلية الثلاثة المطلوبة قبل تشغيل التحليل.'),
+      'error'
+    );
+    invalidOperational.focus?.();
+    invalidOperational.reportValidity?.();
+    return;
+  }
+
   const values = collectValues();
   const validationError = validateValues(values);
 
