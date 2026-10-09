@@ -81,42 +81,9 @@
       </article>
 
       <article class="form-panel">
-        <div class="panel-heading"><div><span class="panel-number">02</span><h2 data-en="Key skills" data-ar="المهارات الأساسية">Key skills</h2></div><span class="model-chip" data-en="Business impact" data-ar="تأثير على الشركة">Business impact</span></div>
-        <p class="skills-intro" data-en="Search and select the customer's key skills. For each selected skill, set how critical that skill is to the company. This affects the Skills Impact score only, not the churn probability." data-ar="ابحثي عن المهارات الأساسية للعميل وحددي مدى أهميتها للشركة. تؤثر هذه الخانة على درجة تأثير المهارات فقط، ولا تغيّر احتمال المغادرة الذي ينتجه المودل.">Search and select the customer's key skills. For each selected skill, set how critical that skill is to the company. This affects the Skills Impact score only, not the churn probability.</p>
-
-        <div class="skills-picker">
-          <label class="field full">
-            <span data-en="Search skills" data-ar="البحث عن مهارة">Search skills</span>
-            <div class="skill-search-wrap">
-              <input id="skillSearch" type="search" autocomplete="off" data-placeholder-en="e.g. Python, SAP, SQL, Leadership..." data-placeholder-ar="مثال: Python أو SAP أو SQL أو Leadership..." placeholder="e.g. Python, SAP, SQL, Leadership..." />
-              <div id="skillSuggestions" class="skill-suggestions" hidden></div>
-            </div>
-          </label>
-          <div id="selectedSkills" class="selected-skills"></div>
-          <p id="skillsEmpty" class="skills-empty" data-en="No skills selected yet." data-ar="لم يتم اختيار مهارات بعد.">No skills selected yet.</p>
-        </div>
-
-        <button type="button" class="secondary-button skill-guide-button" id="skillGuideToggle" aria-expanded="false" data-en="ⓘ Skill strength guide" data-ar="ⓘ دليل أهمية المهارات">ⓘ Skill strength guide</button>
-        <div class="skills-scale-help" id="skillGuidePanel" hidden>
-          <p
-            data-en="What does the skill strength mean? It measures how important that skill is to the company if this person leaves — not how skilled the person is."
-            data-ar="ماذا تعني قوة المهارة؟ هي تقيس مدى أهمية هذه المهارة للشركة إذا غادر هذا الشخص، وليست تقييمًا لمستوى إتقانه للمهارة.">
-            What does the skill strength mean? It measures how important that skill is to the company if this person leaves — not how skilled the person is.
-          </p>
-          <div class="skills-scale-grid">
-            <div class="skill-scale-box"><strong data-en="1 · Low" data-ar="1 · منخفض">1 · Low</strong><span data-en="Limited business impact and relatively easy to replace." data-ar="تأثيرها على العمل محدود ويمكن تعويضها بسهولة نسبيًا.">Limited business impact and relatively easy to replace.</span></div>
-            <div class="skill-scale-box"><strong data-en="2 · Moderate" data-ar="2 · متوسط">2 · Moderate</strong><span data-en="Useful skill, but the company can usually replace or cover it." data-ar="مهارة مفيدة، لكن غالبًا يمكن للشركة تعويضها أو تغطيتها.">Useful skill, but the company can usually replace or cover it.</span></div>
-            <div class="skill-scale-box"><strong data-en="3 · Strong" data-ar="3 · قوي">3 · Strong</strong><span data-en="Important to the role or team and its loss would be noticeable." data-ar="مهمة للدور أو الفريق، وفقدانها سيكون ملحوظًا.">Important to the role or team and its loss would be noticeable.</span></div>
-            <div class="skill-scale-box"><strong data-en="4 · Very strong" data-ar="4 · قوي جدًا">4 · Very strong</strong><span data-en="Hard to replace and has high business impact." data-ar="يصعب تعويضها ولها تأثير مرتفع على العمل.">Hard to replace and has high business impact.</span></div>
-            <div class="skill-scale-box"><strong data-en="5 · Critical" data-ar="5 · حرج">5 · Critical</strong><span data-en="Rare or core skill; losing it could strongly affect operations or results." data-ar="مهارة نادرة أو أساسية، وقد يؤثر فقدانها بشكل كبير على العمليات أو النتائج.">Rare or core skill; losing it could strongly affect operations or results.</span></div>
-          </div>
-        </div>
-      </article>
-
-      <article class="form-panel">
         <div class="panel-heading">
           <div>
-            <span class="panel-number">03</span>
+            <span class="panel-number">02</span>
             <h2 data-en="Operational signals" data-ar="المؤشرات التشغيلية">Operational signals</h2>
           </div>
           <span class="model-chip" data-en="Python model inputs" data-ar="مدخلات نموذج Python">Python model inputs</span>
@@ -234,6 +201,39 @@
 
 
       </article>
+      <article class="form-panel">
+        <div class="panel-heading"><div><span class="panel-number">03</span><h2 data-en="Key skills" data-ar="المهارات الأساسية">Key skills</h2></div><span class="model-chip" data-en="Business impact" data-ar="تأثير على الشركة">Business impact</span></div>
+        <p class="skills-intro" data-en="Search and select the customer's key skills. For each selected skill, set how critical that skill is to the company. This affects the Skills Impact score only, not the churn probability." data-ar="ابحثي عن المهارات الأساسية للعميل وحددي مدى أهميتها للشركة. تؤثر هذه الخانة على درجة تأثير المهارات فقط، ولا تغيّر احتمال المغادرة الذي ينتجه المودل.">Search and select the customer's key skills. For each selected skill, set how critical that skill is to the company. This affects the Skills Impact score only, not the churn probability.</p>
+
+        <div class="skills-picker">
+          <label class="field full">
+            <span data-en="Search skills" data-ar="البحث عن مهارة">Search skills</span>
+            <div class="skill-search-wrap">
+              <input id="skillSearch" type="search" autocomplete="off" data-placeholder-en="e.g. Python, SAP, SQL, Leadership..." data-placeholder-ar="مثال: Python أو SAP أو SQL أو Leadership..." placeholder="e.g. Python, SAP, SQL, Leadership..." />
+              <div id="skillSuggestions" class="skill-suggestions" hidden></div>
+            </div>
+          </label>
+          <div id="selectedSkills" class="selected-skills"></div>
+          <p id="skillsEmpty" class="skills-empty" data-en="No skills selected yet." data-ar="لم يتم اختيار مهارات بعد.">No skills selected yet.</p>
+        </div>
+
+        <button type="button" class="secondary-button skill-guide-button" id="skillGuideToggle" aria-expanded="false" data-en="ⓘ Skill strength guide" data-ar="ⓘ دليل أهمية المهارات">ⓘ Skill strength guide</button>
+        <div class="skills-scale-help" id="skillGuidePanel" hidden>
+          <p
+            data-en="What does the skill strength mean? It measures how important that skill is to the company if this person leaves — not how skilled the person is."
+            data-ar="ماذا تعني قوة المهارة؟ هي تقيس مدى أهمية هذه المهارة للشركة إذا غادر هذا الشخص، وليست تقييمًا لمستوى إتقانه للمهارة.">
+            What does the skill strength mean? It measures how important that skill is to the company if this person leaves — not how skilled the person is.
+          </p>
+          <div class="skills-scale-grid">
+            <div class="skill-scale-box"><strong data-en="1 · Low" data-ar="1 · منخفض">1 · Low</strong><span data-en="Limited business impact and relatively easy to replace." data-ar="تأثيرها على العمل محدود ويمكن تعويضها بسهولة نسبيًا.">Limited business impact and relatively easy to replace.</span></div>
+            <div class="skill-scale-box"><strong data-en="2 · Moderate" data-ar="2 · متوسط">2 · Moderate</strong><span data-en="Useful skill, but the company can usually replace or cover it." data-ar="مهارة مفيدة، لكن غالبًا يمكن للشركة تعويضها أو تغطيتها.">Useful skill, but the company can usually replace or cover it.</span></div>
+            <div class="skill-scale-box"><strong data-en="3 · Strong" data-ar="3 · قوي">3 · Strong</strong><span data-en="Important to the role or team and its loss would be noticeable." data-ar="مهمة للدور أو الفريق، وفقدانها سيكون ملحوظًا.">Important to the role or team and its loss would be noticeable.</span></div>
+            <div class="skill-scale-box"><strong data-en="4 · Very strong" data-ar="4 · قوي جدًا">4 · Very strong</strong><span data-en="Hard to replace and has high business impact." data-ar="يصعب تعويضها ولها تأثير مرتفع على العمل.">Hard to replace and has high business impact.</span></div>
+            <div class="skill-scale-box"><strong data-en="5 · Critical" data-ar="5 · حرج">5 · Critical</strong><span data-en="Rare or core skill; losing it could strongly affect operations or results." data-ar="مهارة نادرة أو أساسية، وقد يؤثر فقدانها بشكل كبير على العمليات أو النتائج.">Rare or core skill; losing it could strongly affect operations or results.</span></div>
+          </div>
+        </div>
+      </article>
+
       <div class="navigate-step-actions"><button class="secondary-button" type="button" id="navigatePrevious" hidden data-en="Previous" data-ar="السابق">Previous</button><button class="primary-button" type="button" id="navigateNext" data-en="Next step" data-ar="الخطوة التالية">Next step</button><button class="primary-button analyze-button" type="submit" id="navigateSubmit" hidden>
           <span data-en="Run customer analysis" data-ar="تشغيل تحليل العميل">Run customer analysis</span>
           <span class="button-arrow">↗</span>
