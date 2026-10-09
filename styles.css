@@ -949,3 +949,29 @@ html[dir="rtl"] body[data-page="about"] .about-hero h1 {
 }
 .main-nav .menu-account-link .account-dot {background:#fff !important; flex:none;}
 .main-nav .menu-account-link:focus-visible {outline:3px solid var(--primary2);outline-offset:3px;}
+
+/* High-contrast login call-to-action in the fullscreen menu. */
+.main-nav a.menu-account-link,
+.main-nav a.menu-account-link:link,
+.main-nav a.menu-account-link:visited,
+.main-nav a.menu-account-link:hover,
+.main-nav a.menu-account-link:focus-visible {
+  color: #ffffff !important;
+  opacity: 1 !important;
+  font-size: 21px !important;
+  font-weight: 800 !important;
+  line-height: 1.4 !important;
+  min-height: 68px !important;
+}
+.main-nav a.menu-account-link > span:not(.account-dot) {
+  color: #ffffff !important;
+  opacity: 1 !important;
+  font-size: inherit !important;
+  font-weight: 800 !important;
+  line-height: inherit !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+.main-nav a.menu-account-link .account-dot {
+  background: #ffffff !important;
+  opacity: 1 !important;
+}
