@@ -1012,3 +1012,31 @@ html[dir="rtl"] body[data-page="about"] .about-hero h1 {
   .header-inner > .header-actions .utility-button {padding-inline: 8px}
   .header-inner > .header-actions .account-button {max-width: 46px; padding-inline: 10px}
 }
+
+/* Mobile header final layout: menu + brand together on left, utilities at far right. */
+@media (max-width: 760px) {
+  .header-inner,
+  html[dir="rtl"] .header-inner {
+    direction: ltr !important;
+    grid-template-columns: auto auto minmax(0, 1fr) !important;
+    column-gap: 9px !important;
+  }
+  .header-inner > .menu-toggle {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    justify-self: start !important;
+  }
+  .header-inner > .brand {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    justify-self: start !important;
+    margin: 0 !important;
+    gap: 7px !important;
+  }
+  .header-inner > .header-actions {
+    grid-column: 3 !important;
+    grid-row: 1 !important;
+    justify-self: end !important;
+    margin-left: auto !important;
+  }
+}
