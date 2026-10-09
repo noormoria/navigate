@@ -900,3 +900,10 @@ html[dir='rtl'] .main-nav a>strong{
 #riskFactors .factor-explained p{margin:0;line-height:1.75}
 #riskFactors .factor-review{margin-top:12px!important;padding-top:11px;border-top:1px solid var(--line);color:var(--text)}
 #riskFactors .factor-review strong{color:var(--primary)}
+
+/* Positive signal explanations use the same readable card pattern. */
+#retentionSignals .factor-explained{display:block;padding:17px 19px;background:var(--surface2);border:1px solid var(--line);border-radius:14px}
+#retentionSignals .factor-title{display:block;margin-bottom:8px;color:var(--deep);font-size:.96rem}
+#retentionSignals .factor-explained p{margin:0;line-height:1.75}
+#retentionSignals .factor-review{margin-top:12px!important;padding-top:11px;border-top:1px solid var(--line);color:var(--text)}
+#retentionSignals .factor-review strong{color:var(--primary)}
