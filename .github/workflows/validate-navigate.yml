@@ -1,0 +1,114 @@
+name: Validate NAVIGATE branch
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          set -eu
+          for file in *.js; do node --check "$file"; done
+      - name: HTML and workflow smoke assertions
+        run: |
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          class Check(HTMLParser):
+              def __init__(self): super().__init__();self.ids=set();self.duplicates=[];self.bad_lang=[]
+              def handle_starttag(self,tag,attrs):
+                  a=dict(attrs)
+                  if 'id' in a:
+                      if a['id'] in self.ids:self.duplicates.append(a['id'])
+                      self.ids.add(a['id'])
+                  if ('data-en' in a)!=('data-ar' in a):self.bad_lang.append((tag,a.get('id')))
+          for f in Path('.').glob('*.html'):
+              c=Check();c.feed(f.read_text(encoding='utf-8'))
+              assert not c.duplicates,(str(f),'duplicate IDs',c.duplicates)
+              assert not c.bad_lang,(str(f),'incomplete translations',c.bad_lang)
+          a=Path('analyze.html').read_text(encoding='utf-8')
+          for id in ('analysisForm','navigateNext','navigatePrevious','navigateSubmit','resultsSection','skillGuideToggle','skillGuidePanel'):
+              assert f'id="{id}"' in a,id
+          j=Path('analyze.js').read_text(encoding='utf-8')
+          assert 'sameCustomer' in j and '.update(row)' in j
+          h=Path('history.js').read_text(encoding='utf-8')
+          assert 'consolidateCustomers' in h and "Last updated" in h
+          print('HTML and workflow assertions passed')
+          PY
+      - name: Check deployed backend and Supabase auth health (no database writes)
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request, time
+          backend='https://navigate-efxe.onrender.com'
+          supabase='https://ixrpgrpbthllzxgvyhor.supabase.co'
+          def request(url,data=None,headers=None):
+              req=urllib.request.Request(url,data=data,headers=headers or {},method='POST' if data else 'GET')
+              with urllib.request.urlopen(req,timeout=95) as resp:
+                  return resp.status,json.loads(resp.read().decode())
+          last=None
+          for attempt in range(3):
+              try:
+                  status,payload=request(backend+'/health')
+                  assert status==200 and payload.get('ok') is True,(status,payload)
+                  print('Backend health: PASS')
+                  last=None
+                  break
+              except Exception as error:
+                  last=error
+                  if attempt<2: time.sleep(8)
+          if last: raise RuntimeError('Backend health failed: '+str(last))
+          sample=dict(tenure=24,total_spend=650,last_interaction=12,usage_frequency=13,support_calls=2,payment_delay=0,subscription_type=None,contract_length=None)
+          status,payload=request(backend+'/predict',json.dumps(sample).encode(),{'Content-Type':'application/json','Origin':'https://app.navigateretention.site'})
+          p=payload.get('churn_probability')
+          assert status==200 and isinstance(p,(int,float)) and 0<=p<=1 and 0<payload.get('decision_threshold',0)<1,(status,payload)
+          print('Backend predict: PASS (valid probability and threshold)')
+          from pathlib import Path
+          import re
+          config=Path('supabase-client.js').read_text()
+          public_key=re.search(r'const SUPABASE_PUBLISHABLE_KEY = "([^"]+)";', config).group(1)
+          status,payload=request(supabase+'/auth/v1/health',headers={'apikey':public_key})
+          assert status==200,(status,payload)
+          print('Supabase Auth health: PASS (does NOT test authenticated database CRUD or RLS)')
+          PY
+      - name: Chromium browser smoke test
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+          python3 -m http.server 8000 >/tmp/navigate-server.log 2>&1 &
+          cat > /tmp/navigate-smoke.cjs <<'JS'
+          const { chromium }=require(process.cwd()+'/node_modules/playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage();
+            const errors=[];
+            page.on('pageerror',e=>errors.push(String(e)));
+            for (const route of ['index.html','analyze.html','compare.html','history.html','about.html']){
+              await page.goto('http://127.0.0.1:8000/'+route,{waitUntil:'domcontentloaded'});
+              await page.waitForTimeout(800);
+              if (!await page.locator('body').count())throw Error('Blank '+route);
+            }
+            await page.goto('http://127.0.0.1:8000/analyze.html');
+            await page.waitForTimeout(800);
+            const next=page.locator('#navigateNext');
+            if(!(await next.isVisible()))throw Error('Wizard next missing');
+            await page.locator('#customerName').fill('Test Customer');
+            await next.click();
+            await page.waitForTimeout(100);
+            if(!(await page.locator('#skillGuideToggle').isVisible()))throw Error('Skill step failed');
+            await page.locator('#skillGuideToggle').click();
+            if(!(await page.locator('#skillGuidePanel').isVisible()))throw Error('Skill guide failed');
+            await page.locator('#navigateNext').click();
+            if(!(await page.locator('#navigateSubmit').isVisible()))throw Error('Run step failed');
+            if(errors.length)throw Error(errors.join('\n').slice(0,1500));
+            await browser.close();
+            console.log('Browser navigation, wizard and guide smoke passed');
+          })().catch(e=>{console.error(e);process.exit(1)});
+          JS
+          node /tmp/navigate-smoke.cjs

@@ -63,6 +63,7 @@
 
   <section class="analysis-layout">
     <form id="analysisForm" class="analysis-form">
+      <div class="navigate-step-header"><p class="eyebrow" data-en="GUIDED CUSTOMER ANALYSIS" data-ar="تحليل العميل خطوة بخطوة">GUIDED CUSTOMER ANALYSIS</p><h2 id="navigateStepTitle">Customer profile</h2><div class="navigate-step-progress"><span id="navigateStepProgress"></span></div><p id="navigateStepCount" aria-live="polite"></p></div>
       <article class="form-panel">
         <div class="panel-heading"><div><span class="panel-number">01</span><h2 data-en="Customer profile" data-ar="بيانات العميل">Customer profile</h2></div><span class="required-note" data-en="* Required" data-ar="* مطلوب">* Required</span></div>
         <label class="field full"><span data-en="Customer name *" data-ar="اسم العميل *">Customer name *</span><input id="customerName" type="text" maxlength="120" required placeholder="e.g. Ahmed Alharbi" data-placeholder-en="e.g. Ahmed Alharbi" data-placeholder-ar="مثال: أحمد الحربي" /></label>
@@ -95,7 +96,8 @@
           <p id="skillsEmpty" class="skills-empty" data-en="No skills selected yet." data-ar="لم يتم اختيار مهارات بعد.">No skills selected yet.</p>
         </div>
 
-        <div class="skills-scale-help">
+        <button type="button" class="secondary-button skill-guide-button" id="skillGuideToggle" aria-expanded="false" data-en="ⓘ Skill strength guide" data-ar="ⓘ دليل أهمية المهارات">ⓘ Skill strength guide</button>
+        <div class="skills-scale-help" id="skillGuidePanel" hidden>
           <p
             data-en="What does the skill strength mean? It measures how important that skill is to the company if this person leaves — not how skilled the person is."
             data-ar="ماذا تعني قوة المهارة؟ هي تقيس مدى أهمية هذه المهارة للشركة إذا غادر هذا الشخص، وليست تقييمًا لمستوى إتقانه للمهارة.">
@@ -228,18 +230,19 @@
           </label>
         </div>
 
-        <div id="rangeWarning" class="range-warning" hidden></div>
+        
 
-        <button class="primary-button analyze-button" type="submit">
+
+      </article>
+      <div class="navigate-step-actions"><button class="secondary-button" type="button" id="navigatePrevious" hidden data-en="Previous" data-ar="السابق">Previous</button><button class="primary-button" type="button" id="navigateNext" data-en="Next step" data-ar="الخطوة التالية">Next step</button><button class="primary-button analyze-button" type="submit" id="navigateSubmit" hidden>
           <span data-en="Run customer analysis" data-ar="تشغيل تحليل العميل">Run customer analysis</span>
           <span class="button-arrow">↗</span>
-        </button>
-      </article>
+        </button></div>
     </form>
 
     <aside class="analysis-side-note">
       <span class="eyebrow" data-en="MEASURABLE BY DESIGN" data-ar="عوامل قابلة للقياس">MEASURABLE BY DESIGN</span>
-      <h3 data-en="Eight operational signals tied to measurable customer behavior." data-ar="ثمانية مؤشرات تشغيلية مرتبطة بسلوك عميل قابل للقياس.">Eight operational signals tied to measurable customer behavior.</h3>
+      <h3 data-en="Six numeric inputs plus optional customer context." data-ar="ستة مدخلات رقمية مع بيانات إضافية اختيارية عن العميل.">Eight operational signals tied to measurable customer behavior.</h3>
       <p data-en="The model does not use customer name, email, phone number, notes, gender, or other identity fields." data-ar="النموذج لا يستخدم اسم العميل أو بريده أو جواله أو ملاحظاته أو جنسه أو أي بيانات تعريفية أخرى.">The model does not use customer name, email, phone number, notes, gender, or other identity fields.</p>
     </aside>
   </section>
@@ -265,7 +268,7 @@
         <div class="card-heading-row"><div><span class="eyebrow" data-en="RISK POSITION" data-ar="موضع الخطر">RISK POSITION</span><h3 data-en="Estimated churn risk" data-ar="خطر المغادرة المتوقع">Estimated churn risk</h3></div><span id="riskCategoryBadge" class="risk-badge">—</span></div>
         <div class="risk-gauge-wrap"><div class="risk-gauge" id="riskGauge"><div class="risk-gauge-inner"><strong id="gaugeRisk">0%</strong><span data-en="estimated risk" data-ar="خطر متوقع">estimated risk</span></div></div><div class="risk-copy"><p id="riskDecisionText"></p><div class="threshold-track"><div class="threshold-gradient"></div><b id="riskMarker"></b></div><div class="threshold-legend"><span data-en="Lower risk" data-ar="خطر أقل">Lower risk</span><span data-en="Higher risk" data-ar="خطر أعلى">Higher risk</span></div><p id="riskPositionExplanation" class="chart-note"></p></div></div>
       </article>
-      <article class="visual-card"><div class="card-heading-row"><div><span class="eyebrow" data-en="SIGNAL PROFILE" data-ar="ملف الإشارات">SIGNAL PROFILE</span><h3 data-en="Customer behavior snapshot" data-ar="ملخص سلوك العميل">Customer behavior snapshot</h3></div></div><div id="signalChart" class="signal-chart"></div><p class="chart-note" data-en="This view summarizes the customer’s current activity, revenue, usage, support, and payment signals on a common 0–100 scale." data-ar="يلخّص هذا العرض مؤشرات العميل الحالية للنشاط والإيراد والاستخدام والدعم والدفع على مقياس موحد من 0 إلى 100.">This view summarizes the customer’s current activity, revenue, usage, support, and payment signals on a common 0–100 scale.</p></article>
+      <article class="visual-card"><div class="card-heading-row"><div><span class="eyebrow" data-en="SIGNAL PROFILE" data-ar="ملف الإشارات">SIGNAL PROFILE</span><h3 data-en="Customer behavior snapshot" data-ar="ملخص سلوك العميل">Customer behavior snapshot</h3></div></div><div id="signalChart" class="signal-chart"></div><p class="chart-note" data-en="Illustrative scores based on reference ranges, not model feature importance. Missing optional signals are omitted." data-ar="درجات وصفية وفق نطاقات مرجعية، وليست أهمية المتغيرات في النموذج. تُستبعد المؤشرات الاختيارية غير المتوفرة.">This view summarizes the customer’s current activity, revenue, usage, support, and payment signals on a common 0–100 scale.</p></article>
     </div>
 
     <div class="analytics-grid">
@@ -288,7 +291,7 @@
           </div>
         </div>
         <div id="sensitivityChart" class="sensitivity-chart"></div>
-        <p id="sensitivityExplanation" class="chart-note" data-en="This chart shows how the customer’s churn risk changes when only the time since last activity changes. A steeper line means inactivity has a stronger effect on this customer’s risk." data-ar="يوضح هذا الرسم كيف يتغير خطر مغادرة العميل عند تغيير المدة منذ آخر نشاط فقط. كلما كان الخط أكثر ميلًا كان تأثير عدم النشاط على خطر هذا العميل أقوى.">This chart shows how the customer’s churn risk changes when only the time since last activity changes. A steeper line means inactivity has a stronger effect on this customer’s risk.</p>
+        <p id="sensitivityExplanation" class="chart-note" data-en="This chart shows how the customer’s churn risk changes when only the time since last activity changes. These are model predictions under alternative inactivity values, not proof that changing inactivity causes the risk change." data-ar="يوضح هذا الرسم كيف يتغير خطر مغادرة العميل عند تغيير المدة منذ آخر نشاط فقط. هذه توقعات النموذج عند تغيير مدة عدم النشاط افتراضيًا، وليست إثباتًا لعلاقة سببية.">This chart shows how the customer’s churn risk changes when only the time since last activity changes. A steeper line means inactivity has a stronger effect on this customer’s risk.</p>
       </article>
     </div>
 
@@ -296,7 +299,7 @@
       <article class="insight-card decision-card"><span class="eyebrow" data-en="DECISION SUMMARY" data-ar="ملخص القرار">DECISION SUMMARY</span><h3 id="decisionTitle">—</h3><p id="decisionSummary"></p><div class="decision-meta"><span><small data-en="Risk level" data-ar="مستوى الخطر">Risk level</small><b id="summaryRiskLevel">—</b></span><span><small data-en="Priority" data-ar="الأولوية">Priority</small><b id="summaryPriority">—</b></span><span><small data-en="Customer segment" data-ar="شريحة العميل">Customer segment</small><b id="summarySegment">—</b></span></div></article>
       <article class="insight-card"><span class="eyebrow" data-en="FACTORS TO REVIEW" data-ar="عوامل للمراجعة">FACTORS TO REVIEW</span><div id="riskFactors" class="factor-list"></div></article>
       <article class="insight-card"><span class="eyebrow" data-en="RETENTION SIGNALS" data-ar="إشارات داعمة للاحتفاظ">RETENTION SIGNALS</span><div id="retentionSignals" class="factor-list positive"></div></article>
-      <article class="insight-card"><span class="eyebrow" data-en="RECOMMENDED ACTIONS" data-ar="الإجراءات المقترحة">RECOMMENDED ACTIONS</span><div id="recommendedActions" class="action-list"></div></article>
+      <article class="insight-card"><span class="eyebrow" data-en="ACTION PLAN · VERIFY BEFORE APPLYING" data-ar="خطة إجراءات · تحقق قبل التنفيذ">RECOMMENDED ACTIONS</span><div id="recommendedActions" class="action-list"></div></article>
       <article class="insight-card"><span class="eyebrow" data-en="FOLLOW-UP PLAN" data-ar="خطة المتابعة">FOLLOW-UP PLAN</span><div id="followUpPlan" class="action-list"></div></article>
       <article class="insight-card">
         <span class="eyebrow" data-en="KEY SKILLS IMPACT" data-ar="تأثير المهارات الأساسية">KEY SKILLS IMPACT</span>

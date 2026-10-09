@@ -51,9 +51,23 @@ function isComparison(record) {
     String(record?.id || '').startsWith('compare-');
 }
 
+function consolidateCustomers(items) {
+  const seen = new Set();
+  return sortHistory(items).filter(record => {
+    if (isComparison(record)) return true;
+    const external = String(record.customer_external_id || '').trim().toLocaleLowerCase();
+    const name = String(record.customer_name || '').trim().replace(/\s+/g,' ').toLocaleLowerCase();
+    const identity = external ? 'id:' + external : 'name:' + name;
+    if (!name && !external) return true;
+    if (seen.has(identity)) return false;
+    seen.add(identity);
+    return true;
+  });
+}
+
 function sortHistory(items) {
   return [...items].sort(
-    (a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)
+    (a, b) => new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0)
   );
 }
 
@@ -175,8 +189,8 @@ function render(data=records) {
         </div>
 
         <div class="history-date">
-          <small>${translate('Compared','تاريخ المقارنة')}</small>
-          <span>${formatDate(r.created_at)}</span>
+          <small>${translate('Last updated','آخر تحديث')}</small>
+          <span>${formatDate(r.updated_at || r.created_at)}</span>
         </div>
 
         <div class="history-actions">
@@ -229,8 +243,8 @@ function render(data=records) {
       </div>
 
       <div class="history-date">
-        <small>${translate('Analyzed','تاريخ التحليل')}</small>
-        <span>${formatDate(r.created_at)}</span>
+        <small>${translate('Last updated','آخر تحديث')}</small>
+        <span>${formatDate(r.updated_at || r.created_at)}</span>
       </div>
 
       <div class="history-actions">
@@ -432,7 +446,7 @@ async function withTimeout(promise, ms = 2500) {
 async function init() {
   // Always start with local history so the page never gets stuck loading.
   historyScope = 'local';
-  records = sortHistory([...getGuestHistory(), ...getComparisonHistory()]);
+  records = consolidateCustomers([...getGuestHistory(), ...getComparisonHistory()]);
 
   updateScopeMessage();
   render();
@@ -456,7 +470,7 @@ async function init() {
       if (error) throw error;
 
       historyScope = 'cloud';
-      records = sortHistory([...(data || []), ...getComparisonHistory()]);
+      records = consolidateCustomers([...(data || []), ...getComparisonHistory()]);
 
       updateScopeMessage();
       render();

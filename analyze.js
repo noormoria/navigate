@@ -26,6 +26,7 @@ const MODEL_INFO = {
   }
 };
 
+// Model outputs are risk estimates; action plans must be verified against real customer records.
 const REQUIRED_FEATURE_IDS = ['Tenure', 'TotalSpend', 'LastInteraction'];
 const OPTIONAL_NUMERIC_IDS = ['UsageFrequency', 'SupportCalls', 'PaymentDelay'];
 
@@ -203,17 +204,30 @@ function getGuestHistory() {
   }
 }
 
+function sameCustomer(a, b) {
+  const externalA = String(a.customer_external_id || '').trim().toLocaleLowerCase();
+  const externalB = String(b.customer_external_id || '').trim().toLocaleLowerCase();
+  if (externalA && externalB) return externalA === externalB;
+  if (externalA || externalB) return false;
+  const nameA = String(a.customer_name || '').trim().replace(/\s+/g, ' ').toLocaleLowerCase();
+  const nameB = String(b.customer_name || '').trim().replace(/\s+/g, ' ').toLocaleLowerCase();
+  return Boolean(nameA && nameA === nameB);
+}
+
 function saveGuestAnalysis(payload) {
   const records = getGuestHistory();
+  const now = new Date().toISOString();
+  const existing = records.find(record => sameCustomer(record, payload));
   const record = {
+    ...existing,
     ...payload,
-    id: `guest-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    created_at: new Date().toISOString(),
+    id: existing?.id || `guest-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    created_at: existing?.created_at || now,
+    updated_at: now,
     storage_scope: 'local'
   };
-
-  records.unshift(record);
-  localStorage.setItem(GUEST_HISTORY_KEY, JSON.stringify(records.slice(0, 100)));
+  const next = [record, ...records.filter(item => !sameCustomer(item, payload))];
+  localStorage.setItem(GUEST_HISTORY_KEY, JSON.stringify(next.slice(0, 100)));
   return record;
 }
 
@@ -505,8 +519,8 @@ function factorData(values, ind) {
 
   if (!risk.length) {
     risk.push({
-      en: 'No single warning signal dominates the profile. The churn score appears to come from the combined customer pattern.',
-      ar: 'لا توجد إشارة تحذير منفردة تسيطر على الملف. يبدو أن خطر المغادرة ناتج عن مجموعة المؤشرات معًا.'
+      en: 'No single warning signal dominates the profile. The model returned a combined risk estimate; no single reason can be confirmed from these inputs alone.',
+      ar: 'لا توجد إشارة تحذير منفردة تسيطر على الملف. قدّر النموذج الخطر من المدخلات مجتمعة، ولا يمكن تأكيد سبب واحد اعتمادًا عليها فقط.'
     });
   }
 
@@ -585,12 +599,17 @@ function recommendationData(probability, values, ind, threshold) {
     });
   }
 
-  if (ind.valueIndex >= 70 && probability >= 0.50) {
+  if (values.TotalSpend >= 1000 && probability >= 0.50) {
     actions.push({
-      en: 'Because this account has strong revenue value, consider a tailored retention offer only after the root cause is identified.',
-      ar: 'لأن إيراد هذا الحساب مرتفع، فكّر في عرض احتفاظ مخصص بعد تحديد السبب الحقيقي للمشكلة، وليس قبله.'
+      en: 'Review account value and the verified reason for leaving before considering an offer. Apply only approved offers within the retention budget.',
+      ar: 'راجع قيمة الحساب والسبب المؤكد لاحتمال المغادرة قبل التفكير في عرض احتفاظ. استخدم فقط العروض المعتمدة وضمن الميزانية.'
     });
   }
+
+  followUp.push({
+    en: 'Assign every action to an account owner, document a case or ticket ID, record a due date, and verify the customer issue before marking it resolved.',
+    ar: 'أسند كل إجراء لمسؤول الحساب، ووثّق رقم الحالة أو التذكرة وموعد التنفيذ، وتحقق من المشكلة قبل تسجيلها كمحلولة.'
+  });
 
   followUp.push({
     en: 'After each action, record whether activity, usage, support demand, or payment behavior improved, then run the analysis again.',
@@ -618,96 +637,39 @@ function renderList(container, items, numbered = false) {
 }
 
 function renderSignalChart(values) {
-  const items = [
-    {
-      en: 'Tenure',
-      ar: 'مدة التعامل',
-      v: normalize(values.Tenure, range('Tenure').min, range('Tenure').max)
-    },
-    {
-      en: 'Revenue',
-      ar: 'الإيراد',
-      v: normalize(values.TotalSpend, range('TotalSpend').min, range('TotalSpend').max)
-    },
-    {
-      en: 'Recency',
-      ar: 'حداثة النشاط',
-      v: inverseNormalize(values.LastInteraction, range('LastInteraction').min, range('LastInteraction').max)
-    },
-    {
-      en: 'Usage',
-      ar: 'الاستخدام',
-      v: values.UsageFrequency === null
-        ? 50
-        : normalize(values.UsageFrequency, range('UsageFrequency').min, range('UsageFrequency').max)
-    },
-    {
-      en: 'Support health',
-      ar: 'سلامة الدعم',
-      v: values.SupportCalls === null
-        ? 50
-        : inverseNormalize(values.SupportCalls, range('SupportCalls').min, range('SupportCalls').max)
-    },
-    {
-      en: 'Payment health',
-      ar: 'سلامة الدفع',
-      v: values.PaymentDelay === null
-        ? 50
-        : inverseNormalize(values.PaymentDelay, range('PaymentDelay').min, range('PaymentDelay').max)
-    }
+  const specs = [
+    ['Tenure','Tenure','مدة التعامل',false],
+    ['TotalSpend','Revenue','الإيراد',false],
+    ['LastInteraction','Activity recency','حداثة النشاط',true],
+    ['UsageFrequency','Usage','الاستخدام',false],
+    ['SupportCalls','Support health','سلامة الدعم',true],
+    ['PaymentDelay','Payment health','سلامة الدفع',true]
   ];
-
-  $('signalChart').innerHTML = items
-    .map((item) => `
-      <div class="signal-row">
-        <div class="signal-meta">
-          <span>${getLanguage() === 'ar' ? item.ar : item.en}</span>
-          <strong>${Math.round(item.v)}</strong>
-        </div>
-        <div class="signal-track"><i style="width:${Math.round(item.v)}%"></i></div>
-      </div>
-    `)
-    .join('');
+  const available = specs.filter(([key]) => values[key] !== null && Number.isFinite(values[key]));
+  const rows = available.map(([key,en,ar,inverse]) => {
+    const r = range(key);
+    const value = inverse ? inverseNormalize(values[key],r.min,r.max) : normalize(values[key],r.min,r.max);
+    const score = Math.round(value);
+    return `<div class="navigate-bar-row"><span class="navigate-bar-label">${getLanguage()==='ar'?ar:en}</span><div class="navigate-bar-track"><span style="width:${score}%"></span></div><strong>${score}</strong></div>`;
+  }).join('');
+  const host = $('signalChart');
+  host.innerHTML = `<div class="navigate-bar-chart" role="img" aria-label="${translate('Customer signal bar chart','رسم أعمدة مؤشرات العميل')}"><div class="navigate-bar-scale"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>${rows}</div>`;
 }
 
 function renderBenchmarkChart(values) {
   const specs = [
-    { key: 'Tenure', en: 'Relationship', ar: 'العلاقة', inverse: false },
-    { key: 'TotalSpend', en: 'Revenue', ar: 'الإيراد', inverse: false },
-    { key: 'LastInteraction', en: 'Activity', ar: 'النشاط', inverse: true },
-    { key: 'UsageFrequency', en: 'Usage', ar: 'الاستخدام', inverse: false },
-    { key: 'SupportCalls', en: 'Support health', ar: 'سلامة الدعم', inverse: true },
-    { key: 'PaymentDelay', en: 'Payment health', ar: 'سلامة الدفع', inverse: true }
+    ['Tenure','Relationship','العلاقة',false],
+    ['TotalSpend','Revenue','الإيراد',false],
+    ['LastInteraction','Activity','النشاط',true],
+    ['UsageFrequency','Usage','الاستخدام',false],
+    ['SupportCalls','Support health','سلامة الدعم',true],
+    ['PaymentDelay','Payment health','سلامة الدفع',true]
   ];
-
-  const rows = specs.map((spec) => {
-    const r = range(spec.key);
-    const raw = values[spec.key];
-
-    let customer = 50;
-
-    if (raw !== null && Number.isFinite(raw)) {
-      customer = spec.inverse
-        ? inverseNormalize(raw, r.min, r.max)
-        : normalize(raw, r.min, r.max);
-    }
-
-    const label = getLanguage() === 'ar' ? spec.ar : spec.en;
-
-    return `
-      <div class="benchmark-row">
-        <div class="benchmark-label">
-          <span>${label}</span>
-          <strong>${Math.round(customer)}</strong>
-        </div>
-        <div class="benchmark-pair">
-          <div class="benchmark-track customer"><i style="width:${Math.round(customer)}%"></i></div>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  $('benchmarkChart').innerHTML = rows;
+  const items = specs.filter(([key])=>values[key]!==null && Number.isFinite(values[key])).map(([key,en,ar,inverse])=>{
+    const r=range(key);
+    return {label:getLanguage()==='ar'?ar:en,score:Math.round(inverse?inverseNormalize(values[key],r.min,r.max):normalize(values[key],r.min,r.max))};
+  }).sort((a,b)=>b.score-a.score);
+  $('benchmarkChart').innerHTML=`<div class="navigate-bar-chart ranked" role="img" aria-label="${translate('Ranked customer signal chart','رسم ترتيب مؤشرات العميل')}"><div class="navigate-bar-scale"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>${items.map(x=>`<div class="navigate-bar-row"><span class="navigate-bar-label">${x.label}</span><div class="navigate-bar-track"><span style="width:${x.score}%"></span></div><strong>${x.score}</strong></div>`).join('')}</div>`;
 }
 
 async function renderSensitivityChart(values) {
@@ -991,13 +953,20 @@ async function renderResults(payload, createdAt = new Date()) {
 
 async function saveAnalysis(payload) {
   if (!supabaseConfigured || !supabase || !activeUser) return null;
-
-  const { data, error } = await supabase
+  const now = new Date().toISOString();
+  const { data: previous, error: lookupError } = await supabase
     .from('customer_analyses')
-    .insert({ user_id: activeUser.id, ...payload })
-    .select()
-    .single();
-
+    .select('id, customer_name, customer_external_id, created_at')
+    .eq('user_id', activeUser.id);
+  if (lookupError) throw lookupError;
+  const existing = (previous || []).find(item => sameCustomer(item, payload));
+  // The deployed table already has created_at. Reuse it for the latest analysis time
+  // so this works without a database migration.
+  const row = { ...payload, created_at: now };
+  const operation = existing
+    ? supabase.from('customer_analyses').update(row).eq('id', existing.id).eq('user_id', activeUser.id)
+    : supabase.from('customer_analyses').insert({ user_id: activeUser.id, ...row });
+  const { data, error } = await operation.select().single();
   if (error) throw error;
   return data;
 }
@@ -1103,7 +1072,7 @@ $('analysisForm')?.addEventListener('submit', async (event) => {
     return;
   }
 
-  renderWarning(getWarnings(values));
+  // Do not block or warn merely because values lie beyond training reference ranges.
 
   const submitButton = event.submitter || $('analysisForm').querySelector('button[type="submit"]');
   if (submitButton) submitButton.disabled = true;
@@ -1140,7 +1109,7 @@ $('analysisForm')?.addEventListener('submit', async (event) => {
         );
       } else {
         const localRecord = saveGuestAnalysis(payload);
-        latestAnalysis = { payload: localRecord, createdAt: localRecord.created_at };
+        latestAnalysis = { payload: localRecord, createdAt: localRecord.updated_at || localRecord.created_at };
 
         const url = new URL(window.location.href);
         url.searchParams.set('id', localRecord.id);
@@ -1248,3 +1217,32 @@ async function init() {
 
 renderSelectedSkills();
 init();
+
+/* Accessible, progressive disclosure of the existing analysis form. */
+function initializeGuidedAnalysis() {
+  const form=$('analysisForm'); if(!form) return;
+  const panels=Array.from(form.querySelectorAll(':scope > article.form-panel'));
+  let step=0;
+  const headings=[['Customer details','معلومات العميل'],['Optional skills','المهارات الاختيارية'],['Customer activity','نشاط العميل']];
+  const update=()=>{
+    panels.forEach((p,i)=>{p.hidden=i!==step;});
+    $('navigateStepTitle').textContent=headings[step][getLanguage()==='ar'?1:0];
+    $('navigateStepProgress').style.width=((step+1)/panels.length*100)+'%';
+    $('navigateStepCount').textContent=translate('Step','الخطوة')+' '+(step+1)+' / '+panels.length;
+    $('navigatePrevious').hidden=step===0;
+    $('navigateNext').hidden=step===panels.length-1;
+    $('navigateSubmit').hidden=step!==panels.length-1;
+  };
+  $('navigateNext').addEventListener('click',()=>{
+    if(step===0 && !$('customerName').value.trim()){setToast(translate('Enter a customer name first.','أدخل اسم العميل أولًا.'),'error');$('customerName').focus();return;}
+    step=Math.min(step+1,panels.length-1);update();form.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+  $('navigatePrevious').addEventListener('click',()=>{step=Math.max(0,step-1);update();form.scrollIntoView({behavior:'smooth',block:'start'});});
+  $('skillGuideToggle')?.addEventListener('click',()=>{
+    const panel=$('skillGuidePanel');panel.hidden=!panel.hidden;
+    $('skillGuideToggle').setAttribute('aria-expanded',String(!panel.hidden));
+  });
+  document.querySelector('[data-language-toggle]')?.addEventListener('click',()=>queueMicrotask(update));
+  update();
+}
+initializeGuidedAnalysis();
