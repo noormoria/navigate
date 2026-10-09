@@ -594,6 +594,11 @@ function recommendationData(probability, values, ind, threshold) {
   }
 
   followUp.push({
+    en: 'Assign every action to an account owner, document a case or ticket ID, record a due date, and verify the customer issue before marking it resolved.',
+    ar: 'أسند كل إجراء لمسؤول الحساب، ووثّق رقم الحالة أو التذكرة وموعد التنفيذ، وتحقق من المشكلة قبل تسجيلها كمحلولة.'
+  });
+
+  followUp.push({
     en: 'After each action, record whether activity, usage, support demand, or payment behavior improved, then run the analysis again.',
     ar: 'بعد كل إجراء، سجّل هل تحسن النشاط أو الاستخدام أو الحاجة للدعم أو سلوك الدفع، ثم أعد تشغيل التحليل.'
   });
