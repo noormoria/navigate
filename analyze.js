@@ -1223,7 +1223,7 @@ function initializeGuidedAnalysis() {
   const form=$('analysisForm'); if(!form) return;
   const panels=Array.from(form.querySelectorAll(':scope > article.form-panel'));
   let step=0;
-  const headings=[['Customer details','معلومات العميل'],['Optional skills','المهارات الاختيارية'],['Customer activity','نشاط العميل']];
+  const headings=[['Customer details','معلومات العميل'],['Operational signals','المؤشرات التشغيلية'],['Optional skills','المهارات الاختيارية']];
   const update=()=>{
     panels.forEach((p,i)=>{p.hidden=i!==step;});
     $('navigateStepTitle').textContent=headings[step][getLanguage()==='ar'?1:0];
@@ -1235,6 +1235,10 @@ function initializeGuidedAnalysis() {
   };
   $('navigateNext').addEventListener('click',()=>{
     if(step===0 && !$('customerName').value.trim()){setToast(translate('Enter a customer name first.','أدخل اسم العميل أولًا.'),'error');$('customerName').focus();return;}
+    if(step===1){
+      const invalid=Array.from(panels[step].querySelectorAll('input[required], select[required], textarea[required]')).find(field=>!field.checkValidity());
+      if(invalid){invalid.reportValidity();return;}
+    }
     step=Math.min(step+1,panels.length-1);update();form.scrollIntoView({behavior:'smooth',block:'start'});
   });
   $('navigatePrevious').addEventListener('click',()=>{step=Math.max(0,step-1);update();form.scrollIntoView({behavior:'smooth',block:'start'});});
