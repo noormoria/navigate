@@ -879,3 +879,5 @@ html[dir='rtl'] .main-nav a>strong{
 .navigate-bar-chart.ranked .navigate-bar-track>span{background:linear-gradient(90deg,var(--primary2),var(--primary))}
 @media(min-width:1000px){.skills-scale-help:not([hidden]){max-width:430px;margin-inline-start:auto}}
 @media(max-width:530px){.navigate-bar-row{grid-template-columns:90px minmax(65px,1fr) 27px;gap:6px}.navigate-step-header{padding:16px}}
+
+.navigate-next-actions{margin:22px 0}.navigate-next-actions .action-list{display:grid;gap:12px}.navigate-next-actions .action-item{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px}
