@@ -204,17 +204,30 @@ function getGuestHistory() {
   }
 }
 
+function sameCustomer(a, b) {
+  const externalA = String(a.customer_external_id || '').trim().toLocaleLowerCase();
+  const externalB = String(b.customer_external_id || '').trim().toLocaleLowerCase();
+  if (externalA && externalB) return externalA === externalB;
+  if (externalA || externalB) return false;
+  const nameA = String(a.customer_name || '').trim().replace(/\\s+/g, ' ').toLocaleLowerCase();
+  const nameB = String(b.customer_name || '').trim().replace(/\\s+/g, ' ').toLocaleLowerCase();
+  return Boolean(nameA && nameA === nameB);
+}
+
 function saveGuestAnalysis(payload) {
   const records = getGuestHistory();
+  const now = new Date().toISOString();
+  const existing = records.find(record => sameCustomer(record, payload));
   const record = {
+    ...existing,
     ...payload,
-    id: `guest-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    created_at: new Date().toISOString(),
+    id: existing?.id || `guest-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    created_at: existing?.created_at || now,
+    updated_at: now,
     storage_scope: 'local'
   };
-
-  records.unshift(record);
-  localStorage.setItem(GUEST_HISTORY_KEY, JSON.stringify(records.slice(0, 100)));
+  const next = [record, ...records.filter(item => !sameCustomer(item, payload))];
+  localStorage.setItem(GUEST_HISTORY_KEY, JSON.stringify(next.slice(0, 100)));
   return record;
 }
 
@@ -940,13 +953,20 @@ async function renderResults(payload, createdAt = new Date()) {
 
 async function saveAnalysis(payload) {
   if (!supabaseConfigured || !supabase || !activeUser) return null;
-
-  const { data, error } = await supabase
+  const now = new Date().toISOString();
+  const { data: previous, error: lookupError } = await supabase
     .from('customer_analyses')
-    .insert({ user_id: activeUser.id, ...payload })
-    .select()
-    .single();
-
+    .select('id, customer_name, customer_external_id, created_at')
+    .eq('user_id', activeUser.id);
+  if (lookupError) throw lookupError;
+  const existing = (previous || []).find(item => sameCustomer(item, payload));
+  // The deployed table already has created_at. Reuse it for the latest analysis time
+  // so this works without a database migration.
+  const row = { ...payload, created_at: now };
+  const operation = existing
+    ? supabase.from('customer_analyses').update(row).eq('id', existing.id).eq('user_id', activeUser.id)
+    : supabase.from('customer_analyses').insert({ user_id: activeUser.id, ...row });
+  const { data, error } = await operation.select().single();
   if (error) throw error;
   return data;
 }
@@ -1089,7 +1109,7 @@ $('analysisForm')?.addEventListener('submit', async (event) => {
         );
       } else {
         const localRecord = saveGuestAnalysis(payload);
-        latestAnalysis = { payload: localRecord, createdAt: localRecord.created_at };
+        latestAnalysis = { payload: localRecord, createdAt: localRecord.updated_at || localRecord.created_at };
 
         const url = new URL(window.location.href);
         url.searchParams.set('id', localRecord.id);
