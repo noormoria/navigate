@@ -53,7 +53,7 @@ function isComparison(record) {
 
 function sortHistory(items) {
   return [...items].sort(
-    (a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)
+    (a, b) => new Date(b.updated_at || b.created_at || 0) - new Date(a.updated_at || a.created_at || 0)
   );
 }
 
@@ -176,7 +176,7 @@ function render(data=records) {
 
         <div class="history-date">
           <small>${translate('Compared','تاريخ المقارنة')}</small>
-          <span>${formatDate(r.created_at)}</span>
+          <span>${formatDate(r.updated_at || r.created_at)}</span>
         </div>
 
         <div class="history-actions">
