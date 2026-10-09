@@ -618,96 +618,39 @@ function renderList(container, items, numbered = false) {
 }
 
 function renderSignalChart(values) {
-  const items = [
-    {
-      en: 'Tenure',
-      ar: 'مدة التعامل',
-      v: normalize(values.Tenure, range('Tenure').min, range('Tenure').max)
-    },
-    {
-      en: 'Revenue',
-      ar: 'الإيراد',
-      v: normalize(values.TotalSpend, range('TotalSpend').min, range('TotalSpend').max)
-    },
-    {
-      en: 'Recency',
-      ar: 'حداثة النشاط',
-      v: inverseNormalize(values.LastInteraction, range('LastInteraction').min, range('LastInteraction').max)
-    },
-    {
-      en: 'Usage',
-      ar: 'الاستخدام',
-      v: values.UsageFrequency === null
-        ? 50
-        : normalize(values.UsageFrequency, range('UsageFrequency').min, range('UsageFrequency').max)
-    },
-    {
-      en: 'Support health',
-      ar: 'سلامة الدعم',
-      v: values.SupportCalls === null
-        ? 50
-        : inverseNormalize(values.SupportCalls, range('SupportCalls').min, range('SupportCalls').max)
-    },
-    {
-      en: 'Payment health',
-      ar: 'سلامة الدفع',
-      v: values.PaymentDelay === null
-        ? 50
-        : inverseNormalize(values.PaymentDelay, range('PaymentDelay').min, range('PaymentDelay').max)
-    }
+  const specs = [
+    ['Tenure','Tenure','مدة التعامل',false],
+    ['TotalSpend','Revenue','الإيراد',false],
+    ['LastInteraction','Activity recency','حداثة النشاط',true],
+    ['UsageFrequency','Usage','الاستخدام',false],
+    ['SupportCalls','Support health','سلامة الدعم',true],
+    ['PaymentDelay','Payment health','سلامة الدفع',true]
   ];
-
-  $('signalChart').innerHTML = items
-    .map((item) => `
-      <div class="signal-row">
-        <div class="signal-meta">
-          <span>${getLanguage() === 'ar' ? item.ar : item.en}</span>
-          <strong>${Math.round(item.v)}</strong>
-        </div>
-        <div class="signal-track"><i style="width:${Math.round(item.v)}%"></i></div>
-      </div>
-    `)
-    .join('');
+  const available = specs.filter(([key]) => values[key] !== null && Number.isFinite(values[key]));
+  const rows = available.map(([key,en,ar,inverse]) => {
+    const r = range(key);
+    const value = inverse ? inverseNormalize(values[key],r.min,r.max) : normalize(values[key],r.min,r.max);
+    const score = Math.round(value);
+    return `<div class="navigate-bar-row"><span class="navigate-bar-label">${getLanguage()==='ar'?ar:en}</span><div class="navigate-bar-track"><span style="width:${score}%"></span></div><strong>${score}</strong></div>`;
+  }).join('');
+  const host = $('signalChart');
+  host.innerHTML = `<div class="navigate-bar-chart" role="img" aria-label="${translate('Customer signal bar chart','رسم أعمدة مؤشرات العميل')}"><div class="navigate-bar-scale"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>${rows}</div>`;
 }
 
 function renderBenchmarkChart(values) {
   const specs = [
-    { key: 'Tenure', en: 'Relationship', ar: 'العلاقة', inverse: false },
-    { key: 'TotalSpend', en: 'Revenue', ar: 'الإيراد', inverse: false },
-    { key: 'LastInteraction', en: 'Activity', ar: 'النشاط', inverse: true },
-    { key: 'UsageFrequency', en: 'Usage', ar: 'الاستخدام', inverse: false },
-    { key: 'SupportCalls', en: 'Support health', ar: 'سلامة الدعم', inverse: true },
-    { key: 'PaymentDelay', en: 'Payment health', ar: 'سلامة الدفع', inverse: true }
+    ['Tenure','Relationship','العلاقة',false],
+    ['TotalSpend','Revenue','الإيراد',false],
+    ['LastInteraction','Activity','النشاط',true],
+    ['UsageFrequency','Usage','الاستخدام',false],
+    ['SupportCalls','Support health','سلامة الدعم',true],
+    ['PaymentDelay','Payment health','سلامة الدفع',true]
   ];
-
-  const rows = specs.map((spec) => {
-    const r = range(spec.key);
-    const raw = values[spec.key];
-
-    let customer = 50;
-
-    if (raw !== null && Number.isFinite(raw)) {
-      customer = spec.inverse
-        ? inverseNormalize(raw, r.min, r.max)
-        : normalize(raw, r.min, r.max);
-    }
-
-    const label = getLanguage() === 'ar' ? spec.ar : spec.en;
-
-    return `
-      <div class="benchmark-row">
-        <div class="benchmark-label">
-          <span>${label}</span>
-          <strong>${Math.round(customer)}</strong>
-        </div>
-        <div class="benchmark-pair">
-          <div class="benchmark-track customer"><i style="width:${Math.round(customer)}%"></i></div>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  $('benchmarkChart').innerHTML = rows;
+  const items = specs.filter(([key])=>values[key]!==null && Number.isFinite(values[key])).map(([key,en,ar,inverse])=>{
+    const r=range(key);
+    return {label:getLanguage()==='ar'?ar:en,score:Math.round(inverse?inverseNormalize(values[key],r.min,r.max):normalize(values[key],r.min,r.max))};
+  }).sort((a,b)=>b.score-a.score);
+  $('benchmarkChart').innerHTML=`<div class="navigate-bar-chart ranked" role="img" aria-label="${translate('Ranked customer signal chart','رسم ترتيب مؤشرات العميل')}"><div class="navigate-bar-scale"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>${items.map(x=>`<div class="navigate-bar-row"><span class="navigate-bar-label">${x.label}</span><div class="navigate-bar-track"><span style="width:${x.score}%"></span></div><strong>${x.score}</strong></div>`).join('')}</div>`;
 }
 
 async function renderSensitivityChart(values) {
@@ -1103,7 +1046,7 @@ $('analysisForm')?.addEventListener('submit', async (event) => {
     return;
   }
 
-  renderWarning(getWarnings(values));
+  // Do not block or warn merely because values lie beyond training reference ranges.
 
   const submitButton = event.submitter || $('analysisForm').querySelector('button[type="submit"]');
   if (submitButton) submitButton.disabled = true;
@@ -1248,3 +1191,32 @@ async function init() {
 
 renderSelectedSkills();
 init();
+
+/* Accessible, progressive disclosure of the existing analysis form. */
+function initializeGuidedAnalysis() {
+  const form=$('analysisForm'); if(!form) return;
+  const panels=Array.from(form.querySelectorAll(':scope > article.form-panel'));
+  let step=0;
+  const headings=[['Customer details','معلومات العميل'],['Optional skills','المهارات الاختيارية'],['Customer activity','نشاط العميل']];
+  const update=()=>{
+    panels.forEach((p,i)=>{p.hidden=i!==step;});
+    $('navigateStepTitle').textContent=headings[step][getLanguage()==='ar'?1:0];
+    $('navigateStepProgress').style.width=((step+1)/panels.length*100)+'%';
+    $('navigateStepCount').textContent=translate('Step','الخطوة')+' '+(step+1)+' / '+panels.length;
+    $('navigatePrevious').hidden=step===0;
+    $('navigateNext').hidden=step===panels.length-1;
+    $('navigateSubmit').hidden=step!==panels.length-1;
+  };
+  $('navigateNext').addEventListener('click',()=>{
+    if(step===0 && !$('customerName').value.trim()){setToast(translate('Enter a customer name first.','أدخل اسم العميل أولًا.'),'error');$('customerName').focus();return;}
+    step=Math.min(step+1,panels.length-1);update();form.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+  $('navigatePrevious').addEventListener('click',()=>{step=Math.max(0,step-1);update();form.scrollIntoView({behavior:'smooth',block:'start'});});
+  $('skillGuideToggle')?.addEventListener('click',()=>{
+    const panel=$('skillGuidePanel');panel.hidden=!panel.hidden;
+    $('skillGuideToggle').setAttribute('aria-expanded',String(!panel.hidden));
+  });
+  document.querySelector('[data-language-toggle]')?.addEventListener('click',()=>queueMicrotask(update));
+  update();
+}
+initializeGuidedAnalysis();
