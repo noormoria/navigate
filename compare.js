@@ -480,6 +480,24 @@ function renderResults(
   );
 
   renderCriteriaChart(terms, resultA, resultB, nameA, nameB);
+  const verify = $("comparisonNextSteps");
+  if (verify) {
+    const gaps = [...new Set([...(resultA.missing||[]),...(resultB.missing||[])])].slice(0,3);
+    const steps = [
+      translate('Confirm the required criteria with the hiring manager before interpreting coverage scores.','تحقق من المتطلبات مع مسؤول التوظيف قبل تفسير نسب التغطية.'),
+      translate('Ask both candidates the same job-related questions and assess a consistent work sample.','اطرح الأسئلة المهنية نفسها على المرشحين، وقيّم عينة عمل بمعايير موحدة.'),
+      gaps.length
+        ? translate('Verify the missing CV evidence through questions or work samples: ','تحقق من الأدلة غير المذكورة في السيرة عبر الأسئلة أو عينة العمل: ') + gaps.join(', ')
+        : translate('Document interview evidence before choosing the next stage.','وثّق أدلة المقابلة قبل اختيار الخطوة التالية.'),
+      translate('Record any confirmed findings separately from text-matching scores; make the final decision with human review.','سجّل النتائج المؤكدة بعيدًا عن درجات المطابقة النصية، واتخذ القرار النهائي بمراجعة بشرية.')
+    ];
+    verify.replaceChildren();
+    steps.forEach((label,index)=>{
+      const row=document.createElement('div');row.className='action-item';
+      const num=document.createElement('span');num.textContent=String(index+1).padStart(2,'0');
+      const para=document.createElement('p');para.textContent=label;row.append(num,para);verify.appendChild(row);
+    });
+  }
 
   const diff = Math.abs(resultA.score - resultB.score);
 
