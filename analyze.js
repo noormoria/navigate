@@ -438,99 +438,78 @@ function customerSegment(ind) {
 function factorData(values, ind) {
   const risk = [];
   const positive = [];
-
-  if (values.LastInteraction >= 20) {
-    risk.push({
-      en: `The customer has had no meaningful activity for ${Math.round(values.LastInteraction)} days, which is a strong disengagement signal.`,
-      ar: `لم يسجل العميل نشاطًا مهمًا منذ ${Math.round(values.LastInteraction)} يومًا، وهذه إشارة قوية على انخفاض التفاعل.`
-    });
-  } else if (values.LastInteraction >= 10) {
-    risk.push({
-      en: `It has been ${Math.round(values.LastInteraction)} days since the customer’s last meaningful activity, so re-engagement should not be delayed.`,
-      ar: `مرّ ${Math.round(values.LastInteraction)} يومًا منذ آخر نشاط مهم للعميل، لذلك لا يُفضّل تأخير إعادة التفاعل معه.`
-    });
+  const addReview = (titleEn, titleAr, observationEn, observationAr, reviewEn, reviewAr) => risk.push({
+    en: observationEn, ar: observationAr,
+    titleEn, titleAr, reviewEn, reviewAr
+  });
+  const days = Math.round(values.LastInteraction);
+  if (days >= 10) {
+    addReview(
+      'Recent activity', 'آخر نشاط للعميل',
+      `No meaningful activity has been recorded for ${days} days. This is a signal to check, not proof the customer plans to leave.`,
+      `لم يُسجَّل نشاط مهم للعميل منذ ${days} يومًا. هذا مؤشر يحتاج تحققًا، وليس دليلًا على نية المغادرة.`,
+      'Confirm whether this gap is unusual for this customer and ask whether they need help using the service.',
+      'قارِن هذه المدة بنمط نشاط العميل المعتاد، واسأله إن كان يواجه صعوبة في استخدام الخدمة.'
+    );
   } else {
-    positive.push({
-      en: `The customer was active recently (${Math.round(values.LastInteraction)} days since the last meaningful activity).`,
-      ar: `العميل كان نشطًا مؤخرًا، إذ مرّ ${Math.round(values.LastInteraction)} يومًا فقط منذ آخر نشاط مهم.`
-    });
+    positive.push({en:`Last meaningful activity was ${days} days ago.`,ar:`آخر نشاط مهم كان قبل ${days} يومًا.`});
   }
-
   if (values.UsageFrequency !== null) {
-    if (values.UsageFrequency <= 8) {
-      risk.push({
-        en: `Usage frequency is limited (${Math.round(values.UsageFrequency)}), which may indicate weakening engagement.`,
-        ar: `تكرار الاستخدام منخفض (${Math.round(values.UsageFrequency)}) وقد يشير إلى تراجع التفاعل.`
-      });
-    } else if (values.UsageFrequency >= 20) {
-      positive.push({
-        en: `Usage is strong (${Math.round(values.UsageFrequency)}), showing that the customer still engages with the service.`,
-        ar: `الاستخدام مرتفع (${Math.round(values.UsageFrequency)}) مما يدل على استمرار تفاعل العميل مع الخدمة.`
-      });
-    }
+    const n = Math.round(values.UsageFrequency);
+    if (n <= 8) addReview(
+      'Service usage', 'استخدام الخدمة',
+      `Recorded usage frequency is ${n}. Without a defined measurement period and the customer's usual usage, this alone does not confirm a decline.`,
+      `تكرار الاستخدام المُدخل هو ${n}. لا يمكن تأكيد انخفاضه دون معرفة فترة القياس ومقارنته باستخدام العميل المعتاد.`,
+      'Compare usage over the same period with the customer’s earlier activity, then check for product or access issues.',
+      'قارِن الاستخدام بالفترة نفسها من نشاط العميل السابق، ثم تحقق من وجود مشكلة في الخدمة أو الوصول إليها.'
+    );
+    else if (n >= 20) positive.push({en:`Recorded usage frequency: ${n}; compare it with the usual level.`,ar:`تكرار الاستخدام المُدخل: ${n}، ويُفضّل مقارنته بالمستوى المعتاد.`});
   }
-
   if (values.SupportCalls !== null) {
-    if (values.SupportCalls >= 5) {
-      risk.push({
-        en: `The customer has contacted support ${Math.round(values.SupportCalls)} times. Review whether there is unresolved friction.`,
-        ar: `تواصل العميل مع الدعم ${Math.round(values.SupportCalls)} مرات. راجع ما إذا كانت هناك مشكلة متكررة أو غير محلولة.`
-      });
-    } else if (values.SupportCalls <= 2) {
-      positive.push({
-        en: `Support demand is currently low (${Math.round(values.SupportCalls)} calls), with no obvious sign of repeated service friction.`,
-        ar: `الحاجة للدعم منخفضة حاليًا (${Math.round(values.SupportCalls)} مكالمات)، ولا توجد إشارة واضحة على احتكاك متكرر بالخدمة.`
-      });
-    }
+    const n = Math.round(values.SupportCalls);
+    if (n >= 5) addReview(
+      'Customer support', 'طلبات الدعم',
+      `The customer contacted support ${n} times. The number does not tell us whether the issues were resolved.`,
+      `تواصل العميل مع الدعم ${n} مرات. عدد الاتصالات وحده لا يوضح ما إذا كانت المشكلات قد حُلّت.`,
+      'Review the support tickets, identify any repeated or open issue, and confirm the resolution with the customer.',
+      'راجع تذاكر الدعم وحدد المشكلات المتكررة أو المفتوحة، ثم تأكد من حلها مع العميل.'
+    );
+    else positive.push({en:`Support calls recorded: ${n}; ticket status still needs review.`,ar:`مكالمات الدعم المسجلة: ${n}، مع ضرورة مراجعة حالة التذاكر.`});
   }
-
   if (values.PaymentDelay !== null) {
-    if (values.PaymentDelay >= 10) {
-      risk.push({
-        en: `Payment is delayed by ${Math.round(values.PaymentDelay)} days. Check for billing friction, affordability concerns, or payment-process issues.`,
-        ar: `يوجد تأخر في الدفع بمقدار ${Math.round(values.PaymentDelay)} يومًا. تحقق من وجود مشكلة في الفوترة أو القدرة على الدفع أو إجراءات السداد.`
-      });
-    } else if (values.PaymentDelay <= 3) {
-      positive.push({
-        en: `Payment behavior is healthy, with only ${Math.round(values.PaymentDelay)} days of delay.`,
-        ar: `سلوك الدفع جيد، إذ يبلغ التأخر ${Math.round(values.PaymentDelay)} أيام فقط.`
-      });
-    }
+    const n = Math.round(values.PaymentDelay);
+    if (n >= 10) addReview(
+      'Payment delay', 'تأخر السداد',
+      `The recorded payment delay is ${n} days. The reason for the delay is not known from these inputs.`,
+      `التأخر المسجّل في السداد هو ${n} يومًا. سبب التأخر غير معروف من هذه البيانات.`,
+      'Verify invoice accuracy, payment status and billing access before offering a payment solution.',
+      'تحقق من صحة الفاتورة وحالة الدفع وإمكانية الوصول لوسيلة السداد قبل اقتراح الحل.'
+    );
+    else positive.push({en:`Payment delay recorded: ${n} days.`,ar:`تأخر السداد المسجّل: ${n} يومًا.`});
   }
-
-  if (values.Tenure < 6) {
-    risk.push({
-      en: `The customer relationship is still new (${Math.round(values.Tenure)} months), so early onboarding and value reinforcement are important.`,
-      ar: `علاقة العميل ما زالت حديثة (${Math.round(values.Tenure)} أشهر)، لذلك يعد تحسين البداية وتوضيح القيمة أمرًا مهمًا.`
-    });
-  } else if (values.Tenure >= 24) {
-    positive.push({
-      en: `The customer has a long relationship with the company (${Math.round(values.Tenure)} months), which is worth protecting.`,
-      ar: `للعميل علاقة طويلة مع الشركة (${Math.round(values.Tenure)} شهرًا)، وهي علاقة تستحق الحفاظ عليها.`
-    });
-  }
-
-  if (values.TotalSpend >= 1000) {
-    positive.push({
-      en: `Customer revenue is substantial (${Number(values.TotalSpend).toLocaleString()}), so losing this account may have meaningful financial impact.`,
-      ar: `إيراد العميل مرتفع (${Number(values.TotalSpend).toLocaleString()}), لذلك فقدان هذا الحساب قد يترك أثرًا ماليًا مهمًا.`
-    });
-  }
-
-  if (!risk.length) {
-    risk.push({
-      en: 'No single warning signal dominates the profile. The model returned a combined risk estimate; no single reason can be confirmed from these inputs alone.',
-      ar: 'لا توجد إشارة تحذير منفردة تسيطر على الملف. قدّر النموذج الخطر من المدخلات مجتمعة، ولا يمكن تأكيد سبب واحد اعتمادًا عليها فقط.'
-    });
-  }
-
-  if (!positive.length) {
-    positive.push({
-      en: 'There is no strong positive signal to rely on right now, so the account should be managed proactively.',
-      ar: 'لا توجد إشارة إيجابية قوية يمكن الاعتماد عليها حاليًا، لذلك يفضّل إدارة الحساب بشكل استباقي.'
-    });
-  }
-
+  if (values.Tenure < 6) addReview(
+    'New customer', 'عميل حديث',
+    `The customer has been with the company for ${Math.round(values.Tenure)} months. Early-stage experience may be worth reviewing.`,
+    `مدة تعامل العميل مع الشركة ${Math.round(values.Tenure)} أشهر. قد تستحق تجربة البداية مراجعة إضافية.`,
+    'Check whether onboarding was completed and whether the customer understands the value of the service.',
+    'تحقق من اكتمال خطوات التهيئة الأولية وفهم العميل لفائدة الخدمة.'
+  );
+  else if (values.Tenure >= 24) positive.push({en:`Customer relationship length: ${Math.round(values.Tenure)} months.`,ar:`مدة علاقة العميل بالشركة: ${Math.round(values.Tenure)} شهرًا.`});
+  if (values.TotalSpend >= 1000) positive.push({
+    en:`Recorded total spend: ${Number(values.TotalSpend).toLocaleString()}; review its business impact in the appropriate currency and time period.`,
+    ar:`إجمالي الإنفاق المسجّل: ${Number(values.TotalSpend).toLocaleString()}؛ راجع أثره التجاري حسب العملة وفترة القياس.`
+  });
+  if (!risk.length) addReview(
+    'No clear single warning', 'لا يوجد مؤشر تحذير منفرد واضح',
+    'The provided inputs do not highlight one specific issue. The churn estimate combines several signals.',
+    'المدخلات المتاحة لا تُظهر مشكلة واحدة محددة. تقدير المغادرة يعتمد على مجموعة مؤشرات.',
+    'Review changes against the customer’s own history before assigning a specific reason for churn.',
+    'راجع التغيرات مقارنة بسجل العميل السابق قبل تحديد سبب محتمل للمغادرة.'
+  );
+  if (!positive.length) positive.push({
+    en:'No clear reassuring signal is available from the supplied fields.',
+    ar:'لا يوجد مؤشر مطمئن واضح اعتمادًا على الحقول المُدخلة.'
+  });
   return { risk, positive };
 }
 
@@ -620,18 +599,31 @@ function recommendationData(probability, values, ind, threshold) {
 }
 
 function renderList(container, items, numbered = false) {
-  container.innerHTML = '';
-
+  container.replaceChildren();
   items.forEach((item, index) => {
     const row = document.createElement('div');
     row.className = numbered ? 'action-item' : 'factor-item';
-
     const text = getLanguage() === 'ar' ? item.ar : item.en;
-
-    row.innerHTML = numbered
-      ? `<span>${String(index + 1).padStart(2, '0')}</span><p>${text}</p>`
-      : `<i></i><p>${text}</p>`;
-
+    if (!numbered && item.titleEn) {
+      row.classList.add('factor-explained');
+      const title = document.createElement('strong');
+      title.className = 'factor-title';
+      title.textContent = getLanguage() === 'ar' ? item.titleAr : item.titleEn;
+      const observation = document.createElement('p');
+      observation.textContent = text;
+      const review = document.createElement('p');
+      review.className = 'factor-review';
+      const prompt = document.createElement('strong');
+      prompt.textContent = translate('What to check: ', 'ما الذي نراجعه؟ ');
+      review.append(prompt, document.createTextNode(getLanguage() === 'ar' ? item.reviewAr : item.reviewEn));
+      row.append(title, observation, review);
+    } else {
+      const number = document.createElement('span');
+      number.textContent = numbered ? String(index + 1).padStart(2, '0') : '•';
+      const detail = document.createElement('p');
+      detail.textContent = text;
+      row.append(number, detail);
+    }
     container.appendChild(row);
   });
 }
@@ -841,7 +833,7 @@ async function renderResults(payload, createdAt = new Date()) {
   const derivedRecs = recommendationData(probability, values, ind, threshold);
 
   const factors = {
-    risk: payload.risk_factors || derivedFactors.risk,
+    risk: derivedFactors.risk,
     positive: payload.retention_signals || derivedFactors.positive
   };
 
