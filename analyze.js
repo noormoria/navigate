@@ -209,8 +209,8 @@ function sameCustomer(a, b) {
   const externalB = String(b.customer_external_id || '').trim().toLocaleLowerCase();
   if (externalA && externalB) return externalA === externalB;
   if (externalA || externalB) return false;
-  const nameA = String(a.customer_name || '').trim().replace(/\\s+/g, ' ').toLocaleLowerCase();
-  const nameB = String(b.customer_name || '').trim().replace(/\\s+/g, ' ').toLocaleLowerCase();
+  const nameA = String(a.customer_name || '').trim().replace(/\s+/g, ' ').toLocaleLowerCase();
+  const nameB = String(b.customer_name || '').trim().replace(/\s+/g, ' ').toLocaleLowerCase();
   return Boolean(nameA && nameA === nameB);
 }
 
