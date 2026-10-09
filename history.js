@@ -56,7 +56,7 @@ function consolidateCustomers(items) {
   return sortHistory(items).filter(record => {
     if (isComparison(record)) return true;
     const external = String(record.customer_external_id || '').trim().toLocaleLowerCase();
-    const name = String(record.customer_name || '').trim().replace(/\\s+/g,' ').toLocaleLowerCase();
+    const name = String(record.customer_name || '').trim().replace(/\s+/g,' ').toLocaleLowerCase();
     const identity = external ? 'id:' + external : 'name:' + name;
     if (!name && !external) return true;
     if (seen.has(identity)) return false;
@@ -244,7 +244,7 @@ function render(data=records) {
 
       <div class="history-date">
         <small>${translate('Last updated','آخر تحديث')}</small>
-        <span>${formatDate(r.created_at)}</span>
+        <span>${formatDate(r.updated_at || r.created_at)}</span>
       </div>
 
       <div class="history-actions">
