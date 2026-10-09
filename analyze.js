@@ -208,8 +208,7 @@ function sameCustomer(a, b) {
   const externalA = String(a.customer_external_id || '').trim().toLocaleLowerCase();
   const externalB = String(b.customer_external_id || '').trim().toLocaleLowerCase();
   if (externalA && externalB) return externalA === externalB;
-  // Older saved analyses may have an ID, while the simplified form no longer asks for one.
-  // Match by normalized customer name when one or both IDs are missing.
+  // Match by name only when an ID is missing; two different IDs must never be merged.
   const nameA = String(a.customer_name || '').trim().replace(/\s+/g, ' ').toLocaleLowerCase();
   const nameB = String(b.customer_name || '').trim().replace(/\s+/g, ' ').toLocaleLowerCase();
   return Boolean(nameA && nameA === nameB);
@@ -780,7 +779,7 @@ function buildPayload(values, apiResult, ind, factors, recs) {
     customer_name: $('customerName').value.trim(),
     customer_email: $('customerEmail').value.trim() || null,
     customer_phone: $('customerPhone').value.trim() || null,
-    customer_external_id: null,
+    customer_external_id: $('customerExternalId').value.trim() || null,
     company_account_id: null,
     notes: $('customerNotes').value.trim() || null,
 
@@ -963,6 +962,7 @@ function populateFormFromRecord(data) {
   $('customerName').value = data.customer_name || '';
   $('customerEmail').value = data.customer_email || '';
   $('customerPhone').value = data.customer_phone || '';
+  $('customerExternalId').value = data.customer_external_id || '';
   $('customerNotes').value = data.notes || '';
 
   const input = data.input_data || {};
