@@ -64,7 +64,7 @@
   </section>
 
   <section class="analysis-layout">
-    <form id="analysisForm" class="analysis-form">
+    <form id="analysisForm" class="analysis-form" novalidate>
       <div class="navigate-step-header"><p class="eyebrow" data-en="GUIDED CUSTOMER ANALYSIS" data-ar="تحليل العميل خطوة بخطوة">GUIDED CUSTOMER ANALYSIS</p><h2 id="navigateStepTitle">Customer profile</h2><div class="navigate-step-progress"><span id="navigateStepProgress"></span></div><p id="navigateStepCount" aria-live="polite"></p></div>
       <article class="form-panel">
         <div class="panel-heading"><div><span class="panel-number">01</span><h2 data-en="Customer profile" data-ar="بيانات العميل">Customer profile</h2></div><span class="required-note" data-en="* Required" data-ar="* مطلوب">* Required</span></div>
@@ -237,7 +237,7 @@
 
       <div class="navigate-step-actions"><button class="secondary-button" type="button" id="navigatePrevious" hidden data-en="Previous" data-ar="السابق">Previous</button><button class="primary-button" type="button" id="navigateNext" data-en="Next step" data-ar="الخطوة التالية">Next step</button><button class="primary-button analyze-button" type="submit" id="navigateSubmit" hidden>
           <span data-en="Run customer analysis" data-ar="تشغيل تحليل العميل">Run customer analysis</span>
-          <span class="button-arrow">↗</span>
+          <span class="button-arrow" aria-hidden="true">&rarr;</span>
         </button></div>
     </form>
 
@@ -323,6 +323,6 @@
     <span data-en="Built for earlier, clearer retention decisions." data-ar="صُمم لقرارات احتفاظ أبكر وأكثر وضوحًا.">Built for earlier, clearer retention decisions.</span>
   </div>
 </footer>
-<script type="module" src="analyze.js?v=20261009-8"></script>
+<script type="module" src="analyze.js?v=20261009-9"></script>
 </body>
 </html>
