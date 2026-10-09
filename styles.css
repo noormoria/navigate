@@ -907,3 +907,45 @@ html[dir='rtl'] .main-nav a>strong{
 #retentionSignals .factor-explained p{margin:0;line-height:1.75}
 #retentionSignals .factor-review{margin-top:12px!important;padding-top:11px;border-top:1px solid var(--line);color:var(--text)}
 #retentionSignals .factor-review strong{color:var(--primary)}
+
+/* About: comfortable Arabic line spacing on small screens. */
+html[dir="rtl"] body[data-page="about"] .about-section .section-intro h2,
+html[dir="rtl"] body[data-page="about"] .about-hero h1 {
+  line-height: 1.5 !important;
+  letter-spacing: 0 !important;
+  overflow-wrap: break-word;
+}
+@media (max-width: 760px) {
+  html[dir="rtl"] body[data-page="about"] .about-section .section-intro h2 {
+    font-size: clamp(1.9rem, 7.4vw, 2.65rem) !important;
+    line-height: 1.48 !important;
+  }
+  html[dir="rtl"] body[data-page="about"] .about-hero h1 {
+    font-size: clamp(2.15rem, 8vw, 3rem) !important;
+    line-height: 1.4 !important;
+  }
+}
+/* Full-screen menu: easily identifiable account action. */
+.main-nav .menu-account-link,
+.main-nav .menu-account-link:hover,
+.main-nav .menu-account-link:focus-visible {
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:12px !important;
+  width:min(100%,440px) !important;
+  min-height:56px !important;
+  margin-top:20px !important;
+  padding:12px 20px !important;
+  background:var(--primary) !important;
+  border:1px solid var(--primary) !important;
+  color:#fff !important;
+  border-radius:15px !important;
+  text-align:center !important;
+  text-decoration:none !important;
+  font-size:1rem !important;
+  font-weight:800 !important;
+  letter-spacing:0 !important;
+}
+.main-nav .menu-account-link .account-dot {background:#fff !important; flex:none;}
+.main-nav .menu-account-link:focus-visible {outline:3px solid var(--primary2);outline-offset:3px;}
