@@ -26,6 +26,7 @@ const MODEL_INFO = {
   }
 };
 
+// Model outputs are risk estimates; action plans must be verified against real customer records.
 const REQUIRED_FEATURE_IDS = ['Tenure', 'TotalSpend', 'LastInteraction'];
 const OPTIONAL_NUMERIC_IDS = ['UsageFrequency', 'SupportCalls', 'PaymentDelay'];
 
@@ -505,8 +506,8 @@ function factorData(values, ind) {
 
   if (!risk.length) {
     risk.push({
-      en: 'No single warning signal dominates the profile. The churn score appears to come from the combined customer pattern.',
-      ar: 'لا توجد إشارة تحذير منفردة تسيطر على الملف. يبدو أن خطر المغادرة ناتج عن مجموعة المؤشرات معًا.'
+      en: 'No single warning signal dominates the profile. The model returned a combined risk estimate; no single reason can be confirmed from these inputs alone.',
+      ar: 'لا توجد إشارة تحذير منفردة تسيطر على الملف. قدّر النموذج الخطر من المدخلات مجتمعة، ولا يمكن تأكيد سبب واحد اعتمادًا عليها فقط.'
     });
   }
 
@@ -585,10 +586,10 @@ function recommendationData(probability, values, ind, threshold) {
     });
   }
 
-  if (ind.valueIndex >= 70 && probability >= 0.50) {
+  if (values.TotalSpend >= 1000 && probability >= 0.50) {
     actions.push({
-      en: 'Because this account has strong revenue value, consider a tailored retention offer only after the root cause is identified.',
-      ar: 'لأن إيراد هذا الحساب مرتفع، فكّر في عرض احتفاظ مخصص بعد تحديد السبب الحقيقي للمشكلة، وليس قبله.'
+      en: 'Review account value and the verified reason for leaving before considering an offer. Apply only approved offers within the retention budget.',
+      ar: 'راجع قيمة الحساب والسبب المؤكد لاحتمال المغادرة قبل التفكير في عرض احتفاظ. استخدم فقط العروض المعتمدة وضمن الميزانية.'
     });
   }
 
