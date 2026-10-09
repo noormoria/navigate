@@ -881,3 +881,15 @@ html[dir='rtl'] .main-nav a>strong{
 @media(max-width:530px){.navigate-bar-row{grid-template-columns:90px minmax(65px,1fr) 27px;gap:6px}.navigate-step-header{padding:16px}}
 
 .navigate-next-actions{margin:22px 0}.navigate-next-actions .action-list{display:grid;gap:12px}.navigate-next-actions .action-item{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:12px}
+
+/* Compact, consistent history selection controls */
+.history-row-select{display:flex;align-items:center;justify-content:center;min-width:0;margin:0;cursor:pointer}
+.history-row-checkbox,#selectAllHistory{appearance:none;-webkit-appearance:none;box-sizing:border-box;display:inline-grid;place-content:center;width:17px!important;height:17px!important;min-width:17px!important;min-height:17px!important;padding:0!important;margin:0!important;flex:none;border:1.5px solid var(--muted2);border-radius:5px;background:var(--surface2);cursor:pointer;vertical-align:middle}
+.history-row-checkbox:checked,#selectAllHistory:checked{background:var(--primary);border-color:var(--primary)}
+.history-row-checkbox:checked:before,#selectAllHistory:checked:before{content:'✓';font-size:12px;font-weight:800;line-height:1;color:#fff}
+.history-row-checkbox:focus-visible,#selectAllHistory:focus-visible{outline:2px solid var(--primary);outline-offset:3px}
+.history-row{grid-template-columns:28px minmax(190px,1.6fr) .6fr .6fr .65fr .9fr auto}
+.history-row-select{grid-column:1}
+.history-customer{grid-column:2}
+.history-date{min-width:112px}
+@media(max-width:1100px){.history-row{grid-template-columns:24px minmax(150px,1.5fr) .6fr .6fr .7fr auto}.history-date{display:none}}
