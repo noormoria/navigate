@@ -893,3 +893,10 @@ html[dir='rtl'] .main-nav a>strong{
 .history-customer{grid-column:2}
 .history-date{min-width:112px}
 @media(max-width:1100px){.history-row{grid-template-columns:24px minmax(150px,1.5fr) .6fr .6fr .7fr auto}.history-date{display:none}}
+
+/* Readable review factors on the analysis results page */
+#riskFactors .factor-explained{display:block;padding:17px 19px;background:var(--surface2);border:1px solid var(--line);border-radius:14px}
+#riskFactors .factor-title{display:block;margin-bottom:8px;color:var(--deep);font-size:.96rem}
+#riskFactors .factor-explained p{margin:0;line-height:1.75}
+#riskFactors .factor-review{margin-top:12px!important;padding-top:11px;border-top:1px solid var(--line);color:var(--text)}
+#riskFactors .factor-review strong{color:var(--primary)}
