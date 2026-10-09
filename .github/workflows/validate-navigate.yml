@@ -42,6 +42,37 @@ jobs:
           assert 'consolidateCustomers' in h and "Last updated" in h
           print('HTML and workflow assertions passed')
           PY
+      - name: Check deployed backend and Supabase auth health (no database writes)
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request, time
+          backend='https://navigate-efxe.onrender.com'
+          supabase='https://ixrpgrpbthllzxgvyhor.supabase.co'
+          def request(url,data=None,headers=None):
+              req=urllib.request.Request(url,data=data,headers=headers or {},method='POST' if data else 'GET')
+              with urllib.request.urlopen(req,timeout=95) as resp:
+                  return resp.status,json.loads(resp.read().decode())
+          last=None
+          for attempt in range(3):
+              try:
+                  status,payload=request(backend+'/health')
+                  assert status==200 and payload.get('ok') is True,(status,payload)
+                  print('Backend health: PASS')
+                  last=None
+                  break
+              except Exception as error:
+                  last=error
+                  if attempt<2: time.sleep(8)
+          if last: raise RuntimeError('Backend health failed: '+str(last))
+          sample=dict(tenure=24,total_spend=650,last_interaction=12,usage_frequency=13,support_calls=2,payment_delay=0,subscription_type=None,contract_length=None)
+          status,payload=request(backend+'/predict',json.dumps(sample).encode(),{'Content-Type':'application/json','Origin':'https://app.navigateretention.site'})
+          p=payload.get('churn_probability')
+          assert status==200 and isinstance(p,(int,float)) and 0<=p<=1 and 0<payload.get('decision_threshold',0)<1,(status,payload)
+          print('Backend predict: PASS (valid probability and threshold)')
+          status,payload=request(supabase+'/auth/v1/health')
+          assert status==200,(status,payload)
+          print('Supabase Auth health: PASS (does NOT test authenticated database CRUD or RLS)')
+          PY
       - name: Chromium browser smoke test
         run: |
           npm install --no-save playwright
