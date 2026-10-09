@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Support | NAVIGATE</title>
-  <link rel="stylesheet" href="styles.css?v=20261009-11"/>
+  <link rel="stylesheet" href="styles.css?v=20261009-12"/>
 </head>
 <body data-page="support">
 <header class="site-header">
@@ -114,6 +114,32 @@
       <p data-en="The first FormSubmit message may send an activation email to the support inbox. Confirm it once, then future submissions are forwarded automatically." data-ar="أول رسالة عبر FormSubmit قد ترسل رسالة تفعيل إلى بريد الدعم. وافق عليها مرة واحدة، وبعدها تصل الرسائل تلقائيًا.">The first FormSubmit message may send an activation email to the support inbox. Confirm it once, then future submissions are forwarded automatically.</p>
     </aside>
   </section>
+  <section class="rating-section" aria-labelledby="rateNavigateTitle">
+    <div class="section-intro">
+      <span class="eyebrow" data-en="SHARE YOUR EXPERIENCE" data-ar="شارك تجربتك">SHARE YOUR EXPERIENCE</span>
+      <h2 id="rateNavigateTitle" data-en="Rate NAVIGATE" data-ar="قيّم تجربتك مع NAVIGATE">Rate NAVIGATE</h2>
+      <p data-en="How useful was your experience? Your feedback helps improve the website. No account is required." data-ar="ما مدى رضاك عن تجربتك؟ يساعد التقييم على تحسين الموقع، ولا يلزم إنشاء حساب.">How useful was your experience? Your feedback helps improve the website. No account is required.</p>
+    </div>
+    <form id="ratingForm" class="rating-card">
+      <fieldset class="rating-stars">
+        <legend data-en="Your rating (required)" data-ar="التقييم (مطلوب)">Your rating (required)</legend>
+        <div class="rating-options" role="group" aria-label="Rate from one to five">
+          <label><input type="radio" name="rating" value="1" required/><span aria-hidden="true">★</span><span class="sr-only">1 / 5</span></label>
+          <label><input type="radio" name="rating" value="2"/><span aria-hidden="true">★</span><span class="sr-only">2 / 5</span></label>
+          <label><input type="radio" name="rating" value="3"/><span aria-hidden="true">★</span><span class="sr-only">3 / 5</span></label>
+          <label><input type="radio" name="rating" value="4"/><span aria-hidden="true">★</span><span class="sr-only">4 / 5</span></label>
+          <label><input type="radio" name="rating" value="5"/><span aria-hidden="true">★</span><span class="sr-only">5 / 5</span></label>
+        </div>
+      </fieldset>
+      <label class="field full" for="ratingComment">
+        <span data-en="Your feedback (optional)" data-ar="ملاحظاتك (اختيارية)">Your feedback (optional)</span>
+        <textarea id="ratingComment" maxlength="1500" rows="4" data-placeholder-en="What worked well? What could be better?" data-placeholder-ar="ما الذي أعجبك؟ وما الذي يمكن تحسينه؟" placeholder="What worked well? What could be better?"></textarea>
+      </label>
+      <p class="rating-privacy" data-en="Feedback is submitted privately and is not shown publicly." data-ar="يُحفظ التقييم بشكل خاص ولا يُعرض للزوار.">Feedback is submitted privately and is not shown publicly.</p>
+      <button id="ratingSubmit" type="submit" class="primary-button" data-en="Send rating" data-ar="إرسال التقييم">Send rating</button>
+      <p id="ratingStatus" role="status" aria-live="polite" hidden></p>
+    </form>
+  </section>
 </main>
 
 <footer class="site-footer">
@@ -130,6 +156,6 @@
   </div>
 </footer>
 
-<script type="module" src="support.js?v=20261009-2"></script>
+<script type="module" src="support.js?v=20261009-12"></script>
 </body>
 </html>
