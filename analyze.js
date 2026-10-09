@@ -438,6 +438,7 @@ function customerSegment(ind) {
 function factorData(values, ind) {
   const risk = [];
   const positive = [];
+  const addPositive = (titleEn,titleAr,en,ar,reviewEn,reviewAr) => positive.push({titleEn,titleAr,en,ar,reviewEn,reviewAr});
   const addReview = (titleEn, titleAr, observationEn, observationAr, reviewEn, reviewAr) => risk.push({
     en: observationEn, ar: observationAr,
     titleEn, titleAr, reviewEn, reviewAr
@@ -452,7 +453,7 @@ function factorData(values, ind) {
       'قارِن هذه المدة بنمط نشاط العميل المعتاد، واسأله إن كان يواجه صعوبة في استخدام الخدمة.'
     );
   } else {
-    positive.push({en:`Last meaningful activity was ${days} days ago.`,ar:`آخر نشاط مهم كان قبل ${days} يومًا.`});
+    addPositive('Recent activity','النشاط الحديث',`Last activity was ${days} days ago.`,`آخر نشاط كان قبل ${days} يومًا.`,'This shows relatively recent interaction, but does not guarantee the customer will stay. Compare it with their usual activity.','هذا يوضح وجود تفاعل حديث نسبيًا، لكنه لا يضمن بقاء العميل. تُقارن المدة بنمط نشاطه المعتاد.');
   }
   if (values.UsageFrequency !== null) {
     const n = Math.round(values.UsageFrequency);
@@ -463,7 +464,7 @@ function factorData(values, ind) {
       'Compare usage over the same period with the customer’s earlier activity, then check for product or access issues.',
       'قارِن الاستخدام بالفترة نفسها من نشاط العميل السابق، ثم تحقق من وجود مشكلة في الخدمة أو الوصول إليها.'
     );
-    else if (n >= 20) positive.push({en:`Recorded usage frequency: ${n}; compare it with the usual level.`,ar:`تكرار الاستخدام المُدخل: ${n}، ويُفضّل مقارنته بالمستوى المعتاد.`});
+    else if (n >= 20) addPositive('Service usage','استخدام الخدمة',`Recorded usage frequency: ${n}.`,`تكرار الاستخدام المسجل: ${n}.`,'The number suggests activity, but its strength depends on the measurement period and the customer’s normal usage.','العدد يشير إلى وجود استخدام، لكن قوته تعتمد على فترة القياس ومستوى الاستخدام المعتاد للعميل.');
   }
   if (values.SupportCalls !== null) {
     const n = Math.round(values.SupportCalls);
@@ -474,7 +475,7 @@ function factorData(values, ind) {
       'Review the support tickets, identify any repeated or open issue, and confirm the resolution with the customer.',
       'راجع تذاكر الدعم وحدد المشكلات المتكررة أو المفتوحة، ثم تأكد من حلها مع العميل.'
     );
-    else positive.push({en:`Support calls recorded: ${n}; ticket status still needs review.`,ar:`مكالمات الدعم المسجلة: ${n}، مع ضرورة مراجعة حالة التذاكر.`});
+    else addPositive('Support requests','طلبات الدعم',`Support calls recorded: ${n}.`,`مكالمات الدعم المسجلة: ${n}.`,'Few calls can mean fewer reported issues, but do not prove satisfaction. Check unresolved support tickets.','قلة الاتصالات قد تعني مشكلات مُبلّغًا عنها أقل، لكنها لا تثبت الرضا. تُراجع التذاكر غير المحلولة.');
   }
   if (values.PaymentDelay !== null) {
     const n = Math.round(values.PaymentDelay);
@@ -485,7 +486,7 @@ function factorData(values, ind) {
       'Verify invoice accuracy, payment status and billing access before offering a payment solution.',
       'تحقق من صحة الفاتورة وحالة الدفع وإمكانية الوصول لوسيلة السداد قبل اقتراح الحل.'
     );
-    else positive.push({en:`Payment delay recorded: ${n} days.`,ar:`تأخر السداد المسجّل: ${n} يومًا.`});
+    else addPositive('Payment record','سجل السداد',`Recorded payment delay: ${n} days.`,`مدة التأخر المسجلة في السداد: ${n} يومًا.`,'A short delay may be reassuring. Confirm payment status; paying on time alone does not guarantee loyalty.','التأخر القصير قد يكون مطمئنًا. تُراجع حالة الفاتورة؛ فالانتظام في السداد وحده لا يضمن الولاء.');
   }
   if (values.Tenure < 6) addReview(
     'New customer', 'عميل حديث',
@@ -494,11 +495,8 @@ function factorData(values, ind) {
     'Check whether onboarding was completed and whether the customer understands the value of the service.',
     'تحقق من اكتمال خطوات التهيئة الأولية وفهم العميل لفائدة الخدمة.'
   );
-  else if (values.Tenure >= 24) positive.push({en:`Customer relationship length: ${Math.round(values.Tenure)} months.`,ar:`مدة علاقة العميل بالشركة: ${Math.round(values.Tenure)} شهرًا.`});
-  if (values.TotalSpend >= 1000) positive.push({
-    en:`Recorded total spend: ${Number(values.TotalSpend).toLocaleString()}; review its business impact in the appropriate currency and time period.`,
-    ar:`إجمالي الإنفاق المسجّل: ${Number(values.TotalSpend).toLocaleString()}؛ راجع أثره التجاري حسب العملة وفترة القياس.`
-  });
+  else if (values.Tenure >= 24) addPositive('Customer relationship','مدة علاقة العميل',`Relationship length: ${Math.round(values.Tenure)} months.`,`مدة العلاقة: ${Math.round(values.Tenure)} شهرًا.`,'A long history helps compare current behavior with the past, but it does not rule out churn.','العلاقة الطويلة تتيح مقارنة السلوك الحالي بالسابق، لكنها لا تستبعد خطر المغادرة.');
+  if (values.TotalSpend >= 1000) addPositive('Customer spending','إنفاق العميل',`Recorded total spend: ${Number(values.TotalSpend).toLocaleString()}.`,`إجمالي الإنفاق المسجل: ${Number(values.TotalSpend).toLocaleString()}.`,'The amount may matter to the business. Assess it in the correct currency and period; spending is not proof of retention.','قد يعكس المبلغ أهمية الحساب للشركة. يُراجع وفق العملة والفترة الصحيحتين، ولا يعد ضمانًا لاستمرار العميل.');
   if (!risk.length) addReview(
     'No clear single warning', 'لا يوجد مؤشر تحذير منفرد واضح',
     'The provided inputs do not highlight one specific issue. The churn estimate combines several signals.',
@@ -506,10 +504,7 @@ function factorData(values, ind) {
     'Review changes against the customer’s own history before assigning a specific reason for churn.',
     'راجع التغيرات مقارنة بسجل العميل السابق قبل تحديد سبب محتمل للمغادرة.'
   );
-  if (!positive.length) positive.push({
-    en:'No clear reassuring signal is available from the supplied fields.',
-    ar:'لا يوجد مؤشر مطمئن واضح اعتمادًا على الحقول المُدخلة.'
-  });
+  if (!positive.length) addPositive('No clear positive signal','لا توجد إشارة إيجابية واضحة','The available fields do not show a clear reassuring signal.','الحقول المتاحة لا تظهر مؤشرًا مطمئنًا واضحًا.','Review the customer’s history before reaching a conclusion.','تُراجع بيانات العميل السابقة قبل الوصول إلى استنتاج.');
   return { risk, positive };
 }
 
@@ -614,7 +609,7 @@ function renderList(container, items, numbered = false) {
       const review = document.createElement('p');
       review.className = 'factor-review';
       const prompt = document.createElement('strong');
-      prompt.textContent = translate('What to check: ', 'ما الذي نراجعه؟ ');
+      prompt.textContent = container.id === 'retentionSignals' ? translate('What this means: ', 'ماذا تعني الإشارة؟ ') : translate('What to check: ', 'ما الذي نراجعه؟ ');
       review.append(prompt, document.createTextNode(getLanguage() === 'ar' ? item.reviewAr : item.reviewEn));
       row.append(title, observation, review);
     } else {
