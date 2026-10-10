@@ -1059,3 +1059,25 @@ html[dir="rtl"] body[data-page="about"] .about-hero h1 {
 #ratingStatus[data-type="error"] {color:var(--danger)}
 #ratingStatus[data-type="success"] {color:var(--success)}
 .sr-only {position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* Private feedback administration */
+.feedback-admin .admin-notice{padding:22px;border:1px solid var(--line);border-radius:16px;background:var(--surface);line-height:1.8}
+.feedback-admin .admin-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px;font-weight:800}
+.feedback-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:0 0 24px}
+.feedback-stats article,.feedback-panel{border:1px solid var(--line);background:var(--surface2);border-radius:20px;padding:clamp(18px,3vw,28px)}
+.feedback-stats article{display:grid;gap:12px}
+.feedback-stats article span{font-size:.9rem;color:var(--muted)}
+.feedback-stats article strong{font-size:clamp(1.8rem,4vw,2.7rem);color:var(--deep);font-variant-numeric:tabular-nums}
+.feedback-panel{margin-bottom:20px}
+.feedback-panel h2{font-size:clamp(1.2rem,3vw,1.6rem);margin:0 0 22px}
+.feedback-rating-row{display:grid;grid-template-columns:55px minmax(0,1fr) 30px;gap:14px;align-items:center;margin:12px 0;font-variant-numeric:tabular-nums}
+.feedback-rating-track{height:11px;background:var(--line);border-radius:20px;overflow:hidden}
+.feedback-rating-fill{height:100%;background:var(--primary);border-radius:20px}
+.feedback-entries{display:grid;gap:14px}
+.feedback-entry{border:1px solid var(--line);border-radius:14px;padding:17px}
+.feedback-entry-head{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;align-items:center}
+.feedback-entry-head strong{color:#c48f20;letter-spacing:2px}
+.feedback-entry-head time{color:var(--muted);font-size:.84rem}
+.feedback-entry p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;margin:11px 0 0}
+.admin-access-link{display:inline-flex;margin-top:15px;align-items:center;gap:8px;text-decoration:none;color:var(--primary);font-weight:800}
+@media(max-width:700px){.feedback-stats{grid-template-columns:1fr}.feedback-rating-row{gap:8px}}
