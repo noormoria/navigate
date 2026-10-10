@@ -1081,3 +1081,13 @@ html[dir="rtl"] body[data-page="about"] .about-hero h1 {
 .feedback-entry p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;margin:11px 0 0}
 .admin-access-link{display:inline-flex;margin-top:15px;align-items:center;gap:8px;text-decoration:none;color:var(--primary);font-weight:800}
 @media(max-width:700px){.feedback-stats{grid-template-columns:1fr}.feedback-rating-row{gap:8px}}
+
+/* Final three-point analysis recap */
+.analysis-final-summary{margin-top:26px;padding:clamp(22px,4vw,34px);border:1px solid var(--line);border-left:4px solid var(--primary);border-radius:20px;background:var(--surface2);box-shadow:var(--shadow-sm)}
+.analysis-final-summary h3{font-size:clamp(1.35rem,3vw,1.8rem);margin:3px 0 22px;color:var(--deep)}
+.final-summary-items{display:grid;gap:15px}
+.final-summary-items p{display:grid;grid-template-columns:minmax(145px,210px) 1fr;gap:18px;align-items:start;margin:0;padding-bottom:15px;border-bottom:1px solid var(--line);line-height:1.65}
+.final-summary-items p:last-child{border:0;padding-bottom:0}
+.final-summary-items strong{color:var(--deep)}
+.final-summary-items span{color:var(--text)}
+@media(max-width:600px){.final-summary-items p{grid-template-columns:1fr;gap:3px}}
