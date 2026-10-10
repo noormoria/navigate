@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Analyze | NAVIGATE</title>
-  <link rel="stylesheet" href="styles.css?v=20261010-3" />
+  <link rel="stylesheet" href="styles.css?v=20261010-5" />
   <style>
     .skills-scale-help { margin-top: 18px; padding: 16px; border: 1px solid rgba(126, 30, 58, .14); border-radius: 18px; background: rgba(255,255,255,.34); }
     .skills-scale-help > p { margin: 0 0 12px; font-size: .92rem; line-height: 1.65; opacity: .78; }
@@ -239,6 +239,10 @@
           <span data-en="Run customer analysis" data-ar="تشغيل تحليل العميل">Run customer analysis</span>
           <span class="button-arrow" aria-hidden="true">&rarr;</span>
         </button></div>
+      <div id="analysisLoading" class="analysis-loading" role="status" aria-live="polite" aria-atomic="true" hidden>
+        <span class="analysis-loading-spinner" aria-hidden="true"></span>
+        <span data-en="Analyzing customer data... Please wait for the results." data-ar="جارٍ تحليل بيانات العميل... يرجى الانتظار حتى تظهر النتيجة.">Analyzing customer data... Please wait for the results.</span>
+      </div>
     </form>
 
     <aside class="analysis-side-note">
@@ -332,6 +336,6 @@
     <span data-en="Built for earlier, clearer retention decisions." data-ar="صُمم لقرارات احتفاظ أبكر وأكثر وضوحًا.">Built for earlier, clearer retention decisions.</span>
   </div>
 </footer>
-<script type="module" src="analyze.js?v=20261010-3"></script>
+<script type="module" src="analyze.js?v=20261010-5"></script>
 </body>
 </html>
