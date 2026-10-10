@@ -1091,3 +1091,10 @@ html[dir="rtl"] body[data-page="about"] .about-hero h1 {
 .final-summary-items strong{color:var(--deep)}
 .final-summary-items span{color:var(--text)}
 @media(max-width:600px){.final-summary-items p{grid-template-columns:1fr;gap:3px}}
+
+/* Analysis request status: visible only during model prediction. */
+.analysis-loading[hidden]{display:none!important}
+.analysis-loading{display:flex;align-items:center;gap:13px;margin-top:16px;padding:15px 18px;border:1px solid var(--line);background:var(--surface2);border-radius:14px;color:var(--deep);font-weight:700;line-height:1.6}
+.analysis-loading-spinner{flex:0 0 24px;width:24px;height:24px;border:3px solid var(--line);border-top-color:var(--primary);border-radius:50%;animation:navigate-analysis-spin .85s linear infinite}
+@keyframes navigate-analysis-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.analysis-loading-spinner{animation-duration:2.5s}}
