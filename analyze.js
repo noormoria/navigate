@@ -1093,7 +1093,12 @@ $('analysisForm')?.addEventListener('submit', async (event) => {
   // Do not block or warn merely because values lie beyond training reference ranges.
 
   const submitButton = event.submitter || $('analysisForm').querySelector('button[type="submit"]');
-  if (submitButton) submitButton.disabled = true;
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.setAttribute('aria-busy', 'true');
+  }
+  const loadingIndicator = $('analysisLoading');
+  if (loadingIndicator) loadingIndicator.hidden = false;
 
   try {
     const apiResult = await predictFromApi(values);
@@ -1170,7 +1175,11 @@ $('analysisForm')?.addEventListener('submit', async (event) => {
 
     setToast(message, 'error');
   } finally {
-    if (submitButton) submitButton.disabled = false;
+    if (loadingIndicator) loadingIndicator.hidden = true;
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.removeAttribute('aria-busy');
+    }
   }
 });
 
