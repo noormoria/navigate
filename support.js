@@ -51,10 +51,35 @@ ratingForm?.addEventListener("submit", async event => {
       comment: comment || null
     });
     if (error) throw error;
+
+    // Keep Supabase as the primary record; a mail-provider outage must not lose feedback.
+    let emailQueued = false;
+    try {
+      const mailResponse = await fetch("https://formsubmit.co/ajax/navigate.support@gmail.com", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+          _subject: "NAVIGATE | New website rating: " + selected.value + "/5",
+          _template: "table",
+          _url: "https://app.navigateretention.site/support.html",
+          submission_type: "Website rating",
+          rating: selected.value + " / 5",
+          feedback: comment || "No written comment",
+          message: "A visitor submitted a new NAVIGATE website rating."
+        })
+      });
+      const mailResult = await mailResponse.json();
+      emailQueued = mailResponse.ok && mailResult.success !== false && mailResult.success !== "false";
+    } catch (mailError) {
+      console.warn("Rating was saved, but email notification could not be submitted.", mailError);
+    }
+
     ratingForm.reset();
     paintStars();
-    ratingStatus.dataset.type = "success";
-    ratingStatus.textContent = translate("Thank you! Your rating was received.", "شكرًا لك! تم استلام التقييم بنجاح.");
+    ratingStatus.dataset.type = emailQueued ? "success" : "info";
+    ratingStatus.textContent = emailQueued
+      ? translate("Thank you! Your rating was saved and the email notification was submitted.", "شكرًا لك! تم حفظ التقييم وإرسال إشعار البريد.")
+      : translate("Your rating was saved. The email notification could not be confirmed.", "تم حفظ التقييم، لكن تعذّر تأكيد إشعار البريد.");
   } catch (error) {
     console.error("Feedback submission failed", error);
     ratingStatus.dataset.type = "error";
