@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Analyze | NAVIGATE</title>
-  <link rel="stylesheet" href="styles.css?v=20261009-11" />
+  <link rel="stylesheet" href="styles.css?v=20261010-3" />
   <style>
     .skills-scale-help { margin-top: 18px; padding: 16px; border: 1px solid rgba(126, 30, 58, .14); border-radius: 18px; background: rgba(255,255,255,.34); }
     .skills-scale-help > p { margin: 0 0 12px; font-size: .92rem; line-height: 1.65; opacity: .78; }
@@ -307,6 +307,15 @@
         <div id="skillsImpactList" class="skills-impact-list"></div>
       </article>
 </div>
+    <article class="analysis-final-summary" aria-labelledby="finalSummaryHeading">
+      <span class="eyebrow" data-en="IN SHORT" data-ar="الخلاصة">IN SHORT</span>
+      <h3 id="finalSummaryHeading" data-en="Analysis summary" data-ar="ملخص التحليل">Analysis summary</h3>
+      <div class="final-summary-items">
+        <p><strong data-en="Risk" data-ar="مستوى الخطر">Risk</strong><span id="finalRiskSummary"></span></p>
+        <p><strong data-en="Key signal to review" data-ar="أهم مؤشر للمراجعة">Key signal to review</strong><span id="finalSignalSummary"></span></p>
+        <p><strong data-en="Suggested next step" data-ar="الإجراء المقترح">Suggested next step</strong><span id="finalActionSummary"></span></p>
+      </div>
+    </article>
   </section>
 </main>
 
@@ -323,6 +332,6 @@
     <span data-en="Built for earlier, clearer retention decisions." data-ar="صُمم لقرارات احتفاظ أبكر وأكثر وضوحًا.">Built for earlier, clearer retention decisions.</span>
   </div>
 </footer>
-<script type="module" src="analyze.js?v=20261009-9"></script>
+<script type="module" src="analyze.js?v=20261010-3"></script>
 </body>
 </html>
