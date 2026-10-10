@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>Feedback Dashboard | NAVIGATE</title><link rel="stylesheet" href="styles.css?v=20261010-1"/></head>
+<body data-page="feedback-admin">
+<header class="site-header"><div class="header-inner">
+<a class="brand" href="index.html"><span class="brand-mark">NA</span><span class="brand-copy"><strong>NAVIGATE</strong><small data-en="Customer Retention Intelligence" data-ar="ذكاء الاحتفاظ بالعملاء">Customer Retention Intelligence</small></span></a>
+<button class="menu-toggle" data-menu-toggle aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+<nav class="main-nav" aria-label="Main navigation">
+<div class="menu-kicker" data-en="NAVIGATE MENU" data-ar="قائمة NAVIGATE">NAVIGATE MENU</div>
+<a href="index.html" data-nav="home"><span>01</span><strong data-en="Home" data-ar="الرئيسية">Home</strong></a>
+<a href="analyze.html" data-nav="analyze"><span>02</span><strong data-en="Analyze customer" data-ar="تحليل عميل">Analyze customer</strong></a>
+<a href="compare.html" data-nav="compare"><span>03</span><strong data-en="Compare candidates" data-ar="مقارنة مرشحين">Compare candidates</strong></a>
+<a href="history.html" data-nav="history"><span>04</span><strong data-en="History" data-ar="السجل">History</strong></a>
+<a href="about.html" data-nav="about"><span>05</span><strong data-en="About" data-ar="عن المنصة">About</strong></a>
+<a href="support.html" data-nav="support"><span>06</span><strong data-en="Support" data-ar="الدعم">Support</strong></a>
+<a href="auth.html" class="menu-account-link" data-account-button><span class="account-dot signed-out"></span><span data-en="Sign in" data-ar="تسجيل الدخول">Sign in</span></a>
+</nav>
+<div class="header-actions"><button class="utility-button" data-language-toggle>عربي</button><button class="utility-button" data-theme-toggle><span>☾</span><span>Dark</span></button><a class="account-button sign-in-button" data-account-button href="auth.html"><span class="account-dot signed-out"></span><span data-en="Sign in" data-ar="تسجيل الدخول">Sign in</span></a></div>
+</div></header>
+<main class="page-shell inner-page feedback-admin">
+<section class="page-heading"><div><span class="eyebrow" data-en="PRIVATE ADMIN DASHBOARD" data-ar="لوحة الإدارة الخاصة">PRIVATE ADMIN DASHBOARD</span><h1 data-en="Visitor feedback" data-ar="تقييمات الزوار">Visitor feedback</h1><p data-en="Private insights from NAVIGATE website ratings." data-ar="متابعة خاصة لآراء زوار موقع NAVIGATE.">Private insights from NAVIGATE website ratings.</p></div></section>
+<div id="adminNotice" class="admin-notice" role="status" aria-live="polite" data-en="Checking access..." data-ar="جارٍ التحقق من صلاحية الوصول...">Checking access...</div>
+<section id="adminDashboard" hidden>
+  <div class="admin-toolbar"><span data-en="Feedback overview" data-ar="ملخص التقييمات">Feedback overview</span><button class="utility-button" id="refreshFeedback" data-en="Refresh" data-ar="تحديث">Refresh</button></div>
+  <div class="feedback-stats"><article><span data-en="Total ratings" data-ar="إجمالي التقييمات">Total ratings</span><strong id="ratingCount">—</strong></article><article><span data-en="Average rating" data-ar="متوسط التقييم">Average rating</span><strong id="ratingAverage">—</strong></article><article><span data-en="Written comments" data-ar="التعليقات المكتوبة">Written comments</span><strong id="ratingComments">—</strong></article></div>
+  <div class="feedback-panel"><h2 data-en="Ratings breakdown" data-ar="توزيع التقييمات">Ratings breakdown</h2><div id="ratingBreakdown"></div></div>
+  <div class="feedback-panel"><h2 data-en="Latest feedback" data-ar="أحدث التقييمات">Latest feedback</h2><div id="ratingEntries" class="feedback-entries"></div></div>
+</section>
+</main>
+<footer class="site-footer"><div class="footer-inner"><div class="footer-brand"><strong>NAVIGATE</strong><span data-en="Customer Retention Intelligence" data-ar="ذكاء الاحتفاظ بالعملاء">Customer Retention Intelligence</span></div><div class="footer-links"><a href="support.html" data-en="Support" data-ar="الدعم">Support</a></div></div></footer>
+<script type="module" src="feedback-admin.js?v=20261010-1"></script></body></html>
