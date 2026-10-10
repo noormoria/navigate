@@ -94,3 +94,59 @@ refreshUser().then(user => {
   const link = document.getElementById("adminFeedbackLink");
   if (link && user?.id === "33837b6a-ec95-4250-b676-14c6e4e75979") link.hidden = false;
 }).catch(error => console.error("Account check failed", error));
+
+const supportForm = document.getElementById("supportForm");
+supportForm?.addEventListener("submit", async event => {
+  event.preventDefault();
+  if (!supportForm.reportValidity()) return;
+  const button = supportForm.querySelector('button[type="submit"]');
+  const formData = new FormData(supportForm);
+  const name = String(formData.get("name") || "").trim();
+  const email = String(formData.get("email") || "").trim();
+  const issue_type = String(formData.get("issue_type") || "").trim();
+  const message = String(formData.get("message") || "").trim();
+  const status = document.getElementById("supportSubmissionStatus");
+  if (!name || !email || !message) return;
+  button.disabled = true;
+  status.hidden = false;
+  status.textContent = translate("Sending support request...", "جارٍ إرسال طلب الدعم...");
+  status.dataset.type = "info";
+  try {
+    const {error} = await supabase.from("support_requests").insert({
+      name: name.slice(0,160),
+      email: email.slice(0,320),
+      issue_type: issue_type.slice(0,150),
+      message: message.slice(0,5000)
+    });
+    if (error) throw error;
+    let emailQueued = false;
+    try {
+      const response = await fetch("https://formsubmit.co/ajax/navigate.support@gmail.com", {
+        method: "POST",
+        headers: {"Content-Type":"application/json", "Accept":"application/json"},
+        body: JSON.stringify({
+          _subject: "NAVIGATE | New support request: " + issue_type,
+          _template: "table",
+          name, email, issue_type, message,
+          submission_type:"Support request",
+          _replyto: email
+        })
+      });
+      const result = await response.json();
+      emailQueued = response.ok && result.success !== false && result.success !== "false";
+    } catch (mailError) {
+      console.warn("Support request saved but email sending failed", mailError);
+    }
+    supportForm.reset();
+    status.dataset.type = emailQueued ? "success" : "info";
+    status.textContent = emailQueued
+      ? translate("Support request saved and email notification submitted.", "تم حفظ طلب الدعم وإرسال إشعار البريد.")
+      : translate("Support request saved. Email delivery could not be confirmed.", "تم حفظ طلب الدعم، لكن تعذّر تأكيد إرسال إشعار البريد.");
+  } catch (error) {
+    console.error("Support request saving failed", error);
+    status.dataset.type = "error";
+    status.textContent = translate("Could not send your support request. Please try again.", "تعذّر إرسال طلب الدعم. يرجى المحاولة مرة أخرى.");
+  } finally {
+    button.disabled = false;
+  }
+});
