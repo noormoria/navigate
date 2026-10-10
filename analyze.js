@@ -909,6 +909,21 @@ async function renderResults(payload, createdAt = new Date()) {
   $('summaryPriority').textContent = getLanguage() === 'ar' ? priority.ar : priority.en;
   $('summarySegment').textContent = getLanguage() === 'ar' ? segment.ar : segment.en;
 
+  // A deliberately brief recap, independent of the detailed cards above.
+  const selectedLanguage = getLanguage() === 'ar' ? 'ar' : 'en';
+  const keyFactor = factors.risk?.[0];
+  const primaryAction = recs.actions?.[0];
+  const factorName = keyFactor?.[selectedLanguage === 'ar' ? 'titleAr' : 'titleEn']
+    || keyFactor?.[selectedLanguage]
+    || translate('No major warning signal identified.', 'لا توجد إشارة تحذيرية بارزة.');
+  const actionText = typeof primaryAction === 'string'
+    ? primaryAction
+    : primaryAction?.[selectedLanguage]
+      || translate('Continue monitoring the customer’s activity.', 'متابعة نشاط العميل بصورة دورية.');
+  $('finalRiskSummary').textContent = `${Math.round(ind.risk)}% — ${selectedLanguage === 'ar' ? level.ar : level.en}`;
+  $('finalSignalSummary').textContent = factorName;
+  $('finalActionSummary').textContent = actionText;
+
   renderList($('riskFactors'), factors.risk);
   renderList($('retentionSignals'), factors.positive);
   renderList($('recommendedActions'), recs.actions, true);
