@@ -8,7 +8,8 @@ if (params.get("sent") === "1" && sent) {
   sent.scrollIntoView({behavior: "smooth", block: "center"});
 }
 
-import { supabase, supabaseConfigured, translate } from "./shared.js";
+import { translate, refreshUser } from "./shared.js";
+import { supabase, supabaseConfigured } from "./supabase-client.js";
 
 const ratingForm = document.getElementById("ratingForm");
 const ratingStatus = document.getElementById("ratingStatus");
@@ -62,3 +63,9 @@ ratingForm?.addEventListener("submit", async event => {
     ratingSubmit.disabled = false;
   }
 });
+
+// Show the private dashboard entry only for the designated owner account.
+refreshUser().then(user => {
+  const link = document.getElementById("adminFeedbackLink");
+  if (link && user?.id === "33837b6a-ec95-4250-b676-14c6e4e75979") link.hidden = false;
+}).catch(error => console.error("Account check failed", error));
