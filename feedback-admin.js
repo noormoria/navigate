@@ -59,6 +59,48 @@ function render() {
     entries.append(article);
   });
 }
+let supportRequests = [];
+function renderSupportInbox() {
+  const host = $("supportInbox");
+  host.replaceChildren();
+  if (!supportRequests.length) {
+    const empty = document.createElement("p");
+    empty.textContent = translate("No support messages yet.", "ما وصلت رسائل دعم حتى الآن.");
+    host.append(empty);
+    return;
+  }
+  for (const item of supportRequests) {
+    const article = document.createElement("article");
+    article.className = "feedback-entry";
+    const heading = document.createElement("div");
+    heading.className = "feedback-entry-head";
+    const title = document.createElement("strong");
+    title.textContent = item.issue_type || translate("Support message", "رسالة دعم");
+    const date = document.createElement("time");
+    date.dateTime = item.created_at;
+    date.textContent = new Date(item.created_at).toLocaleString(getLanguage() === "ar" ? "ar-SA" : "en-GB", {dateStyle:"medium",timeStyle:"short"});
+    heading.append(title, date);
+    const sender = document.createElement("p");
+    sender.textContent = (item.name || "") + " — " + (item.email || "");
+    const message = document.createElement("p");
+    message.textContent = item.message || "";
+    article.append(heading, sender, message);
+    host.append(article);
+  }
+}
+async function loadSupportInbox() {
+  const { data, error } = await supabase.from("support_requests")
+    .select("id,name,email,issue_type,message,created_at")
+    .order("created_at", {ascending:false}).limit(1000);
+  if (error) {
+    console.error("Admin support inbox retrieval failed", error);
+    $("supportInboxStatus").textContent = translate("Could not load support messages.", "تعذّر تحميل رسائل الدعم.");
+    return;
+  }
+  $("supportInboxStatus").textContent = "";
+  supportRequests = data || [];
+  renderSupportInbox();
+}
 async function loadFeedback() {
   showNotice("Loading ratings...", "جارٍ تحميل التقييمات...");
   const {data, error} = await supabase.from("site_feedback").select("id,rating,comment,created_at").order("created_at", {ascending:false}).limit(1000);
@@ -72,6 +114,7 @@ async function loadFeedback() {
   $("adminNotice").hidden = true;
   $("adminDashboard").hidden = false;
   render();
+  await loadSupportInbox();
 }
 async function initialize() {
   if (!supabase) {
@@ -95,6 +138,6 @@ async function initialize() {
 }
 $("refreshFeedback")?.addEventListener("click", loadFeedback);
 window.addEventListener("navigate:language", () => {
-  if ($("adminDashboard") && !$("adminDashboard").hidden) render();
+  if ($("adminDashboard") && !$("adminDashboard").hidden) { render(); renderSupportInbox(); }
 });
 initialize();
